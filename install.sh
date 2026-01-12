@@ -147,8 +147,9 @@
         cd "$gpath/git"
         TAR_VERSION="$(cat version)_dirty"
     else
+    else
         VERSION_NEW=$(curl --silent --show-error "https://raw.githubusercontent.com/wiedehopf/tar1090/master/version")
-        if  [[ "$(cat "$gpath/git/version" 2>/dev/null)" != "$VERSION_NEW" ]]; then
+        if [[ "$1" == "force" ]] || [[ "$(cat "$gpath/git/version" 2>/dev/null)" != "$VERSION_NEW" ]]; then
             if ! getGIT "$repo" "master" "$gpath/git"; then
                 echo "Unable to download files, exiting! (Maybe try again?)"
                 exit 1
@@ -162,7 +163,7 @@
     fi
 
 
-    if [[ -n $1 ]] && [ "$1" != "test" ] ; then
+    if [[ -n $1 ]] && [ "$1" != "test" ] && [ "$1" != "force" ]; then
         srcdir=$1
     elif [ -f /etc/default/tar1090_instances ]; then
         true
@@ -193,7 +194,7 @@
 
     if [[ -n $2 ]]; then
         instances="$srcdir $2"
-    elif [[ -n $1 ]] && [ "$1" != "test" ] ; then
+    elif [[ -n $1 ]] && [ "$1" != "test" ] && [ "$1" != "force" ]; then
         instances="$1 tar1090"
     elif [ -f /etc/default/tar1090_instances ]; then
         instances=$(</etc/default/tar1090_instances)	
