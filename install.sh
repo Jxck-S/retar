@@ -147,7 +147,6 @@
         cd "$gpath/git"
         TAR_VERSION="$(cat version)_dirty"
     else
-    else
         VERSION_NEW=$(curl --silent --show-error "https://raw.githubusercontent.com/wiedehopf/tar1090/master/version")
         if [[ "$1" == "force" ]] || [[ "$(cat "$gpath/git/version" 2>/dev/null)" != "$VERSION_NEW" ]]; then
             if ! getGIT "$repo" "master" "$gpath/git"; then
