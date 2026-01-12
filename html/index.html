@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+    <meta name="referrer" content="no-referrer-when-downgrade">
 
     <!-- HEAD_ANCHOR -->
 
@@ -28,8 +29,9 @@
 
       <div id="highlighted_infoblock" style="pointer-events: none">
         <div class="highlightedTitle infoBlockSection">
-          <div>
+          <div class="alignCS">
             <span class="identLarge"><span id="highlighted_callsign">n/a</span></span>
+            <div id="highlighted_opp_icon" class="identOppIcon"></div>
           </div>
           <div>
             <span class="identSmall"><span id="highlighted_pf_route"></span></span>
@@ -77,8 +79,9 @@
         <div id="infoblock-container">
 
           <div class="highlightedTitle infoBlockSection">
-            <div>
+            <div class="alignCS">
               <span class="identLarge" title="Callsign: Typically the air traffic control callsign or the aircraft's registration, as entered into the transponder by the pilot" id="selected_callsign">n/a</span>
+              <div id="selected_opp_icon" class="identOppIcon"></div>
             </div>
             <div id="selected_icao" title="ICAO hex ID: The aircraft's unique ICAO identification number shown in hexadecimal format as set in the aircrafts transponder (can be wrong, we will still display the data with the wrong hex)">
             </div>
@@ -152,10 +155,10 @@
                 </td>
               </tr>
               <tr id=photo_container>
-                <td>
-                <div title="Airline Banner" id="selected_airline_banner"></div>
+                <td style="text-align: center;">
                   <div title="Aircraft Photo" id="selected_photo"></div>
                   <div id="copyrightInfo"></div>
+                  <div title="Airline Banner" id="selected_airline_banner"></div>
                 </td>
               </tr>
               <tr>
@@ -778,6 +781,14 @@
                 <option value="metric">Metric</option>
                 <option value="imperial">Imperial</option>
               </select>
+            </div>
+            <div class="settingsOptionContainer">
+              <div class="settingsCheckbox" id="airline_logos_filter"></div>
+              <div class="settingsText">Airline Logos</div>
+            </div>
+            <div class="settingsOptionContainer">
+              <div class="settingsCheckbox" id="airline_banners_filter"></div>
+              <div class="settingsText">Airline Banners</div>
             </div>
             <div class="settingsOptionContainer">
               <div class="settingsCheckbox" id="groundvehicle_filter"></div>

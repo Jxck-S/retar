@@ -1509,6 +1509,9 @@ PlaneObject.prototype.updateData = function(now, last, data, init) {
 
     this.setTypeFlagsReg(data);
     this.setFlight(flight);
+    if (this.flight) {
+        this.opp_icao = extractOperatorICAO(this.flight);
+    }
 
     if (mlat && noMLAT) {
         this.dataSource = "modeS";
@@ -3109,6 +3112,7 @@ PlaneObject.prototype.setFlight = function(flight) {
         this.flight = `${flight}`;
         this.name = this.flight.trim() || 'empty callsign';
         this.flightTs = now;
+        this.opp_icao = extractOperatorICAO(this.name);
     }
 }
 

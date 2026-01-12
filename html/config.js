@@ -441,3 +441,10 @@ tableColors = {
 //
 
 // MergeNonIcao = false; // set to true to merge non icao hex with the icao hex (remove the ~)
+// --------------------------------------------------------
+// Airline Logos and Banners (using airline-logos-api)
+// --------------------------------------------------------
+airlineLogos = true;
+airlineBanners = true;
+airlineLogosApiUrl = "/logba/logos/";
+airlineBannersApiUrl = "/logba/banners/";

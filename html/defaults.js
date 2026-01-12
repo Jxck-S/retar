@@ -367,13 +367,14 @@ let debugRoute = false; // bunch of debugging console output for route api
 // show a link to jetphotos, only works if planespottersAPI is disabled
 let jetphotoLinks = false;
 
-let showSil = false;
-// this shows small pictures in the details but they need to be provided by the user in the folder /usr/local/share/tar1090/aircraft_sil
-// showPictures needs to be enabled as well
-// to only get these pictures disable the planespottersAPI
-// pictures need to be named A330.png and so forth with the type code in the form TYPE.png
-// provide ZZZZ.png to be shown when the type is not known.
 // this feature is provided as is please don't expect tar1090's support for getting the pictures right.
+let showSil = false;
+
+// Airline logos and banners from airline-logos-api
+let airlineLogos = false;
+let airlineBanners = false;
+let airlineLogosApiUrl = "";
+let airlineBannersApiUrl = "";
 
 let labelsGeom = false; // labels: uses geometric altitude (WGS84 ellipsoid unless geomUseEGM is enabled
 let geomUseEGM = false; // use EGM96 for displaying geometric altitudes (extra load time!)

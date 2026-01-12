@@ -655,7 +655,7 @@ select.error, textarea.error, input.error {
     padding-left: calc(20px * var(--SCALE));
 }
 
-@media screen and (max-width: 1 calc(000px * var(--SCALE))) {
+@media screen and (max-width: calc(1000px * var(--SCALE))) {
     .dateTime {
         display: none;
     }
@@ -1233,11 +1233,18 @@ table.infoSectionTable tr td {
 #copyrightInfo {
     position: Relative;
     font-size: var(--FS1);
-
+    text-align: center;
 }
 #selected_photo{
     text-align: center;
     display: block;
+    width: 100%;
+    margin: 0;
+}
+#airplanePhoto {
+    display: inline-block;
+    max-width: 100%;
+    height: auto;
 }
 .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
     background: var(--BGCOLOR1);
@@ -1341,31 +1348,30 @@ input{
 }
 
 /* Modded Additions */
-.identOppIcon {}
+.identOppIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 .identOppIcon img {
-    max-height: calc(24px * var(--SCALE));
-    /* Match the line-height of .identLarge */
+    max-height: calc(26px * var(--SCALE));
+    /* Slightly taller than the line-height for better visibility */
     height: auto;
-    /* Maintain the aspect ratio of the image */
     width: auto;
-    /* Maintain the aspect ratio of the image */
     background: white;
-    /* White background for better visibility */
-    border-radius: 8px;
-    /* Rounded corners */
-    padding: 5px;
-    /* Space between the image and the border */
+    border-radius: 6px;
+    padding: 3px;
+    /* Total height: 26px + 6px = 32px */
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    /* Optional: adds a subtle shadow for depth */
+    display: block; /* Ensure it behaves as a block in the flex container */
 }
 
 .alignCS {
     display: flex;
-    /* Establishes a flex container */
     align-items: center;
-    /* Centers the items vertically within the container */
     gap: 5px;
+    line-height: 1; /* Reset line-height to ensure the flex box fits the content tightly */
 }
 
 .flag {
@@ -1522,13 +1528,18 @@ input{
 #selected_airline_banner {
     text-align: center;
     display: block;
+    width: 100%;
+    margin: 5px 0 0 0;
 }
 
 #selected_airline_banner img {
-    max-width: 100%;
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 70%;
     background: white;
     border-radius: 4px;
-    padding: 2px;
+    padding: 1px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 

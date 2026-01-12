@@ -1307,6 +1307,28 @@ function earlyInitPage() {
     });
 
     new Toggle({
+        key: 'airlineLogos',
+        checkbox: '#airline_logos_filter',
+        init: true,
+        setState: function(state) {
+            airlineLogos = state;
+            refreshHighlighted();
+            refreshSelected();
+        }
+    });
+
+    new Toggle({
+        key: 'airlineBanners',
+        checkbox: '#airline_banners_filter',
+        init: true,
+        setState: function(state) {
+            airlineBanners = state;
+            refreshHighlighted();
+            refreshSelected();
+        }
+    });
+
+    new Toggle({
         key: "lastLeg",
         display: "Last Leg only",
         container: "#settingsLeft",
@@ -3496,35 +3518,38 @@ function refreshSelected() {
     var $selected_airline_banner = $('#selected_airline_banner');
     var $banner_img = $selected_airline_banner.find('img');
     if (opperatorICAO) {
-        // Replace with your element's ID
-        var src = `/opp_logos/${opperatorICAO}.png`;
-        if ($icon_img.length === 0) {
-            // If no img sub-element exists, add it
-            $selected_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display=''";"/>`);
-        } else {
-            // If img sub-element exists, set its src attribute
-            if ($icon_img.attr('src') != src) {
-                $icon_img.attr('src', src);
-                $icon_img.style = {};
-                $icon_img.style.display = '';
+        if (airlineLogos) {
+            // Replace with your element's ID
+            var src = airlineLogosApiUrl + opperatorICAO;
+            if ($icon_img.length === 0) {
+                // If no img sub-element exists, add it
+                $selected_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
+            } else {
+                // If img sub-element exists, set its src attribute
+                if ($icon_img.attr('src') != src) {
+                    $icon_img.attr('src', src);
+                    $icon_img.css('display', 'inline-block');
+                }
+                
             }
-
+        } else {
+             $selected_opp_icon.empty();
         }
-        if (airlineBanners) {
-            //https://raw.githubusercontent.com/Jxck-S/airline-logos/main/avcodes_banners/AAL.png
-            var src = `https://raw.githubusercontent.com/Jxck-S/airline-logos/main/avcodes_banners/${opperatorICAO}.png`;
 
+        if (airlineBanners) {
+            var src = airlineBannersApiUrl + opperatorICAO;
             if ($banner_img.length === 0) {
                 // If no img sub-element exists, add it
-                $selected_airline_banner.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display=''";"/>`);
+                $selected_airline_banner.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
             } else {
                 // If img sub-element exists, set its src attribute
                 if ($banner_img.attr('src') != src) {
                     $banner_img.attr('src', src);
-                    $banner_img.style = {};
-                    $banner_img.style.display = '';
+                    $banner_img.css('display', 'inline-block');
                 }
             }
+        } else {
+            $selected_airline_banner.empty();
         }
     }
     else {
@@ -3953,6 +3978,22 @@ function refreshHighlighted() {
     infoBox.css("top", infoBoxTop);
 
     jQuery('#highlighted_callsign').text(highlighted.name);
+
+    if (airlineLogos && highlighted.opp_icao) {
+        var $highlighted_opp_icon = $('#highlighted_opp_icon');
+        var $icon_img = $highlighted_opp_icon.find('img');
+        var src = airlineLogosApiUrl + highlighted.opp_icao;
+        if ($icon_img.length === 0) {
+            $highlighted_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
+        } else {
+            if ($icon_img.attr('src') != src) {
+                $icon_img.attr('src', src);
+                $icon_img.css('display', 'inline-block');
+            }
+        }
+    } else {
+        $('#highlighted_opp_icon').empty();
+    }
 
     if (highlighted.icaoType !== null) {
         jQuery('#highlighted_icaotype').text(highlighted.icaoType);

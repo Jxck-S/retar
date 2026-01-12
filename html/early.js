@@ -11,7 +11,6 @@ TAR = (function (global, jQuery, TAR) {
 
 // global object to store big stuff ... avoid clojur stupidity keeping the reference to big objects
 let g = {};
-let airlineBanners = false;
 
 let loadFinished = false;
 let Dump1090Version = "unknown version";
@@ -732,7 +731,7 @@ function Toggle(arg) {
     this.key = arg.key;
     this.state = (arg.init ? true : false);
     this.setState = arg.setState;
-    this.checkbox = (arg.checkbox == undefined) ? ('#' + this.key + '_cb') : null;
+    this.checkbox = (arg.checkbox == undefined) ? ('#' + this.key + '_cb') : arg.checkbox;
     this.display = arg.display;
     this.container = arg.container;
     this.button = arg.button || this.checkbox;
