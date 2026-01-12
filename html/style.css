@@ -634,10 +634,15 @@ select.error, textarea.error, input.error {
     right: 0 !important;
     top: calc(38px * var(--SCALE) + 12px) !important;
     width: 300px !important;
+    max-width: 85vw !important; /* Prevent overflow on small screens */
     max-height: 80vh;
     height: auto !important;
     min-height: 100px;
     overflow-y: auto;
+    overflow-x: hidden; /* Disable horizontal scroll */
+    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+    touch-action: pan-y; /* Explicitly allow vertical scroll, ignore map gestures */
+    overscroll-behavior: contain; /* Prevent scroll chaining to the map */
     background-color: var(--BGCOLOR1);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     padding: 16px;
@@ -679,14 +684,21 @@ select.error, textarea.error, input.error {
     background: none;
     box-shadow: none;
     padding: 0;
+    /* Reverting flexbox which broke the list layout */
+    display: block; 
+    position: relative; /* Ensure absolute button is relative to this container */
 }
 
 .layer-switcher.shown li.group>label {
     display: block;
-    width: 100%;
+    /* Reverting flex: 1 */
     font-weight: bold;
     color: var(--ACCENT);
     padding: 8px 12px;
+    /* Add padding-left to make room for the collapse button if it's absolute, 
+       OR ensures they sit correctly if flow. 
+       Assuming button is floated or inline. */
+    padding-left: 35px; /* Increase to 35px to clear the 24px button completely */
     margin-bottom: 8px;
     font-size: 1.1em;
     border-bottom: 1px solid var(--ACCENT);
@@ -1904,10 +1916,38 @@ body.mobile_sidebar_open .layer-switcher {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.layer-switcher button:hover, .layer-switcher button:focus {
+.layer-switcher > button:hover, .layer-switcher > button:focus {
     background-color: var(--ACCENT-LIGHT) !important; /* Lighter red on hover */
     outline: none;
 }
+
+/* Fix for Group Collapse Buttons being styled as main button */
+/* Give them a proper Chevron icon */
+.layer-switcher .group button {
+    background-color: transparent !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='grey' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 24px !important;
+    height: 24px !important;
+    margin-right: 5px;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 0 !important;
+    
+    /* Position absolutely to sit inside the header padding */
+    position: absolute;
+    left: 2px; /* Sit at the start of the line */
+    margin-top: 8px; /* Push down to align with text */
+    z-index: 10;
+}
+
+/* Rotate chevron when collapsed (if class distinguishes it, usually standard is expanded by default) */
+/* Assuming 'ol-layerswitcher' behavior: button usually toggles visibility. 
+   If standard lib, it might not have 'collapsed' class on button but on parent. 
+   For now, just ensuring it's not a Layer icon is the fix. */
 
 @media screen and (max-width: 768px) {
     /* Duplicate zoom hide rule if needed or simple revert. 

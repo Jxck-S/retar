@@ -25,6 +25,8 @@ let OLProj = null;
 let OLProjExtent = null;
 let PlaneIconFeatures = new ol.source.Vector();
 let trailGroup = new ol.Collection();
+let miscLayerGroup;
+let miscLayers;
 let siteCircleLayer;
 let siteCircleFeatures = new ol.source.Vector();
 let locationDotLayer;
@@ -2493,7 +2495,7 @@ function webglAddLayer() {
             return false;
         }
 
-        layers.push(webglLayer);
+        miscLayers.push(webglLayer);
 
         webgl = true;
 
@@ -2812,6 +2814,16 @@ function initMapEarly() {
 
     //add_kml_overlay('https://developers.google.com/kml/documentation/KML_Samples.kml', 'samples', 0.8);
 
+    miscLayerGroup = new ol.layer.Group({
+        name: 'misc_layers',
+        title: 'Positions & Ranges',
+        type: 'overlay',
+        layers: [],
+        zIndex: 999 
+    });
+    layers.push(miscLayerGroup);
+    miscLayers = miscLayerGroup.getLayers();
+
     siteCircleLayer = new ol.layer.Vector({
         name: 'siteCircles',
         type: 'overlay',
@@ -2822,7 +2834,7 @@ function initMapEarly() {
         renderOrder: null,
         renderBuffer: renderBuffer,
     });
-    layers.push(siteCircleLayer);
+    miscLayers.push(siteCircleLayer);
 
     siteCircleLayer.on('change:visible', function(evt) {
         if (evt.target.getVisible()) {
@@ -2877,7 +2889,7 @@ function initMap() {
         renderOrder: null,
         renderBuffer: renderBuffer,
     });
-    layers.push(locationDotLayer);
+    miscLayers.push(locationDotLayer);
 
     locationDotLayer.on('change:visible', function(evt) {
         if (evt.target.getVisible()) {
@@ -2911,7 +2923,7 @@ function initMap() {
             style: actualOutline.style,
             visible: actual_range_show,
         });
-        layers.push(actualOutline.layer);
+        miscLayers.push(actualOutline.layer);
     }
     if (calcOutlineData) {
         calcOutlineLayer = new ol.layer.Vector({
@@ -2923,7 +2935,7 @@ function initMap() {
             renderOrder: null,
             renderBuffer: renderBuffer,
         });
-        layers.push(calcOutlineLayer);
+        miscLayers.push(calcOutlineLayer);
         drawUpintheair();
     }
 
@@ -2944,7 +2956,7 @@ function initMap() {
         zIndex: 150,
     });
 
-    layers.push(trailLayers);
+    miscLayers.push(trailLayers);
 
     iconLayer = new ol.layer.Vector({
         name: 'iconLayer',
@@ -2955,7 +2967,7 @@ function initMap() {
         zIndex: 200,
         renderBuffer: renderBuffer,
     });
-    layers.push(iconLayer);
+    miscLayers.push(iconLayer);
 
 
     ol_map_init();
