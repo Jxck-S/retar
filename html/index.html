@@ -811,8 +811,8 @@
         </div>
         <div id="header_top" class="infoHeading">
           <div class="buttonContainer">
-            <span id="U" title="only show the U2 and other military planes" class="button inActiveButton" onclick="toggleMilitary();"><span class="buttonText">U</span></span>
-            <span id="H" title="(H)ome / Reset Map" class="button inActiveButton" onclick="resetMap();"><span class="buttonText">H</span></span>
+            <div id="U" title="Only show military planes" class="svgButton militaryButton" onclick="toggleMilitary();"></div>
+            <div id="locationButton" title="My Location" class="svgButton locationButton" onclick="resetMap();"></div>
             <span id="T" title="All (T)racks" class="button inActiveButton" onclick="selectAllPlanes();"><span class="buttonText">T</span></span>
           </div>
         </div>
@@ -821,9 +821,7 @@
             <div id="toggle_sidebar_control">
               <button id="toggle_sidebar_button" class="show_sidebar sidebar_button " title="Toggle Sidebar"></button>
             </div>
-            <div id="expand_sidebar_control">
-              <button id="expand_sidebar_button" class="sidebar_button" title="Expand Sidebar" style="display: none;"></button>
-            </div>
+            <!-- expand_sidebar_button moved to sidebar-table -->
             <div id="fullscreenButton" class="svgButton fullscreenButton"></div>
             <div id="settingsCog" class="svgButton settingsCog"></div>
             <div id="L" title="Toggle (L)abels" class="button inActiveButton" onclick="toggleLabels();"><span class="buttonText">L</span></div>
@@ -868,6 +866,7 @@
       </div> <!-- map_container-->
 
       <div id="sidebar_container" style="display: none; height: 100%;">
+        <div id="sidebar_close_mobile" class="sidebar_close_mobile" title="Close Sidebar">×</div>
         <div id="splitter" class="ui-resizable-handle ui-resizable-w" style="display: none;"></div>
         <div id="sidebar_canvas">
 
@@ -875,8 +874,9 @@
             <table style="width: 100%">
               <tr>
                 <td>
-                <button id="shrink_sidebar_button" class="shrink_sidebar hidden sidebar_button"
+                <button id="shrink_sidebar_button" class="shrink_sidebar sidebar_button"
                   title="Show Map"></button>
+                <button id="expand_sidebar_button" class="sidebar_button" title="Expand Sidebar" style="display: none;"></button>
                 </td>
               </tr>
 
@@ -1055,6 +1055,7 @@
               </div>
             </div>
 
+            <button id="mobile_table_toggle" class="mobile_table_toggle" style="display: none;">Show Aircraft List</button>
             <table id="planesTable" style="width: 100%">
             </table>
 

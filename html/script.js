@@ -1218,6 +1218,7 @@ function earlyInitPage() {
     jQuery("#expand_sidebar_button").click(expandSidebar);
     jQuery("#shrink_sidebar_button").click(showMap);
 
+
     jQuery("#altimeter_form").submit(onAltimeterChange);
     jQuery("#altimeter_set_standard").click(onAltimeterSetStandard);
     jQuery("#altimeter_set_selected").click(onAltimeterSetSelected);
@@ -1280,7 +1281,8 @@ function earlyInitPage() {
         jQuery('#settings_infoblock').toggle();
     });
 
-    if (onMobile) {
+    if (!onMobile) {
+        // Desktop: Enable fullscreen button
         jQuery('#fullscreenButton').on('click', function() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen();
@@ -1289,6 +1291,7 @@ function earlyInitPage() {
             }
         });
     } else {
+        // Mobile: Hide fullscreen button (User requested Desktop Only)
         jQuery('#fullscreenButton').hide();
     }
 
@@ -1624,15 +1627,56 @@ jQuery('#selected_altitude_geom1')
             } else {
                 if (loadFinished) {
                     jQuery("#sidebar_container").hide();
+                    
+                    // If we were in full-screen sidebar mode (map hidden), restore map
+                    if (!mapIsVisible) {
+                        jQuery("#map_container").show();
+                        mapIsVisible = true;
+                        jQuery("#toggle_sidebar_control").show();
+                        jQuery("#splitter").show();
+                        updateMapSize();
+                        if (TAR.planeMan) TAR.planeMan.redraw();
+                    }
+
                     jQuery("#expand_sidebar_button").hide();
                     jQuery("#toggle_sidebar_button").removeClass("hide_sidebar");
                     jQuery("#toggle_sidebar_button").addClass("show_sidebar");
                 }
             }
+            if (onMobile) {
+                if (state) {
+                    jQuery("body").addClass("mobile_sidebar_open");
+                } else {
+                    jQuery("body").removeClass("mobile_sidebar_open");
+                }
+            } else {
+                 jQuery("body").removeClass("mobile_sidebar_open");
+            }
+
             if (loadFinished) {
                 updateMapSize();
             }
         },
+    });
+
+    jQuery("#sidebar_close_mobile").click(function() {
+        if (toggles.sidebar_visible) {
+             toggles.sidebar_visible.toggle(false);
+        } else {
+             jQuery("#sidebar_container").hide();
+        }
+    });
+
+    jQuery("#mobile_table_toggle").click(function() {
+        let container = jQuery("#sidebar-table");
+        let btn = jQuery(this);
+        if (container.hasClass("mobile_visible")) {
+            container.removeClass("mobile_visible");
+            btn.text("Show Aircraft List");
+        } else {
+            container.addClass("mobile_visible");
+            btn.text("Hide Aircraft List");
+        }
     });
 
     if (!showPictures) {
@@ -4925,6 +4969,7 @@ function expandSidebar(e) {
     jQuery("#toggle_sidebar_control").hide();
     jQuery("#splitter").hide();
     jQuery("#shrink_sidebar_button").show();
+    jQuery("#expand_sidebar_button").hide(); // Hide expand button when fully expanded
     jQuery("#sidebar_container").width("100%");
     TAR.planeMan.redraw();
     updateMapSize();
@@ -4938,6 +4983,7 @@ function showMap() {
     jQuery("#toggle_sidebar_control").show();
     jQuery("#splitter").show();
     jQuery("#shrink_sidebar_button").hide();
+    jQuery("#expand_sidebar_button").show(); // Show expand button when in normal sidebar mode
     TAR.planeMan.redraw();
     updateMapSize();
 }
@@ -5441,6 +5487,10 @@ function onSearch(e) {
         if (results.length < 100) {
             getTrace(null, null, {list: results});
         }
+    }
+
+    if (onMobile) {
+         toggles.sidebar_visible.toggle(false);
     }
     return false;
 }

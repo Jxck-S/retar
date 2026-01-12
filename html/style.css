@@ -122,35 +122,99 @@ select {
 }
 
 .sidebar_button {
-    width: calc( 32px * var(--SCALE));
-    height: calc( 38px * var(--SCALE));
-    border-radius: calc( 2px * var(--SCALE));
-    background-color: rgba(255,255,255,.2);
+    /* Compact standard size matching settings/zoom */
+    width: calc( 28px * var(--SCALE));
+    height: calc( 28px * var(--SCALE));
+    border-radius: calc( 8px * var(--SCALE));
+    
+    /* Using shorthand to enforce all background properties at once and prevent overrides */
+    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>') no-repeat center !important;
+    
+    /* Smaller icon (20px) creates more "spacing" inside the 28px button */
+    background-size: 20px !important;
 
-    cursor: pointer;
-    background-size: calc( 26px * var(--SCALE)) calc( 30px * var(--SCALE));
-    background-repeat: no-repeat;
-    background-position: center;
-
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    /* Spacing around the button */
+    margin: calc( 2px * var(--SCALE));
+}
+
+.sidebar_button:hover {
+    background-color: var(--ACCENT-LIGHT) !important;
+}
+
+/* Dark mode adjustment if needed - assuming html.dark sets filters or we just let it be dark on dark? 
+   Ideally we want contrasting icon. 
+*/
+html.dark .sidebar_button {
+    /* Dark mode background logic - keep standard accent for consistency if it works, or slightly dimmer */
+    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>') no-repeat center !important;
+    background-size: 20px !important;
+    border-color: rgba(255,255,255,0.3);
 }
 
 #toggle_sidebar_button.show_sidebar {
-    transform: scaleX(-1);
-    background-image: url("images/hide_sidebar.png");
+    /* Sidebar is hidden (on right). Want to Show (pull left). Icon should be LEFT (<). 
+       Default is Left, so no transform needed. */
+    transform: none;
+    background-image: none;
 }
 
 #toggle_sidebar_button.hide_sidebar {
-    background-image: url("images/hide_sidebar.png");
+    /* Sidebar is visible. Want to Hide (push right). 
+       User requested this remains visible.
+       Icon: Right Chevron (>) indicating push to right.
+       We need to ensure the transform is correct.
+       Default icon is Left (<). So flip it.
+    */
+    transform: scaleX(-1);
+    background-image: none;
+    display: block !important;
 }
 
 #shrink_sidebar_button {
-    background-image: url("images/hide_sidebar.png");
+    /* Shrink -> Restore / Minimize Sidebar. 
+       Icon: Restore/Arrows In style.
+    */
+    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>') no-repeat center !important;
+    background-size: 20px !important;
+    transform: none;
+    /* Default is hidden (since we start in normal map mode usually). 
+       JS will toggle `display: inline-block` or `none`. 
+       However, we must allow JS `show()`/`hide()` to work, which sets element.style display.
+       So we remove `display: inline-block` from CSS so it doesn't override `display: none` if usage is mixed,
+       BUT wait: `!important` was not used on `display` in CSS earlier, so inline style logic should work.
+       The issue is likely that `display: inline-block` in CSS sets it to visible if `style="display: none"` is removed,
+       or if `hidden` class is used which sets `display: none` but specificity matters.
+       
+       Let's set it to `display: none` by default in CSS, and let JS override with inline style `display: inline-block` or `block`.
+       Actually, standard JS `.show()` sets `display: block` or whatever content default is.
+       Better:
+    */
+    display: none; 
 }
 
 #expand_sidebar_button {
-    transform: scaleX(-1);
-    background-image: url("images/hide_sidebar.png");
+    /* Expand -> Full Screen / Maximize Sidebar. 
+       Icon: Maximize/Arrows Out style to indicate full screen mode.
+    */
+    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>') no-repeat center !important;
+    background-size: 20px !important;
+    transform: none;
+    /* Default visible (normal state) */
+    display: inline-block; 
+    /* Add space to avoid hitting the external puller */
+    margin-left: 30px;
+}
+
+
+
+/* Ensure hidden class works if used */
+.hidden {
+    display: none !important;
 }
 
 
@@ -190,18 +254,14 @@ select {
     display: block;
     position: absolute;
     z-index: 99;
-    top:  calc( 5px * var(--SCALE));
-    left: calc( 0px * var(--SCALE));
-    float: right;
-    width: calc( 30px * var(--SCALE));
-    height: calc( 30px * var(--SCALE));
-    background-size: calc( 30px * var(--SCALE)) calc( 30px * var(--SCALE));
-    background-repeat: no-repeat;
-    background-color: transparent;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--ACCENT);
     border: none;
-    background-image: url("images/toggle-width.png");
-    background-size: cover;
-    transform: scaleX(-1);
+    opacity: 0.8;
 }
 
 #splitter-infoblock {
@@ -230,23 +290,31 @@ select {
     z-index: 999;
 }
 
-.ol-zoom-in {
-    background-image: url("images/zoom-in.png");
-    background-size: cover;
-    color:transparent !important;
-    width: calc( 25px * var(--SCALE)) !important;
-    height: calc( 25px * var(--SCALE)) !important;
-    background-color: transparent !important;
-    margin-bottom: calc( 5px * var(--SCALE)) !important;
+.ol-zoom-in, .ol-zoom-out {
+    background-image: none !important;
+    background-color: var(--ACCENT) !important;
+    color: white !important;
+    width: calc(28px * var(--SCALE)) !important;
+    height: calc(28px * var(--SCALE)) !important;
+    border-radius: 8px !important;
+    font-size: calc(20px * var(--SCALE)) !important;
+    font-weight: bold !important;
+    line-height: calc(28px * var(--SCALE)) !important; /* Center vertically */
+    text-align: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    border: none !important;
+    margin: calc(2px * var(--SCALE)) !important;
 }
 
-.ol-zoom-out {
-    background-image: url("images/zoom-out.png");
-    background-size: cover;
-    color:transparent !important;
-    width: calc( 25px * var(--SCALE)) !important;
-    height: calc( 25px * var(--SCALE)) !important;
-    background-color: transparent !important;
+.ol-zoom-in:hover, .ol-zoom-out:hover {
+    background-color: var(--ACCENT-LIGHT) !important;
+    transform: translateY(-1px);
+}
+
+.ol-zoom-in {
+    margin-bottom: calc(5px * var(--SCALE)) !important;
 }
 
 .ol-zoom {
@@ -713,8 +781,8 @@ select.error, textarea.error, input.error {
 
 .svgButton {
     background-color: var(--ACCENT);
-    width: calc( 27px * var(--SCALE));
-    height: calc( 27px * var(--SCALE));
+    width: calc( 28px * var(--SCALE));
+    height: calc( 28px * var(--SCALE));
     cursor: pointer;
     background-position: center;
     margin: calc( 2px * var(--SCALE));
@@ -722,6 +790,7 @@ select.error, textarea.error, input.error {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.1s;
+    vertical-align: top;
 }
 
 .svgButton:hover {
@@ -736,33 +805,59 @@ select.error, textarea.error, input.error {
 }
 
 .settingsCog {
-    width: calc(32px * var(--SCALE));
-    height: calc(32px * var(--SCALE));
+    width: calc(28px * var(--SCALE));
+    height: calc(28px * var(--SCALE));
     cursor: pointer;
-    background-image: url('images/settings-icon02.png');
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>');
 
     /* Center the image */
-    background-size: 24px;
+    background-size: 20px;
     background-position: center;
     background-repeat: no-repeat;
 
-    /* Spacing */
-    margin-top: calc(4px * var(--SCALE));
-    margin-bottom: calc(4px * var(--SCALE));
-    margin-left: calc(4px * var(--SCALE));
+    /* Spacing - match .button margin */
+    margin: calc(2px * var(--SCALE));
 
-    /* Modern Look */
+    /* Modern Look matching .button */
     border-bottom: none;
     border-radius: 8px;
-    background-color: rgba(0, 0, 0, 0.05);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: var(--ACCENT);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
     align-self: center;
 }
 
 .settingsCog:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-    transform: rotate(15deg);
+    background-color: var(--ACCENT-LIGHT);
+    /* transform rule removed */
+}
+
+.locationButton {
+    /* Target style: Filled center, Ring, 4 Ticks */
+    /* Adjusted spacing: Inner radius 3 (was 4) to increase gap to ring (r=7) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3' fill='white'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='white' stroke-width='2'/%3E%3Cline x1='12' y1='3' x2='12' y2='5' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='12' y1='19' x2='12' y2='21' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='3' y1='12' x2='5' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='19' y1='12' x2='21' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.militaryButton {
+    /* Military Rank style: Star + Chevrons (User Reference) */
+    /* Hollow Star (stroke) to match image, Thick Chevrons for visibility */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Star (Top) --%3E%3Cpolygon points='12 1 14.5 6 20 6 16 9.5 17.5 14.5 12 12 6.5 14.5 8 9.5 4 6 9.5 6' /%3E%3C!-- Chevrons (Bottom) --%3E%3Cpolyline points='4 15 12 19 20 15' /%3E%3Cpolyline points='4 19 12 23 20 19' /%3E%3C/svg%3E");
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Active state for Military button (when ON) */
+#U.activeButton {
+    /* Keep Red Background (var(--ACCENT)) to match other buttons */
+    /* Switch to Black Icon to indicate active state */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Star (Top) --%3E%3Cpolygon points='12 1 14.5 6 20 6 16 9.5 17.5 14.5 12 12 6.5 14.5 8 9.5 4 6 9.5 6' /%3E%3C!-- Chevrons (Bottom) --%3E%3Cpolyline points='4 15 12 19 20 15' /%3E%3Cpolyline points='4 19 12 23 20 19' /%3E%3C/svg%3E");
+}
+#U.activeButton:hover {
+    /* Removing custom hover bg to match standard button behavior */
 }
 
 
@@ -777,6 +872,7 @@ select.error, textarea.error, input.error {
     text-align: center;
     background-clip: padding-box;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    vertical-align: top;
 }
 
 
@@ -1660,4 +1756,166 @@ input{
 .SuperHeavy {
     background-color: darkblue !important;
     color: #fff !important;
+}
+/* Mobile Sidebar Overrides */
+@media screen and (max-width: 768px) {
+    #sidebar_container {
+        width: 100% !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1000; /* Ensure it covers the map */
+        margin: 0 !important; /* Override JS margins */
+        height: 100% !important;
+    }
+
+    /* Hide the sidebar puller/splitter on mobile */
+    #splitter, #splitter-infoblock {
+        display: none !important;
+    }
+
+    /* Hide the extra sidebar buttons on mobile */
+    #shrink_sidebar_button, #expand_sidebar_button {
+        display: none !important;
+    }
+
+    /* Adjust the main toggle button if needed */
+    #toggle_sidebar_button {
+        display: block !important;
+        z-index: 1001; /* Ensure it is above the sidebar if it is outside, or inside */
+    }
+}
+
+/* Mobile Sidebar Close Button */
+.sidebar_close_mobile {
+    display: none; /* hidden by default */
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    z-index: 2000;
+    font-size: 32px;
+    color: var(--TXTCOLOR1);
+    cursor: pointer;
+    font-weight: bold;
+    background-color: var(--BGCOLOR2);
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+@media screen and (max-width: 768px) {
+    .sidebar_close_mobile {
+        display: block !important;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    /* Hide map buttons when mobile sidebar is open */
+    body.mobile_sidebar_open #header_top,
+    body.mobile_sidebar_open #header_side .button,
+    body.mobile_sidebar_open #header_side .svgButton:not(.sidebar_close_mobile),
+    body.mobile_sidebar_open .buttonContainer,
+    .fullscreenButton { /* Hide fullscreen button on mobile entirely */
+        display: none !important;
+    }
+}
+
+/* Mobile Table Toggle */
+.mobile_table_toggle {
+    display: none;
+    width: 96%;
+    margin: 5px 2%;
+    padding: 10px;
+    font-size: var(--FS2); /* Use var(--FS2) instead of calc if possible, or just standard size */
+    font-weight: bold;
+    color: var(--TXTCOLOR1);
+    background-color: var(--BGCOLOR2);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+    /* Mobile Table Toggle: Hide contents of sidebar-table by default, except the toggle button and tabs */
+    #sidebar-table:not(.mobile_visible) > #planesTable,
+    #sidebar-table:not(.mobile_visible) > #legend,
+    #sidebar-table:not(.mobile_visible) > .settingsOptionContainer {
+        display: none !important;
+    }
+
+    /* Ensure the toggle button is always visible */
+    .mobile_table_toggle {
+        display: block !important;
+    }
+    
+    /* Hide table by default if not covered by above or specific overrides needed */
+    #planesTable {
+        display: none;
+    }
+    /* But show it if parent has mobile_visible (overriding the line above) */
+    #sidebar-table.mobile_visible > #planesTable {
+        display: table;
+    }
+    
+    /* Same for legend */
+    #legend {
+        display: none;
+    }
+    #sidebar-table.mobile_visible > #legend {
+        display: block;
+    }
+    
+    /* settingsOptionContainer (More Table Lines etc) default hidden by the :not rule above, 
+       so just need to ensure they show when parent is visible? 
+       They are divs, so display: block is default. 
+       The :not rule handles the hiding. The absence of that rule handles the showing. */
+}
+@media screen and (max-width: 768px) {
+    /* Hide the extra table controls layout container on mobile by default */
+    /* #sidebar-table { display: none; } - REVERTED: this hides everything */
+
+    /* Show it when toggled */
+    /* #sidebar-table.mobile_visible { display: table; } - REVERTED */
+}
+
+/* Hide layer switcher when mobile sidebar is open */
+body.mobile_sidebar_open .layer-switcher {
+    display: none !important;
+}
+
+/* Custom Layer Switcher Button Style */
+.layer-switcher button {
+    background-color: var(--ACCENT) !important; /* Use red accent color */
+    border-radius: 6px !important;
+    border: none !important;
+    /* Use a white SVG icon for the layers */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 11l-2.5-1.25L12 11zm0 2.5l-5-2.5-2.5 1.25L12 16l7.5-3.75-2.5-1.25L12 13.5zm0 2.5l-5-2.5-2.5 1.25L12 18.5l7.5-3.75-2.5-1.25L12 16z"/><path d="M22 13.5l-10 5-10-5L2 15l10 5 10-5zM22 17.5l-10 5-10-5L2 19l10 5 10-5z" opacity="0.5"/></svg>');
+    /* A simpler, cleaner layers icon */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>') !important;
+    background-size: 20px 20px !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important; /* Ensure no-repeat is set */
+    width: 32px !important;
+    height: 32px !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.layer-switcher button:hover, .layer-switcher button:focus {
+    background-color: var(--ACCENT-LIGHT) !important; /* Lighter red on hover */
+    outline: none;
+}
+
+@media screen and (max-width: 768px) {
+    /* Duplicate zoom hide rule if needed or simple revert. 
+       Actually, I can just remove the specific block I added. 
+       The user wants to keep zoom hidden on mobile. 
+    */
+    /* Hide zoom buttons on mobile */
+    .ol-zoom {
+        display: none !important;
+    }
 }
