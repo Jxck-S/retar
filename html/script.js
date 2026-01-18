@@ -140,6 +140,9 @@ let reapTimeout = globeIndex ? 240 : 480;
 
 let baroCorrectQNH = 1013.25;
 
+let customLogoIndex = null;
+let customIndexUrl = "/logba/";
+
 let limitUpdates = -1;
 
 let infoBlockWidth = baseInfoBlockWidth;
@@ -748,6 +751,7 @@ function initialize() {
         configureReceiver = null;
 
         // Initialize stuff
+        fetchCustomLogoIndex();
         initPage();
         initMap();
 
@@ -3573,7 +3577,55 @@ function refreshSelected() {
 
     var $selected_airline_banner = $('#selected_airline_banner');
     var $banner_img = $selected_airline_banner.find('img');
-    if (opperatorICAO) {
+
+    let customKey = null;
+
+    if (customLogoIndex) {
+        let entry = null;
+        if (selected.registration && customLogoIndex[selected.registration]) {
+            entry = customLogoIndex[selected.registration];
+        } else if (selected.flight && customLogoIndex[selected.flight.trim()]) {
+            entry = customLogoIndex[selected.flight.trim()];
+        }
+
+        if (entry) {
+            if (typeof entry === 'object' && entry.name) {
+                customKey = entry.name;
+            } else if (typeof entry === 'string') {
+                customKey = entry;
+            }
+        }
+    }
+
+    if (customKey) {
+        if (airlineLogos) {
+            var src = airlineLogosApiUrl.replace('/logos/', '/custom/logos/') + customKey;
+            if ($icon_img.length === 0) {
+                 $selected_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
+            } else {
+                 if ($icon_img.attr('src') != src) {
+                     $icon_img.attr('src', src);
+                     $icon_img.css('display', 'inline-block');
+                 }
+            }
+        } else {
+             $selected_opp_icon.empty();
+        }
+
+        if (airlineBanners) {
+            var src = airlineBannersApiUrl.replace('/banners/', '/custom/banners/') + customKey;
+            if ($banner_img.length === 0) {
+                 $selected_airline_banner.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
+            } else {
+                 if ($banner_img.attr('src') != src) {
+                     $banner_img.attr('src', src);
+                     $banner_img.css('display', 'inline-block');
+                 }
+            }
+        } else {
+            $selected_airline_banner.empty();
+        }
+    } else if (opperatorICAO) {
         if (airlineLogos) {
             // Replace with your element's ID
             var src = airlineLogosApiUrl + opperatorICAO;
@@ -9368,6 +9420,21 @@ function globeRateUpdate() {
     }
 }
 globeRateUpdate();
+
+function fetchCustomLogoIndex() {
+    if (!airlineLogos && !airlineBanners) return;
+    jQuery.ajax({
+        url: customIndexUrl,
+        dataType: 'json',
+        success: function(data) {
+            customLogoIndex = data;
+        },
+        error: function() {
+            console.log("Failed to fetch custom logo index");
+        }
+    });
+}
+
 
 
 
