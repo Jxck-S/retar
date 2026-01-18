@@ -4087,10 +4087,46 @@ function refreshHighlighted() {
 
     jQuery('#highlighted_callsign').text(highlighted.name);
 
-    if (airlineLogos && highlighted.opp_icao) {
+    let customKey = null;
+
+    if (customLogoIndex) {
+        let entry = null;
+        if (highlighted.registration && customLogoIndex[highlighted.registration]) {
+            entry = customLogoIndex[highlighted.registration];
+        } else if (highlighted.flight && customLogoIndex[highlighted.flight.trim()]) {
+            entry = customLogoIndex[highlighted.flight.trim()];
+        }
+
+        if (entry) {
+            if (typeof entry === 'object' && entry.name) {
+                customKey = entry.name;
+            } else if (typeof entry === 'string') {
+                customKey = entry;
+            }
+        }
+    }
+
+    if (customKey) {
+        if (airlineLogos) {
+            var $highlighted_opp_icon = $('#highlighted_opp_icon');
+            var $icon_img = $highlighted_opp_icon.find('img');
+            var src = airlineLogosApiUrl + 'custom/logos/' + customKey;
+            
+            if ($icon_img.length === 0) {
+                $highlighted_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
+            } else {
+                if ($icon_img.attr('src') != src) {
+                    $icon_img.attr('src', src);
+                    $icon_img.css('display', 'inline-block');
+                }
+            }
+        } else {
+             $('#highlighted_opp_icon').empty();
+        }
+    } else if (airlineLogos && highlighted.opp_icao) {
         var $highlighted_opp_icon = $('#highlighted_opp_icon');
         var $icon_img = $highlighted_opp_icon.find('img');
-        var src = airlineLogosApiUrl + highlighted.opp_icao;
+        var src = airlineLogosApiUrl + 'logos/' + highlighted.opp_icao;
         if ($icon_img.length === 0) {
             $highlighted_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
         } else {
