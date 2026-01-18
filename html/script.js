@@ -141,7 +141,7 @@ let reapTimeout = globeIndex ? 240 : 480;
 let baroCorrectQNH = 1013.25;
 
 let customLogoIndex = null;
-let customIndexUrl = "/logba/";
+let customIndexUrl = "";
 
 let limitUpdates = -1;
 
@@ -3599,7 +3599,7 @@ function refreshSelected() {
 
     if (customKey) {
         if (airlineLogos) {
-            var src = airlineLogosApiUrl.replace('/logos/', '/custom/logos/') + customKey;
+            var src = airlineLogosApiUrl + 'custom/logos/' + customKey;
             if ($icon_img.length === 0) {
                  $selected_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
             } else {
@@ -3613,7 +3613,7 @@ function refreshSelected() {
         }
 
         if (airlineBanners) {
-            var src = airlineBannersApiUrl.replace('/banners/', '/custom/banners/') + customKey;
+            var src = airlineLogosApiUrl + 'custom/banners/' + customKey;
             if ($banner_img.length === 0) {
                  $selected_airline_banner.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
             } else {
@@ -3628,7 +3628,7 @@ function refreshSelected() {
     } else if (opperatorICAO) {
         if (airlineLogos) {
             // Replace with your element's ID
-            var src = airlineLogosApiUrl + opperatorICAO;
+            var src = airlineLogosApiUrl + 'logos/' + opperatorICAO;
             if ($icon_img.length === 0) {
                 // If no img sub-element exists, add it
                 $selected_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
@@ -3645,7 +3645,7 @@ function refreshSelected() {
         }
 
         if (airlineBanners) {
-            var src = airlineBannersApiUrl + opperatorICAO;
+            var src = airlineLogosApiUrl + 'banners/' + opperatorICAO;
             if ($banner_img.length === 0) {
                 // If no img sub-element exists, add it
                 $selected_airline_banner.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
@@ -9423,6 +9423,13 @@ globeRateUpdate();
 
 function fetchCustomLogoIndex() {
     if (!airlineLogos && !airlineBanners) return;
+    
+    // Derive custom index URL from the configured logos API URL base
+    if (airlineLogosApiUrl) {
+         // airlineLogosApiUrl is now the base e.g. "https://api.../logba/"
+         customIndexUrl = airlineLogosApiUrl;
+    }
+
     jQuery.ajax({
         url: customIndexUrl,
         dataType: 'json',
