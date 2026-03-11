@@ -12,14 +12,7 @@ Provides an improved webinterface for use with ADS-B decoders readsb / dump1090-
 - Multiple aircraft can be selected
 - Labels with the callsign can be switched on and off
 
-## NO WARRANTY
 
-See the bottom of this page or the LICENSE for details.
-While striving not to disrupt an existing Raspbian / Debian / Ubuntu installation, this can't be guaranteed.
-This install script assumes Raspbian / Debian / Ubunutu and will not work on systems without apt.
-
-tar1090 is not a readsb / dump1090-fa replacement, it merely adds an additional webinterface for an existing readsb or dump1090-fa installation.
-dump1090-mutability installations should work as well, aircraft details will be limited though.
 
 ## Installation
 
@@ -542,14 +535,3 @@ Make sure that the server address is reachable from the device you are viewing t
 **Note:** for this to work, you must have started AIS-catcher with the geojson flag set to on with the option `-N 8100 geojson on` and you should be able to see a geojson if you visit the `aiscatcher_server` address from above with `/geojson` appeanded to it - from the above example this would be `http://192.168.1.113:8100/geojson`
 
 
-## NO WARRANTY - Excerpt from the License:
-
-  11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
-FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN
-OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
-OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS
-TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE
-PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
-REPAIR OR CORRECTION.
