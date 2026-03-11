@@ -1,9 +1,7 @@
 # retar
 
 
-![Screenshot1](https://raw.githubusercontent.com/wiedehopf/tar1090/screenshots/screenshot3.png)
-
-Provides an improved webinterface for use with ADS-B decoders readsb / dump1090-fa
+Provides an improved webinterface for use with ADS-B decoders readsb 
 
 - Improved adjustable history
 - Show All Tracks much faster than original with many planes
@@ -17,25 +15,25 @@ Provides an improved webinterface for use with ADS-B decoders readsb / dump1090-
 ## Installation
 
 ```
-sudo bash -c "$(wget -nv -O - https://github.com/wiedehopf/tar1090/raw/master/install.sh)"
+sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/master/install.sh)"
 ```
 
 ## View the added webinterface
 
-Click the following URL and replace the IP address with address of your Raspberry Pi:
+Click the following URL and replace the IP address of your instance:
 
-http://192.168.x.yy/tar1090
+http://[IP_ADDRESS]/tar1090
 
 If you are curious about your coverage, try this URL:
 
-http://192.168.x.yy/tar1090/?pTracks
+http://[IP_ADDRESS]/?pTracks
 
 Check further down for keyboard shortcuts.
 
 ## Update (same command as installation)
 
 ```
-sudo bash -c "$(wget -nv -O - https://github.com/wiedehopf/tar1090/raw/master/install.sh)"
+sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/master/install.sh)"
 ```
 
 Configuration should be preserved.
@@ -81,7 +79,7 @@ Then run the install script again.
 
 ## Home / receiver location:
 
-This is set in the decoder, so readsb or dump1090-fa, if you used one of my scripts to install their readme will have further instructions on how to set the location.
+This is set in the decoder, so readsb if you used one of my scripts to install their readme will have further instructions on how to set the location.
 
 ## Change Log
 
@@ -99,7 +97,7 @@ Documentation and explanation is time consuming to do and as such i choose to li
 
 If you think you have found a bug, open an issue here on github.
 Please check all the buttons and read all the tooltips before you do.
-Try deleting the browser cache for the tar1090 page.
+Try deleting the browser cache for the retar page.
 
 
 ## Enable (/disable) FA links in the webinterface (previously enabled by default)
@@ -158,14 +156,14 @@ UAT traffic will be displayed as ADS-B, this can't be avoided.
 
 
 ```
-wget -nv -O /tmp/install.sh https://github.com/wiedehopf/tar1090/raw/master/install.sh
+wget -nv -O /tmp/install.sh https://github.com/Jxck-S/retar/raw/master/install.sh
 sudo bash /tmp/install.sh /run/combine1090
 ```
 
 ## Remove / Uninstall
 
 ```
-sudo bash -c "$(wget -nv -O - https://github.com/wiedehopf/tar1090/raw/master/uninstall.sh)"
+sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/master/uninstall.sh)"
 ```
 
 ## Using the filters
