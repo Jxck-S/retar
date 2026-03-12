@@ -8,7 +8,7 @@
     renice 10 $$
 
     srcdir=$RUNBASE/readsb
-    repo="https://github.com/Jxck-S/tar1090"
+    repo="https://github.com/Jxck-S/retar"
     db_repo="https://github.com/wiedehopf/tar1090-db"
 
     # optional command line options for this install script
