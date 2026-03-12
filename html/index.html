@@ -1,4 +1,4 @@
-﻿<!DOCTYPE HTML>
+<!DOCTYPE HTML>
 <html>
   <head>
     <meta name="description" content="tar1090 - ADS-B plane tracking interface">
@@ -824,8 +824,7 @@
             <!-- expand_sidebar_button moved to sidebar-table -->
             <div id="fullscreenButton" class="svgButton fullscreenButton"></div>
             <div id="settingsCog" class="svgButton settingsCog"></div>
-            <div id="L" title="Toggle (L)abels" class="button inActiveButton" onclick="toggleLabels();"><span class="buttonText">L</span></div>
-            <div id="O" title="Toggle Label Extensi(O)ns" class="button inActiveButton" onclick="toggleExtendedLabels();"><span class="buttonText">O</span></div>
+            <div id="L" title="Label Configuration" class="button inActiveButton" onclick="toggleLabelMenu();" style="display:inline-flex;align-items:center;justify-content:center;vertical-align:top;"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></div>
             <div id="K" title="Toggle Trac(K) Labels" class="button inActiveButton" onclick="toggleTrackLabels();"><span class="buttonText">K</span></div>
             <div class="buttonSpacer">
             </div>
@@ -842,7 +841,44 @@
             </div>
             <div id="R" title="Follow a (R)andom plane!" class="button inActiveButton" onclick="followRandomPlane();"><span class="buttonText">R</span></div>
             <div id="F" title="(F)ollow" class="button inActiveButton" onclick="toggleFollow();"><span class="buttonText">F</span></div>
-          <!--< div id="RP" title="Replay" class="button inActiveButton" onclick="showReplayBar();"><span class="buttonText">RP</span></div>-->
+          </div>
+        </div>
+        <!-- Label Configuration Menu -->
+        <div id="labelConfigMenu" style="display: none;">
+          <div class="labelMenuHeader">
+            <span class="labelMenuTitle">LABEL CONFIG</span>
+            <button class="labelMenuClose" onclick="toggleLabelMenu();">✕</button>
+          </div>
+          <div class="labelMenuBody">
+            <label class="labelMenuItem">
+              <input type="checkbox" id="labelToggle_enabled" onchange="updateLabelConfig();">
+              <span>Enable Labels</span>
+            </label>
+            <hr class="labelMenuDivider">
+            <label class="labelMenuItem">
+              <input type="checkbox" id="labelToggle_callsign" onchange="updateLabelConfig();">
+              <span>Callsign</span>
+            </label>
+            <label class="labelMenuItem">
+              <input type="checkbox" id="labelToggle_altitude" onchange="updateLabelConfig();">
+              <span>Altitude</span>
+            </label>
+            <label class="labelMenuItem">
+              <input type="checkbox" id="labelToggle_speed" onchange="updateLabelConfig();">
+              <span>Speed</span>
+            </label>
+            <label class="labelMenuItem">
+              <input type="checkbox" id="labelToggle_registration" onchange="updateLabelConfig();">
+              <span>Registration</span>
+            </label>
+            <label class="labelMenuItem">
+              <input type="checkbox" id="labelToggle_type" onchange="updateLabelConfig();">
+              <span>Aircraft Type</span>
+            </label>
+            <label class="labelMenuItem">
+              <input type="checkbox" id="labelToggle_category" onchange="updateLabelConfig();">
+              <span>Emitter Category</span>
+            </label>
           </div>
         </div>
         <div id="altitude_chart" class="ol-unselectable ol-control altitudeFeet">
@@ -980,7 +1016,6 @@
                           maxlength="128" title="Search by airport code like KATL, ZBAA, or LAX">
                         <div id="jump_clear_button" class="search-clear-btn" title="Clear">×</div>
                       </div>
-                        <button class="formButton" type="submit">Jump</button>
                       </form>
                     </td>
                   </tr>
@@ -993,59 +1028,70 @@
                   <tbody>
                     <tr>
                       <td>
-                        <form id="altitude_filter_form">
-                          <div class="infoBlockTitleText">Filter by altitude:</div>
-                          <input id="altitude_filter_min" name="minAltitude" type="text" class="altitudeFilterInput" maxlength="6">
-                          <label for="altitude_filter_min" class="altitudeUnit"></label>
-                          <span> to </span>
-                          <input id="altitude_filter_max" name="maxAltitude" type="text" class="altitudeFilterInput" maxlength="6">
-                          <label for="altitude_filter_max" class="altitudeUnit"></label>
-                          <button class="formButton" type="submit">Filter</button>
-                          <button class="formButton" id="altitude_filter_reset_button">Reset</button>
-                        </form>
+                        <div class="infoBlockSection" style="background-color: var(--BGCOLOR2); border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); margin-bottom: 8px;">
+                          <form id="altitude_filter_form">
+                            <div class="infoBlockTitleText" style="margin-bottom: 5px;">ALTITUDE:</div>
+                            <input id="altitude_filter_min" name="minAltitude" type="text" class="altitudeFilterInput" maxlength="6">
+                            <label for="altitude_filter_min" class="altitudeUnit"></label>
+                            <span> to </span>
+                            <input id="altitude_filter_max" name="maxAltitude" type="text" class="altitudeFilterInput" maxlength="6">
+                            <label for="altitude_filter_max" class="altitudeUnit"></label>
+                            <div style="margin-top: 5px;">
+                              <button class="formButton" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                              <button class="formButton" id="altitude_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                            </div>
+                          </form>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
                 </table>
-                <table style="width: 100%" cellpadding="0" cellspacing="0" id="filterTable2">
-                  <tbody>
+                
+                <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 8px;">
+                  <!-- Filter by Source -->
+                  <div class="infoBlockSection" style="background-color: var(--BGCOLOR2); border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <form id="source_filter_form">
+                      <div class="infoBlockTitleText" style="margin-bottom: 5px;">SOURCE:</div>
+                      <div>
+                        <ol id="sourceFilter" class="buttonFilter"></ol>
+                      </div>
+                      <div style="margin-top: 5px;">
+                        <button class="formButton" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                        <button class="formButton" id="source_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                      </div>
+                    </form>
+                  </div>
 
-                    <tr>
-                      <td>
-                        <form id="source_filter_form">
-                          <div class="infoBlockTitleText">Filter by source:</div>
-                          <table>
-                            <tr><td>
-                              <ol id="sourceFilter" class="buttonFilter"></ol>
-                            </td></tr>
-                            <tr><td>
-                              <button class="formButton" type="submit">Filter</button>
-                              <button class="formButton" id="source_filter_reset_button">Reset</button>
-                            </td></tr>
-                          </table>
-                        </form>
-                      </td>
-                    </tr>
+                  <!-- Filter by DB Flags -->
+                  <div class="infoBlockSection" style="background-color: var(--BGCOLOR2); border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <form id="flag_filter_form">
+                      <div class="infoBlockTitleText" style="margin-bottom: 5px;">DB FLAGS:</div>
+                      <div>
+                        <ol id="flagFilter" class="buttonFilter"></ol>
+                      </div>
+                      <div style="margin-top: 5px;">
+                        <button class="formButton" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                        <button class="formButton" id="flag_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                      </div>
+                    </form>
+                  </div>
 
-                    <tr>
-                      <td>
-                        <form id="flag_filter_form">
-                          <div class="infoBlockTitleText">Filter by DB flags:</div>
-                          <table>
-                            <tr><td>
-                              <ol id="flagFilter" class="buttonFilter"></ol>
-                            </td></tr>
-                            <tr><td>
-                              <button class="formButton" type="submit">Filter</button>
-                              <button class="formButton" id="flag_filter_reset_button">Reset</button>
-                            </td></tr>
-                          </table>
-                        </form>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table cellpadding="0" cellspacing="0" id="filterTable3">
+                  <!-- Filter Missing DB Info -->
+                  <div class="infoBlockSection" style="background-color: var(--BGCOLOR2); border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <form id="nodb_filter_form">
+                      <div class="infoBlockTitleText" style="margin-bottom: 5px;">MISSING DB INFO:</div>
+                      <div>
+                        <ol id="nodbFilter" class="buttonFilter"></ol>
+                      </div>
+                      <div style="margin-top: 5px;">
+                        <button class="formButton" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                        <button class="formButton" id="nodb_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <table cellpadding="0" cellspacing="0" id="filterTable3" style="margin-top: 8px;">
                   <tbody>
                   </tbody>
                 </table>

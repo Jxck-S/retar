@@ -335,6 +335,21 @@ PlaneObject.prototype.isFiltered = function() {
             return true;
     }
 
+    if (PlaneFilter.nodbFilter && PlaneFilter.nodbFilter.length > 0) {
+        let keep = false;
+        for (const flag of PlaneFilter.nodbFilter) {
+            if (flag === 'noreg' && !this.registration) {
+                keep = true;
+            }
+            if (flag === 'notype' && !this.icaoType) {
+                keep = true;
+            }
+        }
+        if (!keep) {
+            return true;
+        }
+    }
+
     if (this.sitedist && this.sitedist > filterMaxRange)
         return true;
 
@@ -866,18 +881,14 @@ PlaneObject.prototype.updateIcon = function() {
         )
     ) {
         let callsign = "";
-        if (this.flight && this.flight.trim() && !(this.dataSource == "ais" && !g.extendedLabels))
+        if (this.flight && this.flight.trim() && this.dataSource != "ais")
             callsign =  this.flight.trim();
         else if (this.registration)
             callsign =  'reg: ' + this.registration;
         else
             callsign =   'hex: ' + this.icao;
         if ((useRouteAPI || this.dataSource == "ais") && this.routeString) {
-            if (0 && g.extendedLabels) {
-                callsign += ' - ' + this.routeString;
-            } else {
-                callsign += '\n' + this.routeString;
-            }
+            callsign += '\n' + this.routeString;
         }
 
         const unknown = NBSP+NBSP+"?"+NBSP+NBSP;
@@ -892,6 +903,9 @@ PlaneObject.prototype.updateIcon = function() {
         let speedString = (this.speed == null) ? (NBSP+'?'+NBSP) : format_speed_brief(this.speed, DisplayUnits, showLabelUnits).padStart(3, NBSP);
 
         labelText = "";
+
+        const lc = g.labelConfig || {};
+
         if (atcStyle) {
             labelText += callsign + '\n';
             labelText += altString + '\n';
@@ -905,43 +919,41 @@ PlaneObject.prototype.updateIcon = function() {
                     labelText += '\nHIJACK';
                 }
             }
-        } else if (g.extendedLabels == 3) {
-            if (!windLabelsSlim) {
-                labelText += 'Wind' + NBSP;
-            }
-            if (this.wd != null) {
-                if (showLabelUnits) {
-                    labelText += format_track_arrow((this.wd + 180 % 360)) + NBSP + this.wd + '°' + NBSP;
-                    labelText += format_speed_long(this.ws, DisplayUnits);
-                } else {
-                    labelText += format_track_arrow((this.wd + 180 % 360)) + NBSP + this.wd + NBSP;
-                    labelText += format_speed_brief(this.ws, DisplayUnits);
+        } else {
+            // Registration and Type line
+            if (lc.registration || lc.type) {
+                let infoLine = '';
+                if (lc.registration) {
+                    infoLine += (this.registration ? this.registration : unknown);
                 }
-            } else {
-                labelText += 'n/a';
+                if (lc.type) {
+                    if (infoLine) infoLine += NBSP;
+                    infoLine += (this.icaoType ? this.icaoType : unknown);
+                }
+                labelText += infoLine + '\n';
             }
-            if (windLabelsSlim) {
-                labelText += '\n' + altString;
-            } else {
+            // Speed and Altitude line
+            if (lc.altitude || lc.speed) {
                 if ((!this.onGround || (this.speed && this.speed > 18) || (this.selected && !SelectedAllPlanes))) {
-                    labelText += '\n' + speedString + NBSP + NNBSP + altString.padStart(6, NBSP);
+                    let dataLine = '';
+                    if (lc.speed) dataLine += speedString;
+                    if (lc.speed && lc.altitude) dataLine += NBSP + NNBSP;
+                    if (lc.altitude) dataLine += altString.padStart(6, NBSP);
+                    labelText += dataLine + '\n';
                 }
-                labelText += '\n' + callsign;
             }
-
-            if (windLabelsSlim && this.wd == null) {
-                labelText = '';
+            // Emitter Category
+            if (lc.category && this.category) {
+                labelText += this.category + '\n';
             }
-        } else if (g.extendedLabels == 2) {
-            labelText += (this.registration ? this.registration : unknown) + NBSP + (this.icaoType ? this.icaoType : unknown) + '\n';
-        }
-        if (g.extendedLabels == 1 || g.extendedLabels == 2) {
-            if ((!this.onGround || (this.speed && this.speed > 18) || (this.selected && !SelectedAllPlanes))) {
-                labelText += speedString + NBSP + NNBSP + altString.padStart(6, NBSP) + '\n';
+            // Callsign
+            if (lc.callsign) {
+                labelText += callsign;
             }
         }
-        if (g.extendedLabels < 3 && !atcStyle) {
-            labelText += callsign;
+        // Trim trailing newlines so label background fits tightly
+        if (labelText) {
+            labelText = labelText.replace(/\n+$/, '');
         }
     }
     if (!webgl && (this.markerStyle == null || this.markerIcon == null || (this.markerSvgKey != svgKey))) {

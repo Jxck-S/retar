@@ -91,6 +91,9 @@ let sourcesFilter = null;
 let sources = ['adsb', ['uat', 'adsr'], 'mlat', 'tisb', 'modeS', 'other', 'adsc', 'ais'];
 let flagFilter = null;
 let flagFilterValues = ['military', 'pia', 'ladd'];
+
+let nodbFilter = null;
+let nodbFilterValues = ['noreg', 'notype'];
 let showTrace = false;
 let showTraceExit = false;
 let showTraceWasIsolation = false;
@@ -1173,6 +1176,10 @@ function earlyInitPage() {
         PlaneFilter.flagFilter = usp.get('filterDbFlag').split(',');
         shareFiltersParam = true;
     }
+    if (usp.has('filterNoDb')) {
+        PlaneFilter.nodbFilter = usp.get('filterNoDb').split(',');
+        shareFiltersParam = true;
+    }
 
 
     if (false && iOSVersion() <= 12 && !('PointerEvent' in window)) {
@@ -1183,16 +1190,7 @@ function earlyInitPage() {
         }, 30000);
     }
 
-    if (loStore['enableLabels'] == 'true' || usp.has('enableLabels')) {
-        toggleLabels();
-    }
-    if (usp.has('extendedLabels')) {
-        g.extendedLabels = parseInt(usp.getFloat('extendedLabels'));
-        toggleExtendedLabels({ noIncrement: true });
-    } else if (loStore['extendedLabels']) {
-        g.extendedLabels = parseInt(loStore['extendedLabels']);
-        toggleExtendedLabels({ noIncrement: true });
-    }
+    initLabelConfig();
     if (loStore['trackLabels'] == "true" || usp.has('trackLabels')) {
         toggleTrackLabels();
     }
@@ -1332,6 +1330,14 @@ function earlyInitPage() {
     jQuery('#blockedmlat_filter').on('click', function() {
         filterBlockedMLAT(true);
         refresh();
+    });
+
+    jQuery('#nodb_filter_form').submit(function(event) {
+        updateNoDbFilter(event);
+    });
+
+    jQuery('#nodb_filter_reset_button').click(function(event) {
+        onResetNoDbFilter(event);
     });
 
     new Toggle({
@@ -1945,6 +1951,35 @@ function initFlagFilter(colors) {
     });
 
     jQuery("#flagFilter").on("selectablestart", function (event, ui) {
+        event.originalEvent.ctrlKey = true;
+    });
+}
+
+function initNoDbFilter() {
+    const createFilter = function (text, key) {
+        return '<li class="ui-widget-content" id="nodb-filter-' + key + '">' + text + '</li>';
+    };
+
+    let html = '';
+    html += createFilter('NO REG', nodbFilterValues[0]);
+    html += createFilter('NO TYPE', nodbFilterValues[1]);
+
+    document.getElementById('nodbFilter').innerHTML = html;
+
+    jQuery("#nodbFilter").selectable({
+        stop: function () {
+            nodbFilter = [];
+            jQuery(".ui-selected", this).each(function () {
+                const index = jQuery("#nodbFilter li").index(this);
+                if (Array.isArray(nodbFilterValues[index]))
+                    nodbFilterValues[index].forEach(member => { nodbFilter.push(member); });
+                else
+                    nodbFilter.push(nodbFilterValues[index]);
+            });
+        }
+    });
+
+    jQuery("#nodbFilter").on("selectablestart", function (event, ui) {
         event.originalEvent.ctrlKey = true;
     });
 }
@@ -3227,10 +3262,10 @@ function initMap() {
                 break;
                 // Labels
             case "l":
-                toggleLabels();
+                toggleLabelMenu();
                 break;
             case "o":
-                toggleExtendedLabels();
+                toggleLabelMenu();
                 break;
             case "k":
                 toggleTrackLabels();
@@ -5258,6 +5293,8 @@ function filterGroundVehicles(switchFilter) {
     }
     loStore['groundVehicleFilter'] = groundFilter;
     PlaneFilter.groundVehicles = groundFilter;
+    PlaneFilter.blockedMLAT = loStore['blockedMLATFilter'] || 'not_filtered';
+    PlaneFilter.nodbFilter = nodbFilter;
 }
 
 function filterBlockedMLAT(switchFilter) {
@@ -5477,6 +5514,7 @@ function toggleTableInView(arg) {
 function toggleLabels() {
     g.enableLabels = !g.enableLabels;
     loStore['enableLabels'] = g.enableLabels;
+    document.getElementById('labelToggle_enabled').checked = g.enableLabels;
     for (let key in g.planesOrdered) {
         g.planesOrdered[key].updateMarker();
     }
@@ -5487,22 +5525,100 @@ function toggleLabels() {
         remakeTrails();
 }
 
-function toggleExtendedLabels(options) {
-    if (isNaN(g.extendedLabels))
-        g.extendedLabels = 0;
+function initLabelConfig() {
+    // Default label config
+    const defaults = {
+        enabled: true,
+        callsign: true,
+        altitude: true,
+        speed: true,
+        registration: false,
+        type: false,
+        category: false,
+    };
 
-    options = options || {};
-    if (!options.noIncrement) {
-        g.extendedLabels++;
+    // Load from localStorage or use defaults
+    let saved = loStore['labelConfig'];
+    if (saved) {
+        try {
+            g.labelConfig = JSON.parse(saved);
+            // Ensure all keys exist (in case we add new ones)
+            for (let key in defaults) {
+                if (g.labelConfig[key] === undefined) {
+                    g.labelConfig[key] = defaults[key];
+                }
+            }
+        } catch(e) {
+            g.labelConfig = Object.assign({}, defaults);
+        }
+    } else {
+        g.labelConfig = Object.assign({}, defaults);
     }
-    g.extendedLabels %= 4;
-    //console.log(extendedLabels);
-    loStore['extendedLabels'] = g.extendedLabels;
+
+    // Also respect legacy enableLabels
+    if (loStore['enableLabels'] == 'true') {
+        g.labelConfig.enabled = true;
+    }
+
+    // Sync checkboxes to state
+    syncLabelCheckboxes();
+
+    // Apply initial state
+    g.enableLabels = g.labelConfig.enabled;
+    buttonActive('#L', g.enableLabels);
+}
+
+function syncLabelCheckboxes() {
+    const fields = ['enabled', 'callsign', 'altitude', 'speed', 'registration', 'type', 'category'];
+    for (const field of fields) {
+        const el = document.getElementById('labelToggle_' + field);
+        if (el) el.checked = g.labelConfig[field];
+    }
+}
+
+function updateLabelConfig() {
+    const fields = ['enabled', 'callsign', 'altitude', 'speed', 'registration', 'type', 'category'];
+    for (const field of fields) {
+        const el = document.getElementById('labelToggle_' + field);
+        if (el) g.labelConfig[field] = el.checked;
+    }
+
+    g.enableLabels = g.labelConfig.enabled;
+    loStore['labelConfig'] = JSON.stringify(g.labelConfig);
+    loStore['enableLabels'] = g.enableLabels;
+
     for (let key in g.planesOrdered) {
         g.planesOrdered[key].updateMarker();
     }
-    buttonActive('#O', g.extendedLabels);
+    refreshFeatures();
+    buttonActive('#L', g.enableLabels);
+
+    if (showTrace)
+        remakeTrails();
 }
+
+function toggleLabelMenu() {
+    const menu = document.getElementById('labelConfigMenu');
+    let overlay = document.getElementById('labelConfigMenuOverlay');
+
+    if (menu.style.display === 'none' || !menu.style.display) {
+        // Show menu + overlay
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'labelConfigMenuOverlay';
+            overlay.onclick = function() { toggleLabelMenu(); };
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'block';
+        menu.style.display = 'block';
+        syncLabelCheckboxes();
+    } else {
+        // Hide menu + overlay
+        menu.style.display = 'none';
+        if (overlay) overlay.style.display = 'none';
+    }
+}
+
 
 function toggleTrackLabels() {
     trackLabels = !trackLabels;
@@ -5709,6 +5825,23 @@ function updateFlagFilter(e) {
     refreshFilter();
 }
 
+function onResetNoDbFilter(e) {
+    jQuery('#nodbFilter .ui-selected').removeClass('ui-selected');
+
+    nodbFilter = null;
+
+    updateNoDbFilter();
+}
+
+function updateNoDbFilter(e) {
+    if (e)
+        e.preventDefault();
+
+    PlaneFilter.nodbFilter = nodbFilter;
+
+    refreshFilter();
+}
+
 const filters = {};
 const filter_list = [];
 const filters_active = [];
@@ -5769,13 +5902,20 @@ Filter.prototype.init = function() {
     // don't F directly with the innerhtml of the body because it will drop event listeners / recreate dom elements
     const row = this.tbody.insertRow();
     row.innerHTML =
-        `<td><form id="${this.id}">`
-        + '<div class="infoBlockTitleText">Filter by '+ this.name +':</div>'
-        + `<input id="${this.id}_input" name="${this.id}_name" type="text" class="searchInput" maxlength="1024">`
-        + '<button class="formButton" type="submit">Filter</button>'
-        + `<button class="formButton" id="${this.id}_reset">Reset</button>`
-        + '</form></td>'
-    ;
+        `<td>
+            <div class="infoBlockSection" style="background-color: var(--BGCOLOR2); border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); margin-bottom: 8px; width: fit-content;">
+                <form id="${this.id}">
+                    <div class="infoBlockTitleText" style="margin-bottom: 5px; text-transform: uppercase;">${this.name}:</div>
+                    <div>
+                        <input id="${this.id}_input" name="${this.id}_name" type="text" class="searchInput" maxlength="1024" style="width: 100%;">
+                    </div>
+                    <div style="margin-top: 5px;">
+                        <button class="formButton" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                        <button class="formButton" id="${this.id}_reset" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                    </div>
+                </form>
+            </div>
+        </td>`;
     this.input = jQuery(this.sid + '_input');
     this.form = document.getElementById(this.id)
     this.form.onsubmit = (e) => { return this.update(e); };
@@ -5785,6 +5925,7 @@ Filter.prototype.init = function() {
 function initFilters() {
     initSourceFilter(tableColors.unselected);
     initFlagFilter(tableColors.unselected);
+    initNoDbFilter();
     new Filter({
         key: 'callsign',
         field: 'name',
@@ -5866,6 +6007,11 @@ function initFilters() {
         if (PlaneFilter.flagFilter) {
             flagFilter = PlaneFilter.flagFilter
             flagFilter.map((f) => jQuery('#flag-filter-' + f).addClass('ui-selected'))
+        }
+
+        if (PlaneFilter.nodbFilter) {
+            nodbFilter = PlaneFilter.nodbFilter
+            nodbFilter.map((f) => jQuery('#nodb-filter-' + f).addClass('ui-selected'))
         }
     }
 }
@@ -6831,6 +6977,10 @@ function updateAddressBar() {
         }
         if (PlaneFilter.flagFilter) {
             filterStrings.push('filterDbFlag=' + PlaneFilter.flagFilter.map(f => encodeURIComponent(f)).join(','));
+        }
+
+        if (PlaneFilter.nodbFilter) {
+            filterStrings.push('filterNoDb=' + PlaneFilter.nodbFilter.map(f => encodeURIComponent(f)).join(','));
         }
 
         if (filterStrings.length > 0) {

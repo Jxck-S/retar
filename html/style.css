@@ -432,9 +432,10 @@ html.dark .sidebar_button {
 #filterTable td,
 #filterTable2 td,
 #filterTable3 td {
-    padding-bottom: 25px;
-    display: block;
-    /* Ensure full width behavior */
+    padding: 0px;
+    padding-bottom: 8px;
+    margin: 0px;
+    border-top-width: 0px;
 }
 
 /* Remove border/padding from the very last row's cell in each table to clean up bottom edge */
@@ -442,8 +443,8 @@ html.dark .sidebar_button {
 #filterTable tr:last-child td,
 #filterTable2 tr:last-child td,
 #filterTable3 tr:last-child td {
-    padding-bottom: 0;
     border-bottom: none;
+    padding-bottom: 0px;
 }
 
 .infoBlockTitleText {
@@ -513,7 +514,7 @@ html.dark .infoBlockTitleText {
     width: calc(70px * var(--SCALE));
     height: calc(24px * var(--SCALE));
     color:var(--TXTCOLOR2);
-    background-color: var(--BGCOLOR2);
+    background-color: var(--BGCOLOR1);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 6px;
     padding: 0 4px;
@@ -522,10 +523,11 @@ html.dark .infoBlockTitleText {
     width: calc(100px * var(--SCALE));
     height: calc(24px * var(--SCALE));
     color: var(--TXTCOLOR2);
-    background-color: var(--BGCOLOR2);
+    background-color: var(--BGCOLOR1);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 6px;
     padding: 0 4px;
+    box-sizing: border-box;
 }
 
 .formButton {
@@ -1023,96 +1025,105 @@ table.infoSectionTable tr td {
 
 #settings_infoblock {
     position: fixed;
-    top: 15%;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     width: fit-content;
     max-width: 95vw;
     max-height: 70vh;
     overflow: auto;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
-    padding: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 0;
     z-index: 9999;
     display: none;
-    background-color: var(--BGCOLOR1);
-    border-radius: 24px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    background-color: var(--BGCOLOR2);
+    border-radius: 10px;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--TXTCOLOR2);
+}
+
+#settings_infoblock * {
+    font-family: inherit;
 }
 
 .settingsColumn {
     display: table-cell;
     width:  calc(199px * var(--SCALE));
+    padding: 14px;
 }
 .settingsOptionContainer {
-    display: table;
-    padding-top: calc( 3.5px * var(--SCALE));
-    padding-bottom: calc( 3.5px * var(--SCALE));
+    display: flex;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 13px;
 }
 
 #settings_infoblock .settingsCheckbox {
-    width: calc(44px * var(--SCALE));
-    height: calc(24px * var(--SCALE));
+    width: calc(16px * var(--SCALE));
+    height: calc(16px * var(--SCALE));
     float: left;
     margin-right: calc(10px * var(--SCALE));
     cursor: pointer;
-    background-color: #e5e7eb;
-    border-radius: 9999px;
+    background-color: transparent;
+    border: 2px solid rgba(128, 128, 128, 0.5);
+    border-radius: 3px;
     position: relative;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     background-image: none;
-    /* ensure no image */
 }
 
 #settings_infoblock .settingsCheckbox::after {
     content: '';
     position: absolute;
-    top: calc(2px * var(--SCALE));
-    left: calc(2px * var(--SCALE));
-    width: calc(20px * var(--SCALE));
-    height: calc(20px * var(--SCALE));
-    background-color: white;
-    border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    display: none;
 }
 
 #settings_infoblock .settingsCheckbox:hover {
-    background-color: #d1d5db;
+    border-color: var(--ACCENT, #4a8fe7);
 }
 
 #settings_infoblock .settingsCheckboxChecked {
-    background-color: var(--ACCENT) !important;
+    background-color: var(--ACCENT, #4a8fe7) !important;
+    border-color: var(--ACCENT, #4a8fe7) !important;
 }
 
 #settings_infoblock .settingsCheckboxChecked::after {
-    transform: translateX(calc(20px * var(--SCALE)));
+    display: block;
+    left: calc(4px * var(--SCALE));
+    top: calc(1px * var(--SCALE));
+    width: calc(5px * var(--SCALE));
+    height: calc(9px * var(--SCALE));
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
 }
 
 .settingsCloseBox {
     position: absolute;
-    right: calc(8px * var(--SCALE));
-    top: calc(8px * var(--SCALE));
-    width: calc(24px * var(--SCALE));
-    height: calc(24px * var(--SCALE));
+    right: 10px;
+    top: 10px;
+    width: 24px;
+    height: 24px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: none;
-    transition: transform 0.2s;
+    background: none;
+    border: none;
+    transition: opacity 0.2s ease;
 }
 
 .settingsCloseBox::after {
-    content: '×';
-    font-size: calc(24px * var(--SCALE));
-    font-weight: bold;
-    color: var(--ACCENT-LIGHT);
+    content: '✕';
+    font-size: 14px;
+    color: var(--TXTCOLOR2);
+    opacity: 0.6;
     line-height: 1;
 }
 
-.settingsCloseBox:hover {
-    transform: scale(1.1);
+.settingsCloseBox:hover::after {
+    opacity: 1;
 }
 
 .infoblockCloseBox {
@@ -1143,8 +1154,10 @@ table.infoSectionTable tr td {
 }
 
 .settingsText {
-    line-height: calc( 20px * var(--SCALE));
-    display: table-cell;
+    line-height: 1.4;
+    font-size: 13px;
+    color: var(--TXTCOLOR2);
+    letter-spacing: 0.2px;
 }
 
 #altitude_chart {
@@ -1384,10 +1397,73 @@ a.ui-button:active,
 }
 
 .ui-slider {
-    background-color: var(--BGCOLOR2);
+    background-color: rgba(128, 128, 128, 0.25);
+    border-radius: 4px;
+    height: 6px;
+    border: none;
+    margin: 8px 4px 14px;
 }
 .ui-slider .ui-slider-handle {
-    background-color: rgb(0, 115, 222);
+    background-color: var(--ACCENT, #4a8fe7);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    top: -5px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease;
+}
+.ui-slider .ui-slider-handle:hover {
+    transform: scale(1.15);
+}
+
+/* Settings select dropdown */
+#settings_infoblock select {
+    background-color: rgba(128, 128, 128, 0.15);
+    color: var(--TXTCOLOR2);
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+}
+#settings_infoblock select:hover {
+    border-color: var(--ACCENT, #4a8fe7);
+}
+
+/* Settings reset button */
+#settings_infoblock .formButton {
+    background-color: rgba(128, 128, 128, 0.15);
+    color: var(--TXTCOLOR2);
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+#settings_infoblock .formButton:hover {
+    background-color: rgba(128, 128, 128, 0.25);
+    border-color: var(--ACCENT, #4a8fe7);
+}
+
+/* Settings divider */
+#settings_infoblock .rSpacer hr {
+    border: none;
+    border-top: 1px solid rgba(128, 128, 128, 0.15);
+    margin: 6px 0;
+}
+
+/* Settings infoblock title text */
+#settings_infoblock .infoBlockTitleText {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--TXTCOLOR2);
+    opacity: 0.9;
 }
 
 
@@ -1958,4 +2034,93 @@ body.mobile_sidebar_open .layer-switcher {
     .ol-zoom {
         display: none !important;
     }
+}
+
+/* Label Configuration Menu */
+#labelConfigMenu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    background-color: var(--BGCOLOR2);
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    min-width: 200px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--TXTCOLOR2);
+}
+
+.labelMenuHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.labelMenuTitle {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--TXTCOLOR2);
+    opacity: 0.8;
+}
+
+.labelMenuClose {
+    background: none;
+    border: none;
+    color: var(--TXTCOLOR2);
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+    padding: 0 4px;
+}
+
+.labelMenuClose:hover {
+    opacity: 1;
+}
+
+.labelMenuBody {
+    padding: 8px 14px 12px;
+}
+
+.labelMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    cursor: pointer;
+    font-size: 13px;
+    transition: opacity 0.15s ease;
+}
+
+.labelMenuItem:hover {
+    opacity: 0.8;
+}
+
+.labelMenuItem input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--ACCENT, #4a8fe7);
+    cursor: pointer;
+}
+
+.labelMenuDivider {
+    border: none;
+    border-top: 1px solid rgba(128, 128, 128, 0.15);
+    margin: 4px 0;
+}
+
+#labelConfigMenuOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.3);
 }
