@@ -5528,13 +5528,15 @@ function toggleLabels() {
 function initLabelConfig() {
     // Default label config
     const defaults = {
-        enabled: true,
+        enabled: false,
         callsign: true,
         altitude: true,
         speed: true,
         registration: false,
         type: false,
         category: false,
+        icao_operator: false,
+        operator_icon: false,
     };
 
     // Load from localStorage or use defaults
@@ -5569,7 +5571,7 @@ function initLabelConfig() {
 }
 
 function syncLabelCheckboxes() {
-    const fields = ['enabled', 'callsign', 'altitude', 'speed', 'registration', 'type', 'category'];
+    const fields = ['enabled', 'callsign', 'altitude', 'speed', 'registration', 'type', 'category', 'icao_operator', 'operator_icon'];
     for (const field of fields) {
         const el = document.getElementById('labelToggle_' + field);
         if (el) el.checked = g.labelConfig[field];
@@ -5577,7 +5579,7 @@ function syncLabelCheckboxes() {
 }
 
 function updateLabelConfig() {
-    const fields = ['enabled', 'callsign', 'altitude', 'speed', 'registration', 'type', 'category'];
+    const fields = ['enabled', 'callsign', 'altitude', 'speed', 'registration', 'type', 'category', 'icao_operator', 'operator_icon'];
     for (const field of fields) {
         const el = document.getElementById('labelToggle_' + field);
         if (el) g.labelConfig[field] = el.checked;

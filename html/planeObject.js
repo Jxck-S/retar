@@ -870,6 +870,7 @@ PlaneObject.prototype.updateIcon = function() {
     let fillColor = hslToRgb(this.getMarkerColor());
     let svgKey  = fillColor + '!' + this.shape.name + '!' + this.strokeWidth;
     let labelText = null;
+    let opIconLineAdded = false;
 
     if ( g.enableLabels && (!multiSelect || (multiSelect && this.selected)) &&
         (
@@ -946,6 +947,10 @@ PlaneObject.prototype.updateIcon = function() {
             if (lc.category && this.category) {
                 labelText += this.category + '\n';
             }
+            // ICAO Operator
+            if (lc.icao_operator && this.opp_icao) {
+                labelText += this.opp_icao + '\n';
+            }
             // Callsign
             if (lc.callsign) {
                 labelText += callsign;
@@ -995,9 +1000,35 @@ PlaneObject.prototype.updateIcon = function() {
 
     let styleKey = (webgl ? '' : svgKey) + '!' + labelText + '!' + this.scale;
 
+    // Determine if we need an operator icon overlay (can be used with or without label text)
+    let wantOpIcon = g.labelConfig && g.labelConfig.operator_icon && this.opp_icao && airlineLogosApiUrl;
+    if (wantOpIcon) {
+        if (g.operatorIconFailed == null) g.operatorIconFailed = {};
+        if (g.operatorIconFailed[this.opp_icao]) {
+            wantOpIcon = false;
+        } else {
+            styleKey += '!opicon_' + this.opp_icao;
+        }
+    }
+
     if (this.styleKey != styleKey || !this.marker.getStyle()) {
         this.styleKey = styleKey;
         let style;
+        
+        let lineHeight = 14 * globalScale * labelScale;
+        let finalOffsetX = (this.shape.w * 0.5 * 0.74 * this.scale);
+        let finalOffsetY = labels_top ? (this.shape.w * -0.3 * 0.74 * this.scale) : (this.shape.w * 0.5 * 0.74 * this.scale);
+        let paddingExt = 2; // Default left padding for label background
+        let iconHeight = lineHeight * 2;
+        let iconWidth = iconHeight * 1.5;
+        
+        if (labelText && wantOpIcon) {
+            // Shift text right by iconWidth + margin so there is room for the icon.
+            // Keep the background padding unchanged so the grey background only
+            // appears behind the text, not behind the operator logo.
+            finalOffsetX += iconWidth + 4;
+        }
+
         if (labelText) {
             style = {
                 image: this.markerIcon,
@@ -1009,9 +1040,9 @@ PlaneObject.prototype.updateIcon = function() {
                     textAlign: 'left',
                     textBaseline: labels_top ? 'bottom' : 'top',
                     font: labelFont,
-                    offsetX: (this.shape.w *0.5*0.74*this.scale),
-                    offsetY: labels_top ? (this.shape.w *-0.3*0.74*this.scale) : (this.shape.w *0.5*0.74*this.scale),
-                    padding: [1, 0, -1, 2],
+                    offsetX: finalOffsetX,
+                    offsetY: finalOffsetY,
+                    padding: [1, 0, -1, paddingExt],
                 }),
                 zIndex: this.zIndex,
             };
@@ -1024,7 +1055,31 @@ PlaneObject.prototype.updateIcon = function() {
         if (webgl)
             delete style.image;
         this.markerStyle = new ol.style.Style(style);
-        this.marker.setStyle(this.markerStyle);
+
+        // Add operator icon overlay
+        if (wantOpIcon) {
+            let labelOffsetX = (this.shape.w * 0.5 * 0.74 * this.scale);
+            // Position the logo at a fixed distance relative to the aircraft,
+            // regardless of whether label text is enabled.
+            let iconX = labelOffsetX + (iconWidth / 2) + 2;
+            let iconY = -(this.shape.w * 0.8 * 0.74 * this.scale);
+            
+            let opIconStyle = new ol.style.Style({
+                image: new ol.style.Icon({
+                    src: airlineLogosApiUrl + 'logos/' + this.opp_icao,
+                    scale: iconHeight / 100, // Logos are usually 100px high in API
+                    displacement: [iconX, iconY],
+                }),
+                // Ensure the operator icon always renders above the label background/text
+                zIndex: this.zIndex + 1,
+            });
+            // If there is label text, markerStyle includes text+background.
+            // If not, markerStyle is just the aircraft icon; in both cases, we
+            // layer the operator logo on top.
+            this.marker.setStyle([this.markerStyle, opIconStyle]);
+        } else {
+            this.marker.setStyle(this.markerStyle);
+        }
     }
     if (webgl)
         return;
