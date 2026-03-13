@@ -267,6 +267,14 @@
         services+=("$service")
         names+="$instance "
 
+        # read per-instance settings (including PAGENAME / DESCRIPTION) if present
+        if [[ -r /etc/default/"$service" ]]; then
+            # shellcheck disable=SC1090
+            . /etc/default/"$service"
+        fi
+        inst_pagename="${PAGENAME:-}"
+        inst_description="${DESCRIPTION:-}"
+
         # don't overwrite existing configuration
         useSystemd && copyNoClobber default /etc/default/"$service"
 
@@ -313,6 +321,42 @@
         mv "$html_path/config.js" "$TMP/config.js" 2>/dev/null || true
         mv "$html_path/upintheair.json" "$TMP/upintheair.json" 2>/dev/null || true
 
+        # copy title / description into index.html and config.js so previews match config;
+        # if PAGENAME / DESCRIPTION are unset, leave JS / HTML defaults in place
+        if [[ -n "$inst_pagename" ]]; then
+            title_line=$(printf '<title>%s</title>\n' "$inst_pagename")
+            esc_title_line=$(printf '%s\n' "$title_line" | sed -e 's/[&]/\\&/g')
+            sed -i -e "s|<title>.*</title>|$esc_title_line|" "$TMP/index.html"
+        fi
+
+        if [[ -n "$inst_description" ]]; then
+            meta_line=$(printf '<meta name="description" content=\"%s\">' "$inst_description")
+            esc_meta_line=$(printf '%s\n' "$meta_line" | sed -e 's/[&]/\\&/g')
+            sed -i -e "s|<meta name=\"description\" content=\"[^\"]*\">|$esc_meta_line|" "$TMP/index.html"
+        fi
+
+        if [[ -f "$TMP/config.js" ]]; then
+            if [[ -n "$inst_pagename" ]]; then
+                pn_cfg_line=$(printf 'PageName = "%s";\n' "$inst_pagename")
+                esc_pn_cfg_line=$(printf '%s\n' "$pn_cfg_line" | sed -e 's/[&]/\\&/g')
+                if grep -qs -E '^PageName\s*=' "$TMP/config.js"; then
+                    sed -i -e "s|^PageName\s*=.*;|$esc_pn_cfg_line|" "$TMP/config.js"
+                else
+                    printf '%s\n' "$pn_cfg_line" >> "$TMP/config.js"
+                fi
+            fi
+
+            if [[ -n "$inst_description" ]]; then
+                pd_cfg_line=$(printf 'PageDescription = "%s";\n' "$inst_description")
+                esc_pd_cfg_line=$(printf '%s\n' "$pd_cfg_line" | sed -e 's/[&]/\\&/g')
+                if grep -qs -E '^PageDescription\s*=' "$TMP/config.js"; then
+                    sed -i -e "s|^PageDescription\s*=.*;|$esc_pd_cfg_line|" "$TMP/config.js"
+                else
+                    printf '%s\n' "$pd_cfg_line" >> "$TMP/config.js"
+                fi
+            fi
+        fi
+
         # in case we have offlinemaps installed, modify config.js
         MAX_OFFLINE=""
         MAX_OFFLINE_OFM=""
@@ -339,7 +383,7 @@
             fi
         fi
 
-        cp "$ipath/customIcon.png" "$TMP/images/tar1090-favicon.png" &>/dev/null || true
+        cp "$ipath/customIcon.png" "$TMP/images/favicon.png" &>/dev/null || true
 
         # bust cache for all css and js files
 

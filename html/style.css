@@ -81,7 +81,7 @@ select {
     background-size: calc( 148 * var(--SCALE)) calc( 148 * var(--SCALE));
     background-repeat: no-repeat;
     background-position: calc(7px * var(--SCALE)) calc(108px * var(--SCALE));
-    background-image: url("images/tar1090-favicon.png");
+    background-image: url("images/favicon.png");
     z-index: 2;
     opacity: 0.12;
 }
@@ -239,7 +239,7 @@ html.dark .sidebar_button {
     background-position: 0;
     background-color: transparent;
     border: none;
-    background-image: url("images/tar1090-favicon.png");
+    background-image: url("images/favicon.png");
     z-index: 99;
     opacity: 0.7;
     margin: 4px;

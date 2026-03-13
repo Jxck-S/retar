@@ -203,7 +203,11 @@ ColorByAlt = {
 //SiteCirclesLineDash = [5, 5]; // null - solid line, [5, 5] - dashed line with 5 pixel lines and spaces in between
 
 // Controls page title, righthand pane when nothing is selected
-PageName = "TheAirTraffic";
+PageName = "retar";
+
+// Controls HTML meta description (page description, used by search engines / link previews)
+// If not set here, a default is used from defaults.js.
+PageDescription = "ADS-B plane tracking interface";
 
 // Show country flags by ICAO addresses?
 //ShowFlags = true;

@@ -1219,6 +1219,10 @@ function earlyInitPage() {
 
     // Set page basics
     document.title = PageName;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && typeof PageDescription !== 'undefined' && PageDescription) {
+        metaDesc.setAttribute('content', PageDescription);
+    }
 
     initializeUnitsSelector();
     TAR.planeMan.init();
