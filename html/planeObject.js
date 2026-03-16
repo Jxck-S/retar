@@ -1029,13 +1029,13 @@ PlaneObject.prototype.updateIcon = function() {
             finalOffsetX += iconWidth + 4;
         }
 
-        if (labelText) {
+        if (labelText && labelFill && labelFont) {
             style = {
                 image: this.markerIcon,
                 text: new ol.style.Text({
                     text: labelText,
                     fill: labelFill,
-                    backgroundFill: bgFill,
+                    backgroundFill: bgFill || undefined,
                     stroke: labelStrokeNarrow,
                     textAlign: 'left',
                     textBaseline: labels_top ? 'bottom' : 'top',

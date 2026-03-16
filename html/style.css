@@ -1,23 +1,9 @@
+/* Theme colors (--BGCOLOR1, --ACCENT, etc.) are not defined here; they are applied from defaults.js + config.js via applyThemeColors() injected style. */
 :root {
     --SCALE: 1;
-    --BGCOLOR1: #F8F8F8;
-    --BGCOLOR2: #CCCCCC;
-    --ACCENT: #6b0d0d;
-    --ACCENT-LIGHT: #f87171;
     --FS1: calc(10px * var(--SCALE));
     --FS2: calc(13px * var(--SCALE));
     --FS3: calc(17px * var(--SCALE));
-    --TXTCOLOR1: #1a1a1a;
-    --TXTCOLOR2: #050505;
-    --TXTCOLOR3: #101010;
-}
-
-html.dark {
-    --BGCOLOR1: #313131;
-    --BGCOLOR2: #242424;
-    --TXTCOLOR1: #BFBFBF;
-    --TXTCOLOR2: #D8D8D8;
-    --TXTCOLOR3: #a8a8a8;
 }
 
 html,
@@ -67,7 +53,7 @@ select {
     padding: 10px;
     margin: 10px 5px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 2px solid rgba(0, 0, 0, 0.15);
 }
 
 .aggregator-selected-bg:before {
@@ -427,6 +413,16 @@ html.dark .sidebar_button {
     /* For IE8 and earlier */
 }
 
+/* Box style shared by search and filter sections (same as filter blocks) */
+.sidebarPanelBox {
+    background-color: var(--BGCOLOR2);
+    border-radius: 8px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
 /* Spacing for Search and Filter Sections */
 #tab-search-table td,
 #filterTable td,
@@ -533,8 +529,8 @@ html.dark .infoBlockTitleText {
 .formButton {
     font-size: var(--FS2);
     color: var(--TXTCOLOR2);
-    background-color: var(--BGCOLOR2);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: rgba(128, 128, 128, 0.35);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 6px;
     padding: 4px 10px;
     cursor: pointer;
@@ -542,7 +538,8 @@ html.dark .infoBlockTitleText {
 }
 
 .formButton:hover {
-    background-color: #d4d4d4;
+    background-color: rgba(128, 128, 128, 0.5);
+    border-color: rgba(0, 0, 0, 0.25);
 }
 .formButton:disabled {
     color:var(--TXTCOLOR3);
@@ -630,8 +627,12 @@ select.error, textarea.error, input.error {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
+/* Default layer switcher panel hidden; we use #layers_infoblock (same style as settings) instead */
+.layer-switcher .panel {
+    display: none !important;
+}
 .layer-switcher.shown .panel {
-    display: block !important;
+    display: none !important;
     position: absolute;
     right: 0 !important;
     top: calc(38px * var(--SCALE) + 12px) !important;
@@ -721,6 +722,14 @@ select.error, textarea.error, input.error {
     font-weight: 500;
     color: var(--TXTCOLOR1);
     flex: 1;
+}
+
+/* Single "Aircraft positions" row: hide the icon/webgl sub-row and fold button */
+.layer-switcher.shown li.group.aircraft-positions-single-row > ul {
+    display: none !important;
+}
+.layer-switcher.shown li.group.aircraft-positions-single-row > button {
+    display: none !important;
 }
 
 /* new css */
@@ -844,6 +853,17 @@ select.error, textarea.error, input.error {
 .settingsCog:hover {
     background-color: var(--ACCENT-LIGHT);
     /* transform rule removed */
+}
+
+.layersButton {
+    /* Layers icon: stroked stacked layers SVG provided by user */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'></polygon><polyline points='2 17 12 22 22 17'></polyline><polyline points='2 12 12 17 22 12'></polyline></svg>");
+    background-size: 20px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.layersButton:hover {
+    background-color: var(--ACCENT-LIGHT);
 }
 
 .locationButton {
@@ -997,6 +1017,62 @@ table.infoSectionTable tr td {
     padding-right: calc(7px * var(--SCALE));
 }
 
+/* Compact filter blocks: title + actions on one line, controls on next */
+.filterBlock {
+    background-color: var(--BGCOLOR2);
+    border-radius: 8px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 6px 8px !important;
+}
+#tab-filters .filterForm {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+#tab-filters .filterFormHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    line-height: 1.2;
+}
+#tab-filters .filterFormHeader .infoBlockTitleText {
+    margin: 0;
+    font-size: 12px;
+}
+#tab-filters .filterFormActions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+#tab-filters .filterFormBtn {
+    padding: 2px 6px;
+    min-width: 24px;
+}
+#tab-filters .filterFormBtn svg {
+    display: block;
+}
+#tab-filters .filterFormBody {
+    margin-top: 0;
+    overflow: auto;
+}
+#tab-filters .filterFormBody .buttonFilter {
+    margin-bottom: 0;
+}
+#tab-filters .filterBlocksWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+#tab-filters #filterTable {
+    margin-bottom: 0;
+}
+#tab-filters #filterTable .filterBlock {
+    margin-bottom: 6px;
+}
+
 .largeText a {
     font-weight: bold;
     color: var(--TXTCOLOR1);
@@ -1028,12 +1104,13 @@ table.infoSectionTable tr td {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: fit-content;
+    width: min(calc(360px * var(--SCALE)), 95vw);
     max-width: 95vw;
+    height: 70vh;
     max-height: 70vh;
     overflow: auto;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    padding: 0;
+    padding: 20px;
     z-index: 9999;
     display: none;
     background-color: var(--BGCOLOR2);
@@ -1041,22 +1118,242 @@ table.infoSectionTable tr td {
     border: 1px solid rgba(128, 128, 128, 0.3);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--TXTCOLOR2);
+    box-sizing: border-box;
+}
+@media (min-width: 768px) {
+    #settings_infoblock {
+        position: absolute;
+        left: auto;
+        right: calc(48px * var(--SCALE));
+        transform: translateY(-50%);
+    }
 }
 
 #settings_infoblock * {
     font-family: inherit;
+    box-sizing: border-box;
 }
 
-.settingsColumn {
-    display: table-cell;
-    width:  calc(199px * var(--SCALE));
-    padding: 14px;
-}
-.settingsOptionContainer {
+/* Modern panel header (Settings & Layers) */
+.settingsPanelHeader {
     display: flex;
     align-items: center;
-    padding: 5px 0;
+    justify-content: space-between;
+    padding: calc(14px * var(--SCALE)) calc(44px * var(--SCALE)) calc(12px * var(--SCALE)) calc(16px * var(--SCALE));
+    margin: calc(-20px * var(--SCALE)) calc(-20px * var(--SCALE)) calc(16px * var(--SCALE)) calc(-20px * var(--SCALE));
+    margin-bottom: calc(16px * var(--SCALE));
+    background: linear-gradient(180deg, rgba(128, 128, 128, 0.08) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 10px 10px 0 0;
+    min-height: calc(44px * var(--SCALE));
+    box-sizing: border-box;
+}
+.settingsPanelHeaderTitle {
+    font-size: calc(15px * var(--SCALE));
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--TXTCOLOR2);
+    text-transform: none;
+}
+
+/* Layers picker: same look as settings */
+#layers_infoblock {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(calc(360px * var(--SCALE)), 95vw);
+    max-width: 95vw;
+    height: 70vh;
+    max-height: 70vh;
+    overflow: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    z-index: 9999;
+    display: none;
+    background-color: var(--BGCOLOR2);
+    border-radius: 10px;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--TXTCOLOR2);
+    box-sizing: border-box;
+}
+@media (min-width: 768px) {
+    #layers_infoblock {
+        position: absolute;
+        left: auto;
+        right: calc(48px * var(--SCALE));
+        transform: translateY(-50%);
+    }
+}
+#layers_infoblock * {
+    font-family: inherit;
+    box-sizing: border-box;
+}
+#layers_infoblock .settingsText {
+    flex: 1;
+    min-width: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+#layers_infoblock .settingsCheckbox {
+    width: calc(16px * var(--SCALE));
+    height: calc(16px * var(--SCALE));
+    float: left;
+    margin-right: calc(10px * var(--SCALE));
+    cursor: pointer;
+    background-color: transparent;
+    border: 2px solid rgba(128, 128, 128, 0.5);
+    border-radius: 3px;
+    position: relative;
+    transition: all 0.2s ease;
+    background-image: none;
+}
+#layers_infoblock .settingsCheckbox::after {
+    content: '';
+    position: absolute;
+    display: none;
+    width: calc(5px * var(--SCALE));
+    height: calc(9px * var(--SCALE));
+    left: 50%;
+    top: 50%;
+    margin-left: calc(-2.5px * var(--SCALE));
+    margin-top: calc(-4.5px * var(--SCALE));
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    box-sizing: border-box;
+}
+#layers_infoblock .settingsCheckbox:hover {
+    border-color: var(--ACCENT, #4a8fe7);
+}
+#layers_infoblock .settingsCheckboxChecked {
+    background-color: var(--ACCENT, #4a8fe7) !important;
+    border-color: var(--ACCENT, #4a8fe7) !important;
+}
+#layers_infoblock .settingsCheckboxChecked::after {
+    display: block;
+}
+#layers_infoblock .settingsOptionContainer {
+    cursor: pointer;
+}
+
+/* Styled radio for base map picker (circle + inner dot when selected) */
+#layers_infoblock .settingsRadio {
+    width: calc(16px * var(--SCALE));
+    height: calc(16px * var(--SCALE));
+    min-width: calc(16px * var(--SCALE));
+    float: left;
+    margin-right: calc(10px * var(--SCALE));
+    cursor: pointer;
+    background-color: transparent;
+    border: 2px solid rgba(128, 128, 128, 0.5);
+    border-radius: 50%;
+    position: relative;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    flex-shrink: 0;
+}
+#layers_infoblock .settingsRadio::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(8px * var(--SCALE));
+    height: calc(8px * var(--SCALE));
+    margin-left: calc(-4px * var(--SCALE));
+    margin-top: calc(-4px * var(--SCALE));
+    background-color: var(--ACCENT, #4a8fe7);
+    border-radius: 50%;
+    display: none;
+}
+#layers_infoblock .settingsRadio:hover {
+    border-color: var(--ACCENT, #4a8fe7);
+}
+#layers_infoblock .settingsRadioSelected {
+    border-color: var(--ACCENT, #4a8fe7);
+}
+#layers_infoblock .settingsRadioSelected::after {
+    display: block;
+}
+
+.settingsSections {
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+#settings_infoblock .settingsSliderContainer {
+    max-width: 100%;
+}
+
+.settingsSection {
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    overflow: hidden;
+}
+
+.settingsSection:last-child {
+    margin-bottom: 0;
+}
+
+.settingsSectionHeader {
+    cursor: pointer;
+    padding: 8px 10px;
+    font-weight: 600;
     font-size: 13px;
+    color: var(--TXTCOLOR2);
+    background-color: rgba(128, 128, 128, 0.1);
+    list-style: none;
+    user-select: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
+}
+
+.settingsSectionHeader::-webkit-details-marker {
+    display: none;
+}
+
+.settingsSectionHeader::before {
+    content: '▸ ';
+    display: inline-block;
+    width: 1em;
+    transition: transform 0.15s ease;
+}
+
+.settingsSection[open] .settingsSectionHeader::before {
+    transform: rotate(90deg);
+}
+
+.settingsSectionHeader:hover {
+    background-color: rgba(128, 128, 128, 0.15);
+}
+
+.settingsSectionContent {
+    padding: 8px 10px 10px;
+    border-top: 1px solid rgba(128, 128, 128, 0.15);
+}
+
+#settings_section_units .settingsOptionContainer {
+    cursor: pointer;
+    align-items: center;
+}
+
+.settingsOptionContainer {
+    display: flex;
+    align-items: flex-start;
+    padding: 6px 0;
+    font-size: 13px;
+    min-width: 0;
+}
+
+#settings_infoblock .settingsText {
+    flex: 1;
+    min-width: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 #settings_infoblock .settingsCheckbox {
@@ -1090,13 +1387,16 @@ table.infoSectionTable tr td {
 
 #settings_infoblock .settingsCheckboxChecked::after {
     display: block;
-    left: calc(4px * var(--SCALE));
-    top: calc(1px * var(--SCALE));
     width: calc(5px * var(--SCALE));
     height: calc(9px * var(--SCALE));
+    left: 50%;
+    top: 50%;
+    margin-left: calc(-2.5px * var(--SCALE));
+    margin-top: calc(-4.5px * var(--SCALE));
     border: solid white;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
+    box-sizing: border-box;
 }
 
 .settingsCloseBox {
@@ -1268,7 +1568,7 @@ table.infoSectionTable tr td {
 }
 
 .ui-widget-content .ui-selectable .ui-selected {
-    background-color: rgba(248, 113, 113, 0.2) !important;
+    background-color: color-mix(in srgb, var(--ACCENT-LIGHT) 20%, transparent) !important;
     border-color: var(--ACCENT-LIGHT) !important;
     color: inherit;
 }
@@ -1277,9 +1577,9 @@ table.infoSectionTable tr td {
     border-width: 1px;
     border-color: var(--BGCOLOR2);
     border-radius: 4px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    padding: 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    padding: 3px 4px;
     float: left;
     width: calc(85px * var(--SCALE));
     color: var(--TXTCOLOR2);
@@ -1420,12 +1720,14 @@ a.ui-button:active,
 
 /* Settings select dropdown */
 #settings_infoblock select {
+    max-width: 100%;
     background-color: rgba(128, 128, 128, 0.15);
     color: var(--TXTCOLOR2);
     border: 1px solid rgba(128, 128, 128, 0.3);
     border-radius: 6px;
-    padding: 4px 8px;
+    padding: 6px 12px;
     font-size: 13px;
+    line-height: 1.6;
     font-family: inherit;
     cursor: pointer;
     outline: none;
@@ -1434,11 +1736,45 @@ a.ui-button:active,
     border-color: var(--ACCENT, #4a8fe7);
 }
 
-/* Settings reset button */
-#settings_infoblock .formButton {
-    background-color: rgba(128, 128, 128, 0.15);
+/* jQuery UI selectmenu used for settings dropdowns */
+#settings_infoblock .ui-selectmenu-button.ui-button {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+#settings_infoblock .ui-selectmenu-text {
+    line-height: 1.6;
+}
+
+/* Globe table limit selector in sidebar */
+#sidebar-table .globe-table-limit-row {
+    gap: 8px;
+}
+
+#sidebar-table .globeTableSliderWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+#sidebar-table #globe_table_limit_slider {
+    width: 100%;
+}
+
+#sidebar-table .globeTableSliderLabel {
+    font-size: 11px;
     color: var(--TXTCOLOR2);
-    border: 1px solid rgba(128, 128, 128, 0.3);
+    opacity: 0.8;
+}
+
+/* Settings reset button and form buttons – opaque so they don’t blend in */
+#settings_infoblock .formButton {
+    background-color: rgba(128, 128, 128, 0.4);
+    color: var(--TXTCOLOR2);
+    border: 1px solid rgba(0, 0, 0, 0.25);
     border-radius: 6px;
     padding: 6px 14px;
     font-size: 13px;
@@ -1447,7 +1783,7 @@ a.ui-button:active,
     transition: all 0.2s ease;
 }
 #settings_infoblock .formButton:hover {
-    background-color: rgba(128, 128, 128, 0.25);
+    background-color: rgba(128, 128, 128, 0.55);
     border-color: var(--ACCENT, #4a8fe7);
 }
 
@@ -1627,7 +1963,7 @@ input{
     transform: translateY(0);
 }
 
-/* Base classes (kept as is for map markers etc as requested) */
+/* Base DB flag classes (used for map markers) */
 .LADD {
     background-color: orange;
 }
@@ -1652,48 +1988,39 @@ input{
     background-color: darkblue;
 }
 
-/* Scoped overrides for the Filter by DB flags buttons to be softer (pastel) */
+/* Ensure DB flag filter buttons use the same colors, overriding jQuery UI backgrounds */
 #flagFilter .LADD {
-    background-color: #ffd700;
-    /* Softer Gold/Orange */
-    color: #333 !important;
-    /* Dark text for contrast on light BG */
+    background-color: orange;
 }
 
 #flagFilter .PIA {
-    background-color: #ff6b6b;
-    /* Softer Red */
-    color: #fff !important;
+    background-color: red;
 }
 
 #flagFilter .Military {
-    background-color: #85e085;
-    /* Softer Green */
-    color: #333 !important;
-}
-
-#flagFilter .Intresting {
-    background-color: #ff85ff;
-    /* Softer Magenta */
-    color: #333 !important;
-}
-
-#flagFilter .Heavy {
-    background-color: #6495ed;
-    /* Cornflower Blue (Softer) */
-    color: #fff !important;
-}
-
-#flagFilter .SuperHeavy {
-    background-color: #4169e1;
-    /* Royal Blue */
-    color: #fff !important;
+    background-color: green;
 }
 
 #selected_dbFlags {
     display: flex;
     flex-wrap: wrap;
+    gap: 4px;
     /* Ensure flags wrap to next line */
+}
+
+.dbFlagBadge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 2px;
+}
+
+.dbFlagBadge,
+.dbFlagBadge:link,
+.dbFlagBadge:visited,
+.dbFlagBadge:hover,
+.dbFlagBadge:active {
+    color: inherit;
+    text-decoration: none;
 }
 
 .smallText a {
@@ -1727,124 +2054,6 @@ input{
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
-/* TheAirTraffic Modern Promo Section */
-.tat-promo-container {
-    background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
-    border-radius: 12px;
-    padding: 16px;
-    margin: 10px 5px;
-    color: white;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.tat-promo-header {
-    margin-bottom: 12px;
-}
-
-.tat-promo-subtitle {
-    display: block;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #94a3b8;
-    margin-bottom: 4px;
-    font-weight: 600;
-}
-
-.tat-promo-title-link {
-    font-size: 1.25rem;
-    font-weight: 800;
-    text-decoration: none;
-    color: var(--ACCENT-LIGHT);
-    background: none;
-    -webkit-text-fill-color: initial;
-    transition: opacity 0.2s;
-    display: inline-block;
-}
-
-.tat-promo-title-link:hover {
-    opacity: 0.9;
-}
-
-.tat-promo-actions {
-    margin-bottom: 12px;
-}
-
-.tat-promo-button {
-    display: inline-block;
-    background: var(--ACCENT);
-    color: white;
-    padding: 8px 20px;
-    border-radius: 20px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 5px rgba(220, 38, 38, 0.3);
-}
-
-.tat-promo-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.4);
-    color: white;
-    text-decoration: none;
-}
-
-.tat-promo-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.8rem;
-}
-
-.tat-promo-link {
-    color: #94a3b8;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.tat-promo-link:hover {
-    color: #e2e8f0;
-    text-decoration: none;
-}
-
-.tat-promo-divider {
-    color: #475569;
-}
-
-.LADD {
-    background-color: orange !important;
-    color: #fff !important;
-}
-
-.PIA {
-    background-color: red !important;
-    color: #fff !important;
-}
-
-.Military {
-    background-color: green !important;
-    color: #fff !important;
-}
-
-.Intresting {
-    background-color: magenta !important;
-    color: #fff !important;
-}
-
-.Heavy {
-    background-color: blue !important;
-    color: #fff !important;
-}
-
-.SuperHeavy {
-    background-color: darkblue !important;
-    color: #fff !important;
-}
 /* Mobile Sidebar Overrides */
 @media screen and (max-width: 768px) {
     #sidebar_container {
@@ -1856,7 +2065,6 @@ input{
         margin: 0 !important; /* Override JS margins */
         height: 100% !important;
     }
-
     /* Hide the sidebar puller/splitter on mobile */
     #splitter, #splitter-infoblock {
         display: none !important;
@@ -1874,29 +2082,62 @@ input{
     }
 }
 
-/* Mobile Sidebar Close Button */
-.sidebar_close_mobile {
-    display: none; /* hidden by default */
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    z-index: 2000;
-    font-size: 32px;
-    color: var(--TXTCOLOR1);
-    cursor: pointer;
-    font-weight: bold;
-    background-color: var(--BGCOLOR2);
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    text-align: center;
-    border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+/* Mobile-only top row in sidebar (same look as Settings/Layers header row) */
+.sidebar_mobile_header {
+    display: none;
+    position: relative;
 }
-
+.sidebar_mobile_header .sidebar_close_mobile {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.sidebar_close_mobile {
+    display: none;
+}
+.sidebar_close_mobile::after {
+    content: '\2715';
+    font-size: 14px;
+    color: var(--TXTCOLOR2);
+    opacity: 0.6;
+    line-height: 1;
+}
+.sidebar_close_mobile:hover::after {
+    opacity: 1;
+}
+.sidebar_close_mobile:focus {
+    outline: none;
+}
+.sidebar_close_mobile:focus-visible {
+    outline: 2px solid var(--ACCENT-LIGHT);
+    outline-offset: 2px;
+}
+/* Reserve top space so content doesn’t hit the button */
 @media screen and (max-width: 768px) {
+    .sidebar_mobile_header {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0;
+        padding: calc(14px * var(--SCALE)) calc(44px * var(--SCALE)) calc(12px * var(--SCALE)) calc(16px * var(--SCALE));
+        background: linear-gradient(180deg, rgba(128, 128, 128, 0.08) 0%, transparent 100%);
+        border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+        min-height: calc(44px * var(--SCALE));
+        box-sizing: border-box;
+    }
     .sidebar_close_mobile {
-        display: block !important;
+        display: flex !important;
     }
 }
 
@@ -2036,83 +2277,93 @@ body.mobile_sidebar_open .layer-switcher {
     }
 }
 
-/* Label Configuration Menu */
+/* Label Configuration Menu (same styling as Settings & Layers, no sub-dividers) */
 #labelConfigMenu {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 10000;
+    width: min(calc(360px * var(--SCALE)), 95vw);
+    max-width: 95vw;
+    padding: 20px;
+    box-sizing: border-box;
     background-color: var(--BGCOLOR2);
     border: 1px solid rgba(128, 128, 128, 0.3);
     border-radius: 10px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    min-width: 200px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--TXTCOLOR2);
 }
-
-.labelMenuHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 14px;
-    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+@media (min-width: 768px) {
+    #labelConfigMenu {
+        position: absolute;
+        left: auto;
+        right: calc(48px * var(--SCALE));
+        transform: translateY(-50%);
+    }
 }
-
-.labelMenuTitle {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    color: var(--TXTCOLOR2);
-    opacity: 0.8;
+#labelConfigMenu * {
+    font-family: inherit;
+    box-sizing: border-box;
 }
-
-.labelMenuClose {
-    background: none;
-    border: none;
-    color: var(--TXTCOLOR2);
-    font-size: 14px;
+#labelConfigMenu .labelConfigInput {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+#labelConfigMenu .settingsCheckbox {
+    width: calc(16px * var(--SCALE));
+    height: calc(16px * var(--SCALE));
+    flex-shrink: 0;
+    margin-right: calc(10px * var(--SCALE));
     cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s ease;
-    padding: 0 4px;
+    background-color: transparent;
+    border: 2px solid rgba(128, 128, 128, 0.5);
+    border-radius: 3px;
+    position: relative;
+    transition: all 0.2s ease;
 }
-
-.labelMenuClose:hover {
-    opacity: 1;
+#labelConfigMenu .settingsCheckbox::after {
+    content: '';
+    position: absolute;
+    display: none;
+    width: calc(5px * var(--SCALE));
+    height: calc(9px * var(--SCALE));
+    left: 50%;
+    top: 50%;
+    margin-left: calc(-2.5px * var(--SCALE));
+    margin-top: calc(-4.5px * var(--SCALE));
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    box-sizing: border-box;
 }
-
-.labelMenuBody {
-    padding: 8px 14px 12px;
+#labelConfigMenu .settingsCheckbox:hover {
+    border-color: var(--ACCENT, #4a8fe7);
 }
-
-.labelMenuItem {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 0;
+#labelConfigMenu .settingsCheckboxChecked {
+    background-color: var(--ACCENT, #4a8fe7) !important;
+    border-color: var(--ACCENT, #4a8fe7) !important;
+}
+#labelConfigMenu .settingsCheckboxChecked::after {
+    display: block;
+}
+#labelConfigMenu .settingsOptionContainer {
     cursor: pointer;
+}
+#labelConfigMenu .settingsText {
+    flex: 1;
+    min-width: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     font-size: 13px;
-    transition: opacity 0.15s ease;
 }
-
-.labelMenuItem:hover {
-    opacity: 0.8;
-}
-
-.labelMenuItem input[type="checkbox"] {
-    width: 15px;
-    height: 15px;
-    accent-color: var(--ACCENT, #4a8fe7);
-    cursor: pointer;
-}
-
-.labelMenuDivider {
-    border: none;
-    border-top: 1px solid rgba(128, 128, 128, 0.15);
-    margin: 4px 0;
+#labelConfigMenu #labelConfigMenuBody {
+    padding-top: 0;
 }
 
 #labelConfigMenuOverlay {
@@ -2122,5 +2373,5 @@ body.mobile_sidebar_open .layer-switcher {
     width: 100%;
     height: 100%;
     z-index: 9999;
-    background: rgba(0, 0, 0, 0.3);
+    background: transparent;
 }

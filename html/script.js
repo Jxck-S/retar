@@ -25,14 +25,14 @@ let OLProj = null;
 let OLProjExtent = null;
 let PlaneIconFeatures = new ol.source.Vector();
 let trailGroup = new ol.Collection();
-let miscLayerGroup;
-let miscLayers;
+let positionsRangesGroup;
+/** Single group in the layer picker; contains only the active layer (icon or webgl). Child row is hidden so one checkbox shows. */
+let aircraftPositionsSubGroup;
 let siteCircleLayer;
 let siteCircleFeatures = new ol.source.Vector();
 let locationDotLayer;
 let locationDotFeatures = new ol.source.Vector();
 let iconLayer;
-let trailLayers;
 let heatFeatures = [];
 let heatFeaturesSpread = 1024;
 let heatLayers = [];
@@ -823,40 +823,82 @@ function replaySpeedChange(arg) {
     if (traceOpts.animate)
         return;
     legShift(0);
-};
+}
+
+const GLOBE_TABLE_LIMIT_PRESETS = [
+    { value: '80', label: 'Default (80)', limit: 80 },
+    { value: '400', label: 'More (400)', limit: 400 },
+    { value: '1600', label: 'Many (1600)', limit: 1600 },
+    { value: 'unlimited', label: 'Unlimited', limit: 1e9 }
+];
+
+function applyGlobeTableLimitFromPreset(presetValue) {
+    const preset = GLOBE_TABLE_LIMIT_PRESETS.find(p => p.value === presetValue) || GLOBE_TABLE_LIMIT_PRESETS[0];
+    globeTableLimit = preset.limit;
+    if (onMobile && preset.value !== 'unlimited')
+        globeTableLimit = Math.floor(globeTableLimit / 2);
+}
+
+function initGlobeTableLimitControl() {
+    let preset = loStore['globeTableLimitPreset'] || '80';
+    if (preset !== '80' && preset !== '400' && preset !== '1600' && preset !== 'unlimited') {
+        preset = '80';
+    }
+    if (loStore['moreTableLines1'] == 'true' || loStore['moreTableLines2'] == 'true' || loStore['allTableLines'] == 'true') {
+        if (loStore['allTableLines'] == 'true') preset = 'unlimited';
+        else if (loStore['moreTableLines2'] == 'true') preset = '1600';
+        else if (loStore['moreTableLines1'] == 'true') preset = '400';
+        loStore['globeTableLimitPreset'] = preset;
+        delete loStore['moreTableLines1'];
+        delete loStore['moreTableLines2'];
+        delete loStore['allTableLines'];
+    }
+    applyGlobeTableLimitFromPreset(preset);
+
+    const container = jQuery('#sidebar-table');
+    const currentIndex = Math.max(0, GLOBE_TABLE_LIMIT_PRESETS.findIndex(p => p.value === preset));
+    const maxIndex = GLOBE_TABLE_LIMIT_PRESETS.length - 1;
+
+    const row = jQuery(
+        '<div class="settingsOptionContainer globe-table-limit-row">' +
+            '<div class="settingsText">Table rows (globe):</div>' +
+            '<div class="globeTableSliderWrapper">' +
+                '<input type="range" min="0" max="' + maxIndex + '" step="1" id="globe_table_limit_slider">' +
+                '<div class="globeTableSliderLabel"></div>' +
+            '</div>' +
+        '</div>'
+    );
+
+    const slider = row.find('#globe_table_limit_slider');
+    const label = row.find('.globeTableSliderLabel');
+
+    function updateFromIndex(idx) {
+        const safeIdx = Math.min(Math.max(0, idx), maxIndex);
+        const presetObj = GLOBE_TABLE_LIMIT_PRESETS[safeIdx];
+        if (!presetObj) return;
+        loStore['globeTableLimitPreset'] = presetObj.value;
+        applyGlobeTableLimitFromPreset(presetObj.value);
+        label.text(presetObj.label);
+        if (typeof TAR !== 'undefined' && TAR.planeMan && TAR.planeMan.refresh) {
+            TAR.planeMan.refresh();
+        }
+    }
+
+    slider.val(String(currentIndex));
+    updateFromIndex(currentIndex);
+
+    slider.on('input change', function () {
+        const idx = parseInt(jQuery(this).val(), 10) || 0;
+        updateFromIndex(idx);
+    });
+
+    container.append(row);
+}
 
 function initPage() {
 
     if (globeIndex) {
-        function setGlobeTableLimit() {
-            let mult = 1 + 4 * toggles['moreTableLines1'].state + 16 * (toggles['moreTableLines2'] && toggles['moreTableLines2'].state);
-            globeTableLimit = globeTableLimitBase * mult;
-            if (toggles['allTableLines'] && toggles['allTableLines'].state)
-                globeTableLimit = 1e9;
-            if (onMobile)
-                globeTableLimit /= 2;
-        };
-        new Toggle({
-            key: "moreTableLines1",
-            display: "More Table Lines",
-            container: "#sidebar-table",
-            init: false,
-            setState: setGlobeTableLimit,
-        });
-        new Toggle({
-            key: "moreTableLines2",
-            display: "Even More Table Lines",
-            container: "#sidebar-table",
-            init: false,
-            setState: setGlobeTableLimit,
-        });
-        new Toggle({
-            key: "allTableLines",
-            display: "All Table Lines",
-            container: "#sidebar-table",
-            init: false,
-            setState: setGlobeTableLimit,
-        });
+        initGlobeTableLimitControl();
     }
 
 
@@ -1305,6 +1347,8 @@ function earlyInitPage() {
     jQuery("#leg_next").click(function() {legShift(1)});
 
     jQuery('#settingsCog').on('click', function() {
+        hideCustomLayersPanel();
+        closeLabelMenu();
         jQuery('#settings_infoblock').toggle();
     });
 
@@ -1366,10 +1410,18 @@ function earlyInitPage() {
         }
     });
 
+    // Make entire row clickable for Units section checkboxes (airline logos/banners, ground vehicles, non-ICAO)
+    jQuery('#settings_section_units').on('click', '.settingsOptionContainer', function(e) {
+        const $cb = jQuery(this).find('.settingsCheckbox');
+        if ($cb.length && !$cb.is(e.target) && !jQuery.contains($cb[0], e.target)) {
+            $cb.trigger('click');
+        }
+    });
+
     new Toggle({
         key: "lastLeg",
         display: "Last Leg only",
-        container: "#settingsLeft",
+        container: "#settings_section_tracks",
         init: true,
         setState: function(state) {
             lastLeg = state;
@@ -1383,7 +1435,7 @@ function earlyInitPage() {
     new Toggle({
         key: "labelsGeom",
         display: "Labels: geom. alt. (WGS84)",
-        container: "#settingsLeft",
+        container: "#settings_section_tracks",
         init: labelsGeom,
         setState: function(state) {
             labelsGeom = state;
@@ -1396,7 +1448,7 @@ function earlyInitPage() {
     new Toggle({
         key: "geomUseEGM",
         display: "Geom. alt.: WGS84 -> EGM conversion (long load)",
-        container: "#settingsLeft",
+        container: "#settings_section_tracks",
         init: geomUseEGM,
         setState: function(state) {
             geomUseEGM = state;
@@ -1426,7 +1478,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "baroUseQNH",
         display: "Baro. alt.: correct for QNH",
-        container: "#settingsLeft",
+        container: "#settings_section_tracks",
         init: baroUseQNH,
         setState: function(state) {
             baroUseQNH = state;
@@ -1457,7 +1509,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "utcTimesLive",
         display: "Live track labels: UTC",
-        container: "#settingsLeft",
+        container: "#settings_section_tracks",
         init: utcTimesLive,
         setState: function(state) {
             utcTimesLive = state;
@@ -1469,7 +1521,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "utcTimesHistoric",
         display: "Historic track labels: UTC",
-        container: "#settingsLeft",
+        container: "#settings_section_tracks",
         init: utcTimesHistoric,
         setState: function(state) {
             utcTimesHistoric = state;
@@ -1481,7 +1533,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "windLabelsSlim",
         display: "Smaller wind labels",
-        container: "#settingsLeft",
+        container: "#settings_section_tracks",
         init: windLabelsSlim,
         setState: function(state) {
             windLabelsSlim = state;
@@ -1496,7 +1548,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "showLabelUnits",
         display: "Label units",
-        container: "#settingsLeft",
+        container: "#settings_section_tracks",
         init: showLabelUnits,
         setState: function(state) {
             showLabelUnits = state;
@@ -1521,7 +1573,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "shareFilters",
         display: "Include Filters In URLs",
-        container: "#settingsRight",
+        container: "#settings_section_sharing",
         init: false,
         setState: function(state) {
             updateAddressBar();
@@ -1531,7 +1583,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "debugTracks",
         display: "Debug Tracks",
-        container: "#settingsRight",
+        container: "#settings_section_debug",
         init: false,
         setState: function(state) {
             debugTracks = state;
@@ -1542,7 +1594,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "debugAll",
         display: "Debug show all",
-        container: "#settingsRight",
+        container: "#settings_section_debug",
         init: false,
         setState: function(state) {
             if (state)
@@ -1556,7 +1608,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "SiteCircles",
         display: "Distance Circles",
-        container: "#settingsRight",
+        container: "#settings_section_map",
         init: SiteCircles,
         setState: function(state) {
             SiteCircles = state;
@@ -1569,7 +1621,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "updateLocation",
         display: "Update GPS location",
-        container: "#settingsRight",
+        container: "#settings_section_map",
         init: updateLocation,
         setState: function(state) {
             updateLocation = state;
@@ -1580,7 +1632,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "autoselect",
         display: "Auto-select plane",
-        container: "#settingsRight",
+        container: "#settings_section_map",
         init: autoselect,
         setState: function(state) {
             autoselect = state;
@@ -1595,7 +1647,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "ColoredPlanes",
         display: "Colored Planes",
-        container: "#settingsRight",
+        container: "#settings_section_appearance",
         init: true,
         setState: function(state) {
             if (state)
@@ -1610,7 +1662,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "ColoredTrails",
         display: "Colored Trails",
-        container: "#settingsRight",
+        container: "#settings_section_appearance",
         init: true,
         setState: function(state) {
             if (state)
@@ -1721,7 +1773,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "planespottingAPI",
         display: "Pictures planespotting.be",
-        container: "#settingsRight",
+        container: "#settings_section_data",
         init: planespottingAPI,
         setState: function(state) {
             planespottingAPI = state;
@@ -1735,7 +1787,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "planespottersAPI",
         display: "Pictures planespotters.net",
-        container: "#settingsRight",
+        container: "#settings_section_data",
         init: planespottersAPI,
         setState: function(state) {
             planespottersAPI = state;
@@ -1755,16 +1807,24 @@ jQuery('#selected_altitude_geom1')
         new Toggle({
             key: "useRouteAPI",
             display: "Lookup route",
-            container: "#settingsRight",
+            container: "#settings_section_data",
             init: useRouteAPI,
             setState: function(state) {
                 useRouteAPI = state;
                 if (useRouteAPI) {
                     jQuery('#routeRow').show();
-                    jQuery('#routeRowHighlighted').show();
+                    jQuery('#routeRowHighlight').show();
+                    if (TAR && TAR.planeMan && TAR.planeMan.setColumnVis && TAR.planeMan.cols && TAR.planeMan.cols.route) {
+                        TAR.planeMan.setColumnVis('route', true);
+                        jQuery('#dd_route').show();
+                    }
                 } else {
                     jQuery('#routeRow').hide();
-                    jQuery('#routeRowHighlighted').hide();
+                    jQuery('#routeRowHighlight').hide();
+                    if (TAR && TAR.planeMan && TAR.planeMan.setColumnVis && TAR.planeMan.cols && TAR.planeMan.cols.route) {
+                        TAR.planeMan.setColumnVis('route', false);
+                        jQuery('#dd_route').hide();
+                    }
                 }
             }
         });
@@ -1783,7 +1843,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "enableInfoblock",
         display: "Enable Infoblock",
-        container: "#settingsRight",
+        container: "#settings_section_infoblock",
         init: true,
         setState: function(state) {
             adjustInfoBlock();
@@ -1793,7 +1853,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "wideInfoblock",
         display: "Wide Infoblock",
-        container: "#settingsRight",
+        container: "#settings_section_infoblock",
         init: wideInfoBlock,
         setState: function(state) {
             wideInfoBlock = state;
@@ -1809,7 +1869,7 @@ jQuery('#selected_altitude_geom1')
     new Toggle({
         key: "enableMouseover",
         display: "Enable mouse-over block",
-        container: "#settingsRight",
+        container: "#settings_section_infoblock",
         init: enableMouseover,
         setState: function(state) {
             enableMouseover = state;
@@ -1840,19 +1900,47 @@ jQuery('#selected_altitude_geom1')
 
     TAR.altitudeChart.init();
 
+    jQuery('.credits-text').text(typeof CreditsText !== 'undefined' && CreditsText != null ? CreditsText : '');
+
     if (aggregator) {
-        jQuery('#aggregator_header').show();
         jQuery('#credits').show();
         if (!onMobile) {
             jQuery('#creditsSelected').show();
         }
-        jQuery('#selected_infoblock').addClass('aggregator-selected-bg');
+        if (typeof AggregatorBgEnabled === 'undefined' || AggregatorBgEnabled) {
+            jQuery('#selected_infoblock').addClass('aggregator-selected-bg');
+        }
 
         // activate to prevent iframe use
         if (inhibitIframe && window.self != window.top) {
             window.top.location.href = "https://www.aggregator.com/";
             return;
         }
+    }
+
+    const bannerUrl = (typeof SidebarBannerUrl !== 'undefined' && SidebarBannerUrl) ? SidebarBannerUrl : (aggregator ? 'banner.html' : '');
+    if (bannerUrl) {
+        const bannerCss = (typeof SidebarBannerCss !== 'undefined' && SidebarBannerCss) ? SidebarBannerCss : 'banner.css';
+        let linkEl = document.getElementById('sidebar-banner-css');
+        if (!linkEl && bannerCss) {
+            linkEl = document.createElement('link');
+            linkEl.id = 'sidebar-banner-css';
+            linkEl.rel = 'stylesheet';
+            linkEl.href = bannerCss;
+            (document.head || document.documentElement).appendChild(linkEl);
+        }
+        fetch(bannerUrl).then(function (r) { return r.text(); }).then(function (html) {
+            if (html && html.trim()) {
+                jQuery('#sidebar_banner_inject').html(html.trim());
+                jQuery('#aggregator_header').show();
+            } else {
+                jQuery('#aggregator_header').hide();
+            }
+        }).catch(function () {
+            jQuery('#aggregator_header').hide();
+        });
+    } else {
+        jQuery('#aggregator_header').hide();
     }
     if (imageConfigLink != "") {
         let host = window.location.hostname;
@@ -1928,16 +2016,16 @@ function initSourceFilter(colors) {
     });
 }
 
-function initFlagFilter(colors) {
-    const createFilter = function (color, text, key) {
-        return '<li class="ui-widget-content" style="background-color:' + color + ';" id="flag-filter-' + key + '">' + text + '</li>';
+function initFlagFilter() {
+    const createFilter = function (text, key) {
+        // Use existing CSS classes .Military, .PIA, .LADD for styling
+        return '<li class="ui-widget-content ' + text + '" id="flag-filter-' + key + '">' + text + '</li>';
     };
 
     let html = '';
-    html += createFilter(colors['tisb'], 'Military', flagFilterValues[0]);
-    //html += createFilter(colors['mlat'], 'Interesting');
-    html += createFilter(colors['uat'], 'PIA', flagFilterValues[1]);
-    html += createFilter(colors['adsb'], 'LADD', flagFilterValues[2]);
+    html += createFilter('Military', flagFilterValues[0]);
+    html += createFilter('PIA', flagFilterValues[1]);
+    html += createFilter('LADD', flagFilterValues[2]);
 
     document.getElementById('flagFilter').innerHTML = html;
 
@@ -2490,6 +2578,16 @@ function startPage() {
 //
 //
 
+/** Sync visibility from the Aircraft positions group to its child layer(s) (icon and/or webgl). */
+function syncAircraftPositionsVisibility() {
+    if (!aircraftPositionsSubGroup)
+        return;
+    const on = aircraftPositionsSubGroup.getVisible();
+    const lyrs = aircraftPositionsSubGroup.getLayers();
+    for (let i = 0; i < lyrs.getLength(); i++)
+        lyrs.item(i).setVisible(on);
+}
+
 function webglAddLayer() {
     let success = false;
 
@@ -2559,7 +2657,10 @@ function webglAddLayer() {
             return false;
         }
 
-        miscLayers.push(webglLayer);
+        aircraftPositionsSubGroup.getLayers().clear();
+        aircraftPositionsSubGroup.getLayers().push(webglLayer);
+        aircraftPositionsSubGroup.getLayers().push(iconLayer);
+        syncAircraftPositionsVisibility();
 
         webgl = true;
 
@@ -2576,9 +2677,13 @@ function webglAddLayer() {
         success = true;
     } catch (error) {
         try {
-            layers.remove(webglLayer);
-        } catch (error) {
-            console.error(error);
+            if (aircraftPositionsSubGroup) {
+                aircraftPositionsSubGroup.getLayers().remove(webglLayer);
+                aircraftPositionsSubGroup.getLayers().push(iconLayer);
+                syncAircraftPositionsVisibility();
+            }
+        } catch (err) {
+            console.error(err);
         }
         console.error(error);
         success = false;
@@ -2600,12 +2705,17 @@ function webglInit() {
     new Toggle({
         key: "webgl",
         display: "WebGL",
-        container: "#settingsRight",
+        container: "#settings_section_debug",
         init: init,
         setState: function(state) {
             if (state) {
                 if (webglLayer) {
                     webgl = true;
+                    if (aircraftPositionsSubGroup) {
+                        aircraftPositionsSubGroup.getLayers().clear();
+                        aircraftPositionsSubGroup.getLayers().push(webglLayer);
+                        aircraftPositionsSubGroup.getLayers().push(iconLayer);
+                    }
                 } else {
                     webgl = webglAddLayer();
                 }
@@ -2626,16 +2736,24 @@ function webglInit() {
                         delete plane.glMarker;
                     }
                 }
+                if (aircraftPositionsSubGroup) {
+                    aircraftPositionsSubGroup.getLayers().clear();
+                    aircraftPositionsSubGroup.getLayers().push(iconLayer);
+                }
             }
             if (loadFinished) {
                 refreshFilter();
                 checkPointermove();
             }
+            syncAircraftPositionsVisibility();
         },
     });
 }
 
 function ol_map_init() {
+    // Ensure label styles (labelFill, bgFill, labelStroke*) exist before any plane icons are drawn
+    if (typeof setLineWidth === 'function')
+        setLineWidth();
 
     if (0) {
         let canvas = iconTest();
@@ -2734,12 +2852,6 @@ function ol_map_init() {
     OLProjExtent = OLProj.getExtent();
 
     OLMap.getView().setRotation(g.mapOrientation); // adjust orientation
-
-    OLMap.addControl(new ol.control.LayerSwitcher({
-        groupSelectStyle: 'none',
-        activationMode: 'click', // click sucks in the current implementation
-        target: 'map_canvas',
-    }));
 
     OLMap.on('movestart', function(event) {
         if (webgl) {
@@ -2878,15 +2990,14 @@ function initMapEarly() {
 
     //add_kml_overlay('https://developers.google.com/kml/documentation/KML_Samples.kml', 'samples', 0.8);
 
-    miscLayerGroup = new ol.layer.Group({
-        name: 'misc_layers',
+    positionsRangesGroup = new ol.layer.Group({
+        name: 'positions_ranges',
         title: 'Positions & Ranges',
         type: 'overlay',
         layers: [],
-        zIndex: 999 
+        zIndex: 999
     });
-    layers.push(miscLayerGroup);
-    miscLayers = miscLayerGroup.getLayers();
+    const positionsRangesLayers = positionsRangesGroup.getLayers();
 
     siteCircleLayer = new ol.layer.Vector({
         name: 'siteCircles',
@@ -2898,7 +3009,7 @@ function initMapEarly() {
         renderOrder: null,
         renderBuffer: renderBuffer,
     });
-    miscLayers.push(siteCircleLayer);
+    positionsRangesLayers.push(siteCircleLayer);
 
     siteCircleLayer.on('change:visible', function(evt) {
         if (evt.target.getVisible()) {
@@ -2915,7 +3026,7 @@ function showHideButtons() {
         jQuery('#tabs').hide();
         jQuery('#filterButton').hide();
         jQuery('.ol-zoom').hide();
-        jQuery('.layer-switcher').hide();
+        jQuery('#layers_button').hide();
     } else {
         jQuery('#header_top').show();
         jQuery('#header_side').show();
@@ -2923,7 +3034,7 @@ function showHideButtons() {
         jQuery('#tabs').show();
         jQuery('#filterButton').show();
         jQuery('.ol-zoom').show();
-        jQuery('.layer-switcher').show();
+        jQuery('#layers_button').show();
     }
 }
 
@@ -2953,7 +3064,7 @@ function initMap() {
         renderOrder: null,
         renderBuffer: renderBuffer,
     });
-    miscLayers.push(locationDotLayer);
+    positionsRangesGroup.getLayers().push(locationDotLayer);
 
     locationDotLayer.on('change:visible', function(evt) {
         if (evt.target.getVisible()) {
@@ -2987,7 +3098,7 @@ function initMap() {
             style: actualOutline.style,
             visible: actual_range_show,
         });
-        miscLayers.push(actualOutline.layer);
+        positionsRangesGroup.getLayers().push(actualOutline.layer);
     }
     if (calcOutlineData) {
         calcOutlineLayer = new ol.layer.Vector({
@@ -2999,7 +3110,7 @@ function initMap() {
             renderOrder: null,
             renderBuffer: renderBuffer,
         });
-        miscLayers.push(calcOutlineLayer);
+        positionsRangesGroup.getLayers().push(calcOutlineLayer);
         drawUpintheair();
     }
 
@@ -3012,15 +3123,19 @@ function initMap() {
 
     trailGroup.push(dummyLayer);
 
-    trailLayers = new ol.layer.Group({
+    // Trail/trace layers: originally script.js had trailLayers = new ol.layer.Group({ layers: trailGroup })
+    // and layers.push(trailLayers). When the map was refactored to use positionsRangesGroup, the trail
+    // group was never added to it, so trailGroup was no longer on the map and traces disappeared.
+    const traceLayersGroup = new ol.layer.Group({
         name: 'ac_trail',
         title: 'Aircraft trails',
         type: 'overlay',
         layers: trailGroup,
+        visible: true,
         zIndex: 150,
+        displayInLayerSwitcher: false,
     });
-
-    miscLayers.push(trailLayers);
+    positionsRangesGroup.getLayers().push(traceLayersGroup);
 
     iconLayer = new ol.layer.Vector({
         name: 'iconLayer',
@@ -3031,8 +3146,23 @@ function initMap() {
         zIndex: 200,
         renderBuffer: renderBuffer,
     });
-    miscLayers.push(iconLayer);
 
+    // One "Aircraft positions" row in the layer picker: group holds only the active layer (icon or webgl). Child row is hidden via CSS.
+    aircraftPositionsSubGroup = new ol.layer.Group({
+        name: 'aircraft_positions_overlay',
+        title: 'Aircraft positions',
+        type: 'overlay',
+        layers: new ol.Collection([iconLayer]),
+        zIndex: 200,
+        fold: 'close',
+    });
+    aircraftPositionsSubGroup.on('change:visible', syncAircraftPositionsVisibility);
+    syncAircraftPositionsVisibility();
+
+    positionsRangesGroup.getLayers().push(aircraftPositionsSubGroup);
+
+    // Insert at start so they appear at bottom of layer picker (switcher renders in reverse order)
+    layers.insertAt(0, positionsRangesGroup);
 
     ol_map_init();
 
@@ -3059,7 +3189,7 @@ function initMap() {
     new Toggle({
         key: "darkerColors",
         display: "Darker Colors",
-        container: "#settingsLeft",
+        container: "#settings_section_appearance",
         init: darkerColors,
         setState: function(state) {
             darkerColors = state;
@@ -3087,12 +3217,10 @@ function initMap() {
     new Toggle({
         key: "darkMode",
         display: "Dark Mode",
-        container: "#settingsLeft",
+        container: "#settings_section_appearance",
         init: darkModeDefault,
         setState: function(state) {
             let root = document.documentElement;
-            jQuery(".layer-switcher .panel").css("background", "var(--BGCOLOR1)");
-            jQuery(".layer-switcher .panel").css("border", "4px solid var(--BGCOLOR1)");
             if (state) {
                 root.classList.add('dark');
                 tableColors = tableColorsDark;
@@ -3105,7 +3233,7 @@ function initMap() {
                 refreshFilter();
                 initLegend(tableColors.unselected);
                 initSourceFilter(tableColors.unselected);
-                initFlagFilter(tableColors.unselected);
+                initFlagFilter();
             }
         }
     });
@@ -3123,7 +3251,7 @@ function initMap() {
     new Toggle({
         key: "MapDim",
         display: "Dim Map",
-        container: "#settingsLeft",
+        container: "#settings_section_appearance",
         init: MapDim,
         setState: function(state) {
             /*
@@ -3785,15 +3913,15 @@ function refreshSelected() {
     }
     let dbFlags = "";
     if (selected.ladd)
-        dbFlags += ' <a class="link" target="_blank" href="https://www.faa.gov/pilots/ladd/" rel="noreferrer">LADD</a> / ';
+        dbFlags += '<a class="dbFlagBadge LADD" target="_blank" href="https://www.faa.gov/pilots/ladd/" rel="noreferrer">LADD</a> ';
     if (selected.pia)
-        dbFlags += '<a class="link" target="_blank" href="https://www.faa.gov/air_traffic/technology/equipadsb/privacy/" rel="noreferrer">PIA</a> / ';
+        dbFlags += '<a class="dbFlagBadge PIA" target="_blank" href="https://www.faa.gov/air_traffic/technology/equipadsb/privacy/" rel="noreferrer">PIA</a> ';
     if (selected.military)
-        dbFlags += 'military / ';
+        dbFlags += '<span class="dbFlagBadge Military">Military</span> ';
     if (dbFlags.length == 0) {
         jQuery('#selected_dbFlags').updateText("none");
     } else {
-        jQuery('#selected_dbFlags').html(dbFlags.slice(0, -3));
+        jQuery('#selected_dbFlags').html(dbFlags.trim());
     }
 
     if (selected.icaoType) {
@@ -4355,6 +4483,10 @@ function refreshFeatures() {
         sort: function () { sortBy('type', compareAlpha, function(x) { return x.icaoType; }); },
         value: function(plane) { return (plane.icaoType != null ? plane.icaoType : ""); },
         text: 'Type' };
+    cols.operator = {
+        sort: function () { sortBy('operator', compareAlpha, function(x) { return (x.opp_icao || ''); }); },
+        value: function(plane) { return (plane.opp_icao != null ? plane.opp_icao : ""); },
+        text: '3LTR' };
     cols.squawk = {
         text: 'Squawk',
         sort: function () { sortBy('squawk', compareAlpha, function(x) { return x.squawk; }); },
@@ -4479,6 +4611,10 @@ function refreshFeatures() {
 
         if (!ShowFlags) {
             planeMan.setColumnVis('flag', false);
+        }
+        if (!useRouteAPI && cols.route) {
+            planeMan.setColumnVis('route', false);
+            jQuery('#dd_route').hide();
         }
     }
 
@@ -5418,7 +5554,7 @@ function invertMap(evt){
 
 }
 //
-// Altitude Chart begin
+// Altitude Legend begin
 //
 (function (global, jQuery, TAR) {
     let altitudeChart = TAR.altitudeChart = TAR.altitudeChart || {};
@@ -5467,8 +5603,8 @@ function invertMap(evt){
         }
         new Toggle({
             key: "altitudeChart",
-            display: "Altitude Chart",
-            container: "#settingsRight",
+            display: "Altitude Legend",
+            container: "#settings_section_appearance",
             init: chartOn,
             setState: altitudeChart.render
         });
@@ -5477,7 +5613,7 @@ function invertMap(evt){
     return TAR;
 }(window, jQuery, TAR || {}));
 //
-// Altitude Chart end
+// Altitude Legend end
 //
 
 function followRandomPlane() {
@@ -5517,8 +5653,11 @@ function toggleTableInView(arg) {
 
 function toggleLabels() {
     g.enableLabels = !g.enableLabels;
+    if (g.labelConfig) g.labelConfig.enabled = g.enableLabels;
     loStore['enableLabels'] = g.enableLabels;
+    if (g.labelConfig) loStore['labelConfig'] = JSON.stringify(g.labelConfig);
     document.getElementById('labelToggle_enabled').checked = g.enableLabels;
+    syncLabelCheckboxes();
     for (let key in g.planesOrdered) {
         g.planesOrdered[key].updateMarker();
     }
@@ -5579,6 +5718,8 @@ function syncLabelCheckboxes() {
     for (const field of fields) {
         const el = document.getElementById('labelToggle_' + field);
         if (el) el.checked = g.labelConfig[field];
+        const box = document.querySelector('#labelConfigMenu .labelConfigCheckbox[data-for="labelToggle_' + field + '"]');
+        if (box) box.classList.toggle('settingsCheckboxChecked', !!g.labelConfig[field]);
     }
 }
 
@@ -5588,6 +5729,7 @@ function updateLabelConfig() {
         const el = document.getElementById('labelToggle_' + field);
         if (el) g.labelConfig[field] = el.checked;
     }
+    syncLabelCheckboxes();
 
     g.enableLabels = g.labelConfig.enabled;
     loStore['labelConfig'] = JSON.stringify(g.labelConfig);
@@ -5603,12 +5745,22 @@ function updateLabelConfig() {
         remakeTrails();
 }
 
+function closeLabelMenu() {
+    const menu = document.getElementById('labelConfigMenu');
+    const overlay = document.getElementById('labelConfigMenuOverlay');
+    if (menu) menu.style.display = 'none';
+    if (overlay) overlay.style.display = 'none';
+}
+
 function toggleLabelMenu() {
     const menu = document.getElementById('labelConfigMenu');
     let overlay = document.getElementById('labelConfigMenuOverlay');
 
     if (menu.style.display === 'none' || !menu.style.display) {
-        // Show menu + overlay
+        // Close other panels when opening label menu
+        jQuery('#settings_infoblock').hide();
+        hideCustomLayersPanel();
+        // Show menu + overlay (no dimming; overlay is transparent for click-outside)
         if (!overlay) {
             overlay = document.createElement('div');
             overlay.id = 'labelConfigMenuOverlay';
@@ -5619,9 +5771,7 @@ function toggleLabelMenu() {
         menu.style.display = 'block';
         syncLabelCheckboxes();
     } else {
-        // Hide menu + overlay
-        menu.style.display = 'none';
-        if (overlay) overlay.style.display = 'none';
+        closeLabelMenu();
     }
 }
 
@@ -5909,15 +6059,17 @@ Filter.prototype.init = function() {
     const row = this.tbody.insertRow();
     row.innerHTML =
         `<td>
-            <div class="infoBlockSection" style="background-color: var(--BGCOLOR2); border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); margin-bottom: 8px; width: fit-content;">
-                <form id="${this.id}">
-                    <div class="infoBlockTitleText" style="margin-bottom: 5px; text-transform: uppercase;">${this.name}:</div>
-                    <div>
-                        <input id="${this.id}_input" name="${this.id}_name" type="text" class="searchInput" maxlength="1024" style="width: 100%;">
+            <div class="infoBlockSection filterBlock">
+                <form id="${this.id}" class="filterForm">
+                    <div class="filterFormHeader">
+                        <span class="infoBlockTitleText" style="text-transform: uppercase;">${this.name}:</span>
+                        <span class="filterFormActions">
+                            <button class="formButton filterFormBtn" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                            <button class="formButton filterFormBtn" id="${this.id}_reset" title="Reset"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                        </span>
                     </div>
-                    <div style="margin-top: 5px;">
-                        <button class="formButton" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                        <button class="formButton" id="${this.id}_reset" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                    <div class="filterFormBody">
+                        <input id="${this.id}_input" name="${this.id}_name" type="text" class="searchInput" maxlength="1024" style="width: 100%;">
                     </div>
                 </form>
             </div>
@@ -5930,7 +6082,7 @@ Filter.prototype.init = function() {
 
 function initFilters() {
     initSourceFilter(tableColors.unselected);
-    initFlagFilter(tableColors.unselected);
+    initFlagFilter();
     initNoDbFilter();
     new Filter({
         key: 'callsign',
@@ -7352,11 +7504,11 @@ function setLineWidth() {
         }),
     });
 
-    labelFill = new ol.style.Fill({color: 'white' });
-    blackFill = new ol.style.Fill({color: 'black' });
-    labelStroke = new ol.style.Stroke({color: 'rgba(0,0,0,0.7', width: 4 * globalScale});
-    labelStrokeNarrow = new ol.style.Stroke({color: 'rgba(0,0,0,0.7', width: 2.5 * globalScale});
-    bgFill = new ol.style.Stroke({color: 'rgba(0,0,0,0.25'});
+    labelFill = new ol.style.Fill({ color: 'white' });
+    blackFill = new ol.style.Fill({ color: 'black' });
+    labelStroke = new ol.style.Stroke({ color: 'rgba(0,0,0,0.7)', width: 4 * globalScale });
+    labelStrokeNarrow = new ol.style.Stroke({ color: 'rgba(0,0,0,0.7)', width: 2.5 * globalScale });
+    bgFill = new ol.style.Fill({ color: 'rgba(0,0,0,0.25)' });
 }
 let lastCallLocationChange = 0;
 function onLocationChange(position) {
@@ -9661,23 +9813,184 @@ function fetchCustomLogoIndex() {
 parseURLIcaos();
 initialize();
 
-// Inject close button into Layers Picker panel and handle close event
-function addLayerSwitcherCloseButton() {
-    const checkExist = setInterval(function () {
-        if ($('.layer-switcher .panel').length) {
-            if (!$('.layer-switcher-close-x').length) {
-                $('.layer-switcher .panel').prepend('<button class="layer-switcher-close-x" title="Close">×</button>');
+// Build the custom layers panel (same structure as settings: details/summary + settingsCheckbox/settingsText)
+function buildLayersPanel() {
+    const container = document.getElementById('layers_picker_content');
+    if (!container || !layers_group)
+        return;
+    container.innerHTML = '';
 
-                $(document).on('click', '.layer-switcher-close-x', function (e) {
-                    e.stopPropagation();
-                    $('.layer-switcher').removeClass('shown');
-                });
-            }
-            clearInterval(checkExist);
+    // Collect all base layers globally (for radio: only one visible across the map)
+    const allBaseLayers = [];
+    ol.control.LayerSwitcher.forEachRecursive(layers_group, function (lyr) {
+        if (lyr.get('type') === 'base' && lyr.get('title'))
+            allBaseLayers.push(lyr);
+    });
+
+    function syncAllBaseRadios() {
+        container.querySelectorAll('.layers-base-content .settingsRadio').forEach(function (el) {
+            const row = el.closest('.settingsOptionContainer');
+            if (!row) return;
+            const name = row.getAttribute('data-layer-name');
+            const layer = allBaseLayers.filter(function (l) { return (l.get('name') || '') === name; })[0];
+            const selected = !!(layer && layer.getVisible());
+            el.classList.toggle('settingsRadioSelected', selected);
+            el.setAttribute('aria-checked', selected);
+        });
+    }
+
+    const rootLayers = layers_group.getLayers();
+    // Collect base map groups, then order: Worldwide first, then US, Europe, Custom
+    const baseGroupOrder = ['world', 'us', 'europe', 'custom'];
+    const baseGroups = [];
+    for (let i = 0; i < rootLayers.getLength(); i++) {
+        const item = rootLayers.item(i);
+        if (!(item instanceof ol.layer.Group) || item.get('type') === 'overlay')
+            continue;
+        const groupLayers = [];
+        const lyrs = item.getLayers();
+        for (let j = 0; j < lyrs.getLength(); j++) {
+            const child = lyrs.item(j);
+            if (child.get('type') === 'base' && child.get('title'))
+                groupLayers.push(child);
         }
-    }, 1000);
+        if (groupLayers.length === 0)
+            continue;
+        const name = item.get('name') || '';
+        const orderIndex = baseGroupOrder.indexOf(name);
+        baseGroups.push({
+            group: item,
+            groupLayers: groupLayers,
+            sortKey: orderIndex >= 0 ? orderIndex : baseGroupOrder.length,
+        });
+    }
+    baseGroups.sort(function (a, b) { return a.sortKey - b.sortKey; });
+
+    baseGroups.forEach(function (entry) {
+        const item = entry.group;
+        const groupLayers = entry.groupLayers;
+        const groupTitle = item.get('title') || item.get('name') || 'Base maps';
+        const baseDetails = document.createElement('details');
+        baseDetails.className = 'settingsSection';
+        const baseSummary = document.createElement('summary');
+        baseSummary.className = 'settingsSectionHeader';
+        baseSummary.textContent = groupTitle;
+        baseDetails.appendChild(baseSummary);
+        const baseContent = document.createElement('div');
+        baseContent.className = 'settingsSectionContent layers-base-content';
+        // layers.js uses .reverse() when building the group collection, so reverse for display (first-pushed at top)
+        const orderedLayers = groupLayers.slice().reverse();
+        orderedLayers.forEach(function (lyr) {
+            const row = document.createElement('div');
+            row.className = 'settingsOptionContainer';
+            row.setAttribute('data-layer-name', lyr.get('name') || '');
+            const radio = document.createElement('div');
+            radio.className = 'settingsRadio' + (lyr.getVisible() ? ' settingsRadioSelected' : '');
+            radio.setAttribute('role', 'radio');
+            radio.setAttribute('aria-checked', lyr.getVisible());
+            const text = document.createElement('div');
+            text.className = 'settingsText';
+            text.textContent = lyr.get('title') || lyr.get('name') || '';
+            row.appendChild(radio);
+            row.appendChild(text);
+            baseContent.appendChild(row);
+            row.addEventListener('click', function () {
+                allBaseLayers.forEach(function (b) { b.setVisible(b === lyr); });
+                syncAllBaseRadios();
+            });
+        });
+        baseDetails.appendChild(baseContent);
+        appendOverlayLayers(baseContent, item);
+        container.appendChild(baseDetails);
+    });
+
+    const baseGroupSet = new Set(baseGroups.map(function (e) { return e.group; }));
+
+    for (let i = 0; i < rootLayers.getLength(); i++) {
+        const item = rootLayers.item(i);
+        if (!(item instanceof ol.layer.Group))
+            continue;
+        if (item.get('type') === 'base')
+            continue;
+        if (baseGroupSet.has(item))
+            continue;
+        const title = item.get('title') || item.get('name') || 'Overlay';
+        const details = document.createElement('details');
+        details.className = 'settingsSection';
+        const summary = document.createElement('summary');
+        summary.className = 'settingsSectionHeader';
+        summary.textContent = title;
+        details.appendChild(summary);
+        const content = document.createElement('div');
+        content.className = 'settingsSectionContent';
+        appendOverlayLayers(content, item);
+        details.appendChild(content);
+        container.appendChild(details);
+    }
+}
+
+function appendOverlayLayers(container, group) {
+    const lyrs = group.getLayers();
+    for (let j = 0; j < lyrs.getLength(); j++) {
+        const child = lyrs.item(j);
+        if (child.get('displayInLayerSwitcher') === false)
+            continue;
+        const name = child.get('name');
+        if (name === 'aircraft_positions_overlay' && child === aircraftPositionsSubGroup) {
+            addLayerRow(container, child, child.get('title') || 'Aircraft positions');
+            continue;
+        }
+        if (child instanceof ol.layer.Group) {
+            const title = child.get('title') || child.get('name') || 'Layer';
+            const subDetails = document.createElement('details');
+            subDetails.className = 'settingsSection';
+            const subSummary = document.createElement('summary');
+            subSummary.className = 'settingsSectionHeader';
+            subSummary.textContent = title;
+            subDetails.appendChild(subSummary);
+            const subContent = document.createElement('div');
+            subContent.className = 'settingsSectionContent';
+            appendOverlayLayers(subContent, child);
+            subDetails.appendChild(subContent);
+            container.appendChild(subDetails);
+        } else if (child.get('type') === 'overlay' && child.get('title')) {
+            addLayerRow(container, child, child.get('title'));
+        }
+    }
+}
+
+function addLayerRow(container, layer, title) {
+    const row = document.createElement('div');
+    row.className = 'settingsOptionContainer';
+    row.setAttribute('data-layer-name', layer.get('name') || '');
+    const cb = document.createElement('div');
+    cb.className = 'settingsCheckbox' + (layer.getVisible() ? ' settingsCheckboxChecked' : '');
+    const text = document.createElement('div');
+    text.className = 'settingsText';
+    text.textContent = title;
+    row.appendChild(cb);
+    row.appendChild(text);
+    container.appendChild(row);
+    row.addEventListener('click', function (e) {
+        layer.setVisible(!layer.getVisible());
+        cb.classList.toggle('settingsCheckboxChecked', layer.getVisible());
+        if (layer.get('name'))
+            loStore['layer_' + layer.get('name')] = layer.getVisible();
+    });
+}
+
+function showCustomLayersPanel() {
+    jQuery('#settings_infoblock').hide();
+    closeLabelMenu();
+    buildLayersPanel();
+    jQuery('#layers_infoblock').show();
+}
+
+function hideCustomLayersPanel() {
+    jQuery('#layers_infoblock').hide();
 }
 
 $(document).ready(function () {
-    addLayerSwitcherCloseButton();
+    jQuery('#layers_button').on('click', showCustomLayersPanel);
+    jQuery('#layers_close').on('click', hideCustomLayersPanel);
 });

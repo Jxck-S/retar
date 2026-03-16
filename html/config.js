@@ -30,7 +30,7 @@
 //SiteShow    = false;           // true to show a center marker
 //SiteLat     = 45.0;            // position of the marker
 //SiteLon     = 9.0;
-SiteName = "TheAirTraffic"; // tooltip of the marker
+//SiteName = "My Radar Site"; // tooltip of the marker (override defaults.js)
 
 // Color controls for the range outline
 //range_outline_color = '#0000DD';
@@ -52,6 +52,46 @@ SiteName = "TheAirTraffic"; // tooltip of the marker
 
 // which map is displayed to new visitors
 MapType_tar1090 = "osm";
+
+// -- Sidebar banner (inject from file) --------------------------------------
+// Set SidebarBannerUrl to inject HTML from that file (e.g. 'banner.html'). Set SidebarBannerCss to load a stylesheet when banner is shown.
+// SidebarBannerUrl = 'banner.html';
+// SidebarBannerCss = 'banner.css';
+
+// Aggregator mode (default false in defaults.js). Set true for the main aggregator install to enable credits, default banner, and aggregator backend fast-path.
+//aggregator = true;
+
+// Credits text in sidebar (retar in defaults.js). Override to show your site name.
+//CreditsText = "adsbsite.com";
+// Disable the large aggregator background image behind the selected infoblock when true in aggregator mode.
+// AggregatorBgEnabled = false;
+
+// -- Theme colors (per-install) --------------------------------------
+// Override parts of the default palette from defaults.js (ThemeColorsDefault).
+// Full structure: light and dark each can have BGCOLOR1, BGCOLOR2, ACCENT, ACCENT_LIGHT, TXTCOLOR1, TXTCOLOR2, TXTCOLOR3.
+// Omit any key to keep the default from defaults.js.
+// Example – full override matching current defaults:
+// ThemeColors = {
+//     light: {
+//         BGCOLOR1: '#F8F8F8',
+//         BGCOLOR2: '#E3EFF9',
+//         ACCENT: '#1565c0',
+//         ACCENT_LIGHT: '#42a5f5',
+//         TXTCOLOR1: '#0b1020',
+//         TXTCOLOR2: '#0d1b2a',
+//         TXTCOLOR3: '#1e3a5f',
+//     },
+//     dark: {
+//         BGCOLOR1: '#0b1020',
+//         BGCOLOR2: '#151d30',
+//         ACCENT: '#42a5f5',
+//         ACCENT_LIGHT: '#64b5f6',
+//         TXTCOLOR1: '#e3f2fd',
+//         TXTCOLOR2: '#bbdefb',
+//         TXTCOLOR3: '#90a4ae',
+//     },
+// };
+
 //
 // valid values for the above setting:
 // osm
@@ -203,7 +243,7 @@ ColorByAlt = {
 //SiteCirclesLineDash = [5, 5]; // null - solid line, [5, 5] - dashed line with 5 pixel lines and spaces in between
 
 // Controls page title, righthand pane when nothing is selected
-PageName = "retar";
+//PageName = "retar";
 
 // Controls HTML meta description (page description, used by search engines / link previews)
 // If not set here, a default is used from defaults.js.
@@ -267,7 +307,7 @@ MapboxAPIKey = null;
 // imageConfigText = "";
 
 //flightawareLinks = false;
-shareBaseUrl = 'https://globe.theairtraffic.com/';
+// shareBaseUrl = 'https://example.com/globe/'; // base URL for share links; leave commented to disable
 // planespottersLinks = false;
 
 // show links to various registration websites (not all countries)
@@ -305,6 +345,7 @@ HideCols = [
 //	"#route",
 	"#registration",
 //	"#type",
+	"#operator",
 //	"#squawk",
 //	"#altitude",
 //	"#speed",
@@ -330,18 +371,17 @@ HideCols = [
 // get pictures from planespotting.be
 // planespottingAPI = true;
 
-// Custom Photos API - TheAirTraffic
-customPhotosApi = true;
-customPhotosApiUrl = "https://theairtraffic.com/iapi/photos/details/";
+// Custom Photos API
+//customPhotosApi = true;
+//customPhotosApiUrl = "https://example.com/iapi/photos/details/";
 
 // get flight route from routeApi service default setting (toggle via settings checkbox)
 // useRouteAPI = false;
 // configure route display, possible values: iata, icao, city (can use multiple like this: iata+city)
 // routeDisplay = 'iata';
-// which routeApi service to use
+// which routeApi service to use. Set to a URL to enable route lookup and show "Lookup route" in settings; leave unset or set "" to hide.
 // routeApiUrl = "https://adsb.im/api/0/routeset";
 // routeApiUrl = "https://api.adsb.lol/api/0/routeset";
-// routeApiUrl = ""; // to disable route API so it can't be enabled by a website visitor
 
 // show a link to jetphotos, only works if planespottersAPI is disabled
 // jetphotoLinks = false;
@@ -448,7 +488,13 @@ tableColors = {
 // --------------------------------------------------------
 // Airline Logos and Banners (using airline-logos-api)
 // --------------------------------------------------------
-airlineLogos = true;
-airlineBanners = true;
-airlineLogosApiUrl = "/logba/logos/";
-airlineBannersApiUrl = "/logba/banners/";
+//airlineLogos = true;
+//airlineBanners = true;
+//airlineLogosApiUrl = "https://example.com/airline-logos/";
+//airlineBannersApiUrl = "https://example.com/airline-logos/";
+
+//AggregatorBgEnabled = false;
+
+
+
+applyThemeColors();

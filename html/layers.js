@@ -32,7 +32,7 @@ function createBaseLayers() {
                 transition: tileTransition,
             }),
             name: 'custom_tiles',
-            title: 'Custom tiles',
+            title: 'Custom Tiles',
             type: 'base',
         }));
     }
@@ -83,7 +83,7 @@ function createBaseLayers() {
             transition: tileTransition,
         }),
         name: "carto_" + basemap_id,
-        title: 'CARTO.com English',
+        title: 'CARTO Voyager',
         type: 'base',
     }));
 
@@ -244,7 +244,7 @@ function createBaseLayers() {
                 transition: tileTransition,
             }),
             name: 'esri',
-            title: 'ESRI.com Sat.',
+            title: 'ESRI Satellite',
             type: 'base',
         }));
         world.push(new ol.layer.Tile({
@@ -257,7 +257,7 @@ function createBaseLayers() {
                 transition: tileTransition,
             }),
             name: 'esri_gray',
-            title: 'ESRI.com Gray',
+            title: 'ESRI Gray',
             type: 'base',
         }));
         world.push(new ol.layer.Tile({
@@ -270,7 +270,7 @@ function createBaseLayers() {
                 transition: tileTransition,
             }),
             name: 'esri_streets',
-            title: 'ESRI.com Streets',
+            title: 'ESRI Streets',
             type: 'base',
         }));
     }
@@ -343,13 +343,19 @@ function createBaseLayers() {
             transition: tileTransition,
         }),
         name: 'gibs',
-        title: 'GIBS Clouds ' + yesterday,
+        title: 'NASA GIBS Satellite',
         type: 'base',
     }));
     // carto.com basemaps, see the following URLs for details on them:
     // http://basemaps.cartocdn.com
     // https://github.com/CartoDB/cartodb/wiki/BaseMaps-available
 
+    const cartoDisplayNames = {
+        'dark_all': 'CARTO Dark',
+        'dark_nolabels': 'CARTO Dark (no labels)',
+        'light_all': 'CARTO Light',
+        'light_nolabels': 'CARTO Light (no labels)',
+    };
     let basemaps = [ "dark_all", "dark_nolabels",
         "light_all", "light_nolabels"
     ]
@@ -368,7 +374,7 @@ function createBaseLayers() {
                     transition: tileTransition,
                 }),
                 name: "carto_" + basemap_id,
-                title: 'CARTO.com ' + basemap_id,
+                title: cartoDisplayNames[basemap_id] || 'CARTO ' + basemap_id,
                 type: 'base',
             }));
         }
@@ -453,7 +459,7 @@ function createBaseLayers() {
                 transition: tileTransition,
             }),
             name: 'VFR_Sectional',
-            title: 'VFR Sectional Chart',
+            title: 'VFR Sectional',
             type: 'base'
         }));
 
@@ -467,7 +473,7 @@ function createBaseLayers() {
                 transition: tileTransition,
             }),
             name: 'VFR_Terminal',
-            title: 'VFR Terminal Chart',
+            title: 'VFR Terminal',
             type: 'base'
         }));
 
@@ -481,7 +487,7 @@ function createBaseLayers() {
                 transition: tileTransition,
             }),
             name: 'IFR_AreaLow',
-            title: 'IFR Enroute Chart Low',
+            title: 'IFR Enroute Low',
             type: 'base'
         }));
 
@@ -495,7 +501,7 @@ function createBaseLayers() {
                 transition: tileTransition,
             }),
             name: 'IFR_High',
-            title: 'IFR Enroute Chart High',
+            title: 'IFR Enroute High',
             type: 'base'
         }));
     }
@@ -953,11 +959,13 @@ function createBaseLayers() {
         world.push(g.aiscatcherLayer);
     }
 
-    layers.push(new ol.layer.Group({
-        name: 'custom',
-        title: 'Custom',
-        layers: custom_layers,
-    }));
+    if (custom_layers.getLength() > 0) {
+        layers.push(new ol.layer.Group({
+            name: 'custom',
+            title: 'Custom',
+            layers: custom_layers,
+        }));
+    }
 
     if (europe.getLength() > 0) {
         layers.push(new ol.layer.Group({

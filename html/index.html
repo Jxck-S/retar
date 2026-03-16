@@ -15,8 +15,9 @@
     <!-- CSS_ANCHOR -->
     <link rel="stylesheet" href="libs/jquery-ui-1.13.2.min.css" type="text/css">
     <link rel="stylesheet" href="libs/ol-8.2.0.css" type="text/css" />
-    <link rel="stylesheet" href="libs/ol-layerswitcher-4.1.1.css" type="text/css"/>
     <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="defaults.js"></script>
+    <script src="config.js"></script>
 
     <link rel="icon" type="image/png" href="images/favicon.png">
 
@@ -92,7 +93,7 @@
                     <span class=credits-image></span>
                   </td>
                   <td>
-                  <span class=credits-text>TheAirTraffic.com</span>
+                  <span class="credits-text"></span>
                   </td>
                 </tr>
               </table>
@@ -759,8 +760,11 @@
         </div>
 
         <div id="settings_infoblock">
-          <div id="settings_close" class="settingsCloseBox"></div>
-        <div class="settingsSliderContainer" style="max-width: calc(2 * 199px * var(--SCALE)); margin: 0 auto;">
+          <header class="settingsPanelHeader">
+            <span class="settingsPanelHeaderTitle">Settings</span>
+            <div id="settings_close" class="settingsCloseBox" title="Close"></div>
+          </header>
+        <div class="settingsSliderContainer" style="margin: 0 auto;">
           <div class="settingsOptionContainer">
             <div class="settingsText">Text and Icon size:</div>
           </div>
@@ -773,41 +777,81 @@
           <div class="rSpacer">
             <hr />
           </div>
-          <div id="settingsLeft" class="settingsColumn">
-            <div class="settingsOptionContainer">
-              <label for="units_selector"><span class="infoBlockTitleText">Units:&nbsp;&nbsp;</span></label>
-              <select name="units_selector" id="units_selector">
-                <option value="nautical">Aeronautical</option>
-                <option value="metric">Metric</option>
-                <option value="imperial">Imperial</option>
-              </select>
-            </div>
-            <div class="settingsOptionContainer">
-              <div class="settingsCheckbox" id="airline_logos_filter"></div>
-              <div class="settingsText">Airline Logos</div>
-            </div>
-            <div class="settingsOptionContainer">
-              <div class="settingsCheckbox" id="airline_banners_filter"></div>
-              <div class="settingsText">Airline Banners</div>
-            </div>
-            <div class="settingsOptionContainer">
-              <div class="settingsCheckbox" id="groundvehicle_filter"></div>
-              <div class="settingsText">Ground Vehicles</div>
-            </div>
-            <div class="settingsOptionContainer">
-              <div class="settingsCheckbox" id="blockedmlat_filter"></div>
-              <div class="settingsText">Non-ICAO Targets (radar track / airframe unknown) </div>
-            </div>
+          <div class="settingsSections">
+            <details class="settingsSection" data-section="units" open="">
+              <summary class="settingsSectionHeader">Units &amp; display</summary>
+              <div class="settingsSectionContent" id="settings_section_units">
+                <div class="settingsOptionContainer">
+                  <label for="units_selector"><span class="infoBlockTitleText">Units:&nbsp;&nbsp;</span></label>
+                  <select name="units_selector" id="units_selector">
+                    <option value="nautical">Aeronautical</option>
+                    <option value="metric">Metric</option>
+                    <option value="imperial">Imperial</option>
+                  </select>
+                </div>
+                <div class="settingsOptionContainer">
+                  <div class="settingsCheckbox" id="airline_logos_filter"></div>
+                  <div class="settingsText">Airline Logos</div>
+                </div>
+                <div class="settingsOptionContainer">
+                  <div class="settingsCheckbox" id="airline_banners_filter"></div>
+                  <div class="settingsText">Airline Banners</div>
+                </div>
+                <div class="settingsOptionContainer">
+                  <div class="settingsCheckbox" id="groundvehicle_filter"></div>
+                  <div class="settingsText">Ground Vehicles</div>
+                </div>
+                <div class="settingsOptionContainer">
+                  <div class="settingsCheckbox" id="blockedmlat_filter"></div>
+                  <div class="settingsText">Non-ICAO Targets (radar track / airframe unknown)</div>
+                </div>
+              </div>
+            </details>
+            <details class="settingsSection" data-section="tracks">
+              <summary class="settingsSectionHeader">Tracks &amp; trails</summary>
+              <div class="settingsSectionContent" id="settings_section_tracks"></div>
+            </details>
+            <details class="settingsSection" data-section="appearance">
+              <summary class="settingsSectionHeader">Appearance</summary>
+              <div class="settingsSectionContent" id="settings_section_appearance"></div>
+            </details>
+            <details class="settingsSection" data-section="map">
+              <summary class="settingsSectionHeader">Map &amp; location</summary>
+              <div class="settingsSectionContent" id="settings_section_map"></div>
+            </details>
+            <details class="settingsSection" data-section="infoblock">
+              <summary class="settingsSectionHeader">Infoblock &amp; UI</summary>
+              <div class="settingsSectionContent" id="settings_section_infoblock"></div>
+            </details>
+            <details class="settingsSection" data-section="data">
+              <summary class="settingsSectionHeader">Data &amp; APIs</summary>
+              <div class="settingsSectionContent" id="settings_section_data"></div>
+            </details>
+            <details class="settingsSection" data-section="sharing">
+              <summary class="settingsSectionHeader">Sharing &amp; URL</summary>
+              <div class="settingsSectionContent" id="settings_section_sharing"></div>
+            </details>
+            <details class="settingsSection" data-section="debug">
+              <summary class="settingsSectionHeader">Debug</summary>
+              <div class="settingsSectionContent" id="settings_section_debug">
+                <div class="settingsOptionContainer">
+                  <button class="formButton" onclick="resetSettings();">Reset All Settings</button>
+                </div>
+              </div>
+            </details>
           </div>
-          <div id="settingsRight" class="settingsColumn">
-            <div class="settingsOptionContainer">
-              <button class="formButton" onclick="resetSettings();">Reset All Settings</button>
-            </div>
-          </div>
+        </div>
+        <!-- Layers picker: same structure and styling as settings menu -->
+        <div id="layers_infoblock" class="settingsStylePanel">
+          <header class="settingsPanelHeader">
+            <span class="settingsPanelHeaderTitle">Layers</span>
+            <div id="layers_close" class="settingsCloseBox" title="Close"></div>
+          </header>
+          <div class="settingsSections" id="layers_picker_content"></div>
         </div>
         <div style="display: none" id="credits">
           <span class=credits-image></span>
-        <span class=credits-text>TheAirTraffic.com</span>
+        <span class="credits-text"></span>
         </div>
         <div id="header_top" class="infoHeading">
           <div class="buttonContainer">
@@ -823,6 +867,7 @@
             </div>
             <!-- expand_sidebar_button moved to sidebar-table -->
             <div id="fullscreenButton" class="svgButton fullscreenButton"></div>
+            <div id="layers_button" class="svgButton layersButton" title="Layers"></div>
             <div id="settingsCog" class="svgButton settingsCog"></div>
             <div id="L" title="Label Configuration" class="button inActiveButton" onclick="toggleLabelMenu();" style="display:inline-flex;align-items:center;justify-content:center;vertical-align:top;"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></div>
             <div id="K" title="Toggle Trac(K) Labels" class="button inActiveButton" onclick="toggleTrackLabels();"><span class="buttonText">K</span></div>
@@ -843,54 +888,62 @@
             <div id="F" title="(F)ollow" class="button inActiveButton" onclick="toggleFollow();"><span class="buttonText">F</span></div>
           </div>
         </div>
-        <!-- Label Configuration Menu -->
+        <!-- Label Configuration Menu (same styling as Settings & Layers, no sub-dividers) -->
         <div id="labelConfigMenu" style="display: none;">
-          <div class="labelMenuHeader">
-            <span class="labelMenuTitle">LABEL CONFIG</span>
-            <button class="labelMenuClose" onclick="toggleLabelMenu();">✕</button>
-          </div>
-          <div class="labelMenuBody">
-            <label class="labelMenuItem">
-              <input type="checkbox" id="labelToggle_enabled" onchange="updateLabelConfig();">
-              <span>Enable Labels</span>
+          <header class="settingsPanelHeader">
+            <span class="settingsPanelHeaderTitle">Label config</span>
+            <div class="settingsCloseBox" title="Close" onclick="toggleLabelMenu();"></div>
+          </header>
+          <div class="settingsSections" id="labelConfigMenuBody">
+            <label class="settingsOptionContainer">
+              <input type="checkbox" id="labelToggle_enabled" onchange="updateLabelConfig();" class="labelConfigInput">
+              <div class="settingsCheckbox labelConfigCheckbox" data-for="labelToggle_enabled" aria-hidden="true"></div>
+              <span class="settingsText">Enable Labels</span>
             </label>
-            <hr class="labelMenuDivider">
-            <label class="labelMenuItem">
-              <input type="checkbox" id="labelToggle_callsign" onchange="updateLabelConfig();">
-              <span>Callsign</span>
+            <label class="settingsOptionContainer">
+              <input type="checkbox" id="labelToggle_callsign" onchange="updateLabelConfig();" class="labelConfigInput">
+              <div class="settingsCheckbox labelConfigCheckbox" data-for="labelToggle_callsign" aria-hidden="true"></div>
+              <span class="settingsText">Callsign</span>
             </label>
-            <label class="labelMenuItem">
-              <input type="checkbox" id="labelToggle_altitude" onchange="updateLabelConfig();">
-              <span>Altitude</span>
+            <label class="settingsOptionContainer">
+              <input type="checkbox" id="labelToggle_altitude" onchange="updateLabelConfig();" class="labelConfigInput">
+              <div class="settingsCheckbox labelConfigCheckbox" data-for="labelToggle_altitude" aria-hidden="true"></div>
+              <span class="settingsText">Altitude</span>
             </label>
-            <label class="labelMenuItem">
-              <input type="checkbox" id="labelToggle_speed" onchange="updateLabelConfig();">
-              <span>Speed</span>
+            <label class="settingsOptionContainer">
+              <input type="checkbox" id="labelToggle_speed" onchange="updateLabelConfig();" class="labelConfigInput">
+              <div class="settingsCheckbox labelConfigCheckbox" data-for="labelToggle_speed" aria-hidden="true"></div>
+              <span class="settingsText">Speed</span>
             </label>
-            <label class="labelMenuItem">
-              <input type="checkbox" id="labelToggle_registration" onchange="updateLabelConfig();">
-              <span>Registration</span>
+            <label class="settingsOptionContainer">
+              <input type="checkbox" id="labelToggle_registration" onchange="updateLabelConfig();" class="labelConfigInput">
+              <div class="settingsCheckbox labelConfigCheckbox" data-for="labelToggle_registration" aria-hidden="true"></div>
+              <span class="settingsText">Registration</span>
             </label>
-            <label class="labelMenuItem">
-              <input type="checkbox" id="labelToggle_type" onchange="updateLabelConfig();">
-              <span>Aircraft Type</span>
+            <label class="settingsOptionContainer">
+              <input type="checkbox" id="labelToggle_type" onchange="updateLabelConfig();" class="labelConfigInput">
+              <div class="settingsCheckbox labelConfigCheckbox" data-for="labelToggle_type" aria-hidden="true"></div>
+              <span class="settingsText">Aircraft Type</span>
             </label>
-            <label class="labelMenuItem">
-              <input type="checkbox" id="labelToggle_category" onchange="updateLabelConfig();">
-              <span>Emitter Category</span>
+            <label class="settingsOptionContainer">
+              <input type="checkbox" id="labelToggle_category" onchange="updateLabelConfig();" class="labelConfigInput">
+              <div class="settingsCheckbox labelConfigCheckbox" data-for="labelToggle_category" aria-hidden="true"></div>
+              <span class="settingsText">Emitter Category</span>
             </label>
-            <label class="labelMenuItem">
-              <input type="checkbox" id="labelToggle_icao_operator" onchange="updateLabelConfig();">
-              <span>ICAO Operator</span>
+            <label class="settingsOptionContainer">
+              <input type="checkbox" id="labelToggle_icao_operator" onchange="updateLabelConfig();" class="labelConfigInput">
+              <div class="settingsCheckbox labelConfigCheckbox" data-for="labelToggle_icao_operator" aria-hidden="true"></div>
+              <span class="settingsText">ICAO Operator</span>
             </label>
-            <label class="labelMenuItem">
-              <input type="checkbox" id="labelToggle_operator_icon" onchange="updateLabelConfig();">
-              <span>Operator Icon</span>
+            <label class="settingsOptionContainer">
+              <input type="checkbox" id="labelToggle_operator_icon" onchange="updateLabelConfig();" class="labelConfigInput">
+              <div class="settingsCheckbox labelConfigCheckbox" data-for="labelToggle_operator_icon" aria-hidden="true"></div>
+              <span class="settingsText">Operator Icon</span>
             </label>
           </div>
         </div>
         <div id="altitude_chart" class="ol-unselectable ol-control altitudeFeet">
-          <button id="altitude_chart_button"></button>
+          <button id="altitude_chart_button" title="Altitude Legend"></button>
         </div>
         <div id="replayBar">
           <button id="replayPlay" >Play</button>
@@ -910,7 +963,10 @@
       </div> <!-- map_container-->
 
       <div id="sidebar_container" style="display: none; height: 100%;">
-        <div id="sidebar_close_mobile" class="sidebar_close_mobile" title="Close Sidebar">×</div>
+        <header class="sidebar_mobile_header" aria-hidden="true">
+          <span class="settingsPanelHeaderTitle"></span>
+          <button type="button" id="sidebar_close_mobile" class="sidebar_close_mobile" title="Close Sidebar" aria-label="Close sidebar"></button>
+        </header>
         <div id="splitter" class="ui-resizable-handle ui-resizable-w" style="display: none;"></div>
         <div id="sidebar_canvas">
 
@@ -924,23 +980,10 @@
                 </td>
               </tr>
 
-              <tr id='aggregator_header' class="infoblock_row">
+              <tr id='aggregator_header' class="infoblock_row" style="display: none;">
               <td style="padding: 0;">
-                <div class="tat-promo-container">
-                  <div class="tat-promo-header">
-                    <span class="tat-promo-subtitle">Help us Grow</span>
-                    <a href="https://theairtraffic.com/" target="_blank" class="tat-promo-title-link">
-                      TheAirTraffic.com
-                    </a>
-                  </div>
-
-                  <div class="tat-promo-actions">
-                    <a class="tat-promo-button" target="_blank" href="https://theairtraffic.com/how-to-feed">
-                      Start Feeding
-                    </a>
-                  </div>
-                  </div>
-                </td>
+                <div id="sidebar_banner_inject"></div>
+              </td>
               </tr>
               <tr id="imageConfigHeader" class="infoblock_row hidden">
                 <td style="text-align: center">
@@ -1001,34 +1044,36 @@
                 <li><a href="#tab-columns">Columns</a></li>
               </ul>
               <div id="tab-search">
-                <table id="tab-search-table" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td>
-                      <form id="search_form">
-                        <div class="infoBlockTitleText">Search:</div>
-                      <div class="search-input-wrapper">
-                        <input id="search_input" name="searchBox" type="text" class="searchInput textInputWithClear"
-                          maxlength="128" title="Searches on the hex ID, callsign, registration, and type.">
-                        <div id="search_clear_button" class="search-clear-btn" title="Clear Search">×</div>
-                      </div>
-                        <button class="formButton" type="submit">Search</button>
-                      </form>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <form id="jump_form">
-                        <div class="infoBlockTitleText">Jump to Airport or Latitude, Longitude:</div>
-                      <div class="search-input-wrapper">
-                        <input id="jump_input" name="jumpBox" type="text" class="searchInput textInputWithClear"
-                          maxlength="128" title="Search by airport code like KATL, ZBAA, or LAX">
-                        <div id="jump_clear_button" class="search-clear-btn" title="Clear">×</div>
-                      </div>
-                      </form>
-                    </td>
-                  </tr>
-                </table>
-                <div class="warning" id="search_warning" style="display:none">
+                <div class="sidebarPanelBox">
+                  <table id="tab-search-table" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td>
+                        <form id="search_form">
+                          <div class="infoBlockTitleText">Search:</div>
+                          <div class="search-input-wrapper">
+                            <input id="search_input" name="searchBox" type="text" class="searchInput textInputWithClear"
+                              maxlength="128" title="Searches on the hex ID, callsign, registration, and type.">
+                            <div id="search_clear_button" class="search-clear-btn" title="Clear Search">×</div>
+                          </div>
+                          <button class="formButton" type="submit">Search</button>
+                        </form>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form id="jump_form">
+                          <div class="infoBlockTitleText">Jump to Airport or Latitude, Longitude:</div>
+                          <div class="search-input-wrapper">
+                            <input id="jump_input" name="jumpBox" type="text" class="searchInput textInputWithClear"
+                              maxlength="128" title="Search by airport code like KATL, ZBAA, or LAX">
+                            <div id="jump_clear_button" class="search-clear-btn" title="Clear">×</div>
+                          </div>
+                        </form>
+                      </td>
+                    </tr>
+                  </table>
+                  <div class="warning" id="search_warning" style="display:none">
+                  </div>
                 </div>
               </div>
               <div id="tab-filters">
@@ -1036,17 +1081,21 @@
                   <tbody>
                     <tr>
                       <td>
-                        <div class="infoBlockSection" style="background-color: var(--BGCOLOR2); border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); margin-bottom: 8px;">
-                          <form id="altitude_filter_form">
-                            <div class="infoBlockTitleText" style="margin-bottom: 5px;">ALTITUDE:</div>
-                            <input id="altitude_filter_min" name="minAltitude" type="text" class="altitudeFilterInput" maxlength="6">
-                            <label for="altitude_filter_min" class="altitudeUnit"></label>
-                            <span> to </span>
-                            <input id="altitude_filter_max" name="maxAltitude" type="text" class="altitudeFilterInput" maxlength="6">
-                            <label for="altitude_filter_max" class="altitudeUnit"></label>
-                            <div style="margin-top: 5px;">
-                              <button class="formButton" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                              <button class="formButton" id="altitude_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                        <div class="infoBlockSection filterBlock">
+                          <form id="altitude_filter_form" class="filterForm">
+                            <div class="filterFormHeader">
+                              <span class="infoBlockTitleText">ALTITUDE:</span>
+                              <span class="filterFormActions">
+                                <button class="formButton filterFormBtn" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                                <button class="formButton filterFormBtn" id="altitude_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                              </span>
+                            </div>
+                            <div class="filterFormBody">
+                              <input id="altitude_filter_min" name="minAltitude" type="text" class="altitudeFilterInput" maxlength="6">
+                              <label for="altitude_filter_min" class="altitudeUnit"></label>
+                              <span> to </span>
+                              <input id="altitude_filter_max" name="maxAltitude" type="text" class="altitudeFilterInput" maxlength="6">
+                              <label for="altitude_filter_max" class="altitudeUnit"></label>
                             </div>
                           </form>
                         </div>
@@ -1055,45 +1104,48 @@
                   </tbody>
                 </table>
                 
-                <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 8px;">
-                  <!-- Filter by Source -->
-                  <div class="infoBlockSection" style="background-color: var(--BGCOLOR2); border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                    <form id="source_filter_form">
-                      <div class="infoBlockTitleText" style="margin-bottom: 5px;">SOURCE:</div>
-                      <div>
+                <div class="filterBlocksWrap">
+                  <div class="infoBlockSection filterBlock">
+                    <form id="source_filter_form" class="filterForm">
+                      <div class="filterFormHeader">
+                        <span class="infoBlockTitleText">SOURCE:</span>
+                        <span class="filterFormActions">
+                          <button class="formButton filterFormBtn" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                          <button class="formButton filterFormBtn" id="source_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                        </span>
+                      </div>
+                      <div class="filterFormBody">
                         <ol id="sourceFilter" class="buttonFilter"></ol>
                       </div>
-                      <div style="margin-top: 5px;">
-                        <button class="formButton" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                        <button class="formButton" id="source_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                      </div>
                     </form>
                   </div>
 
-                  <!-- Filter by DB Flags -->
-                  <div class="infoBlockSection" style="background-color: var(--BGCOLOR2); border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                    <form id="flag_filter_form">
-                      <div class="infoBlockTitleText" style="margin-bottom: 5px;">DB FLAGS:</div>
-                      <div>
+                  <div class="infoBlockSection filterBlock">
+                    <form id="flag_filter_form" class="filterForm">
+                      <div class="filterFormHeader">
+                        <span class="infoBlockTitleText">DB FLAGS:</span>
+                        <span class="filterFormActions">
+                          <button class="formButton filterFormBtn" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                          <button class="formButton filterFormBtn" id="flag_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                        </span>
+                      </div>
+                      <div class="filterFormBody">
                         <ol id="flagFilter" class="buttonFilter"></ol>
                       </div>
-                      <div style="margin-top: 5px;">
-                        <button class="formButton" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                        <button class="formButton" id="flag_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                      </div>
                     </form>
                   </div>
 
-                  <!-- Filter Missing DB Info -->
-                  <div class="infoBlockSection" style="background-color: var(--BGCOLOR2); border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.2); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                    <form id="nodb_filter_form">
-                      <div class="infoBlockTitleText" style="margin-bottom: 5px;">MISSING DB INFO:</div>
-                      <div>
-                        <ol id="nodbFilter" class="buttonFilter"></ol>
+                  <div class="infoBlockSection filterBlock">
+                    <form id="nodb_filter_form" class="filterForm">
+                      <div class="filterFormHeader">
+                        <span class="infoBlockTitleText">MISSING DB INFO:</span>
+                        <span class="filterFormActions">
+                          <button class="formButton filterFormBtn" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                          <button class="formButton filterFormBtn" id="nodb_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                        </span>
                       </div>
-                      <div style="margin-top: 5px;">
-                        <button class="formButton" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                        <button class="formButton" id="nodb_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                      <div class="filterFormBody">
+                        <ol id="nodbFilter" class="buttonFilter"></ol>
                       </div>
                     </form>
                   </div>
@@ -1157,8 +1209,6 @@
     <script src="early.js"></script>
 
   <script src="pia_info.js"></script>
-    <script src="defaults.js"></script>
-    <script src="config.js"></script>
     <script src="dbloader.js"></script>
     <script src="registrations.js"></script>
     <script src="formatter.js"></script>

@@ -11,6 +11,46 @@ let no = false;
 let enabled = true;
 let disabled = false;
 
+// Canonical default theme palette (single source of truth). style.css fallbacks should match.
+// config.js may override ThemeColors for per-install customization; script.js merges with this and applies.
+const ThemeColorsDefault = {
+    light: {
+        BGCOLOR1: '#F8F8F8',
+        BGCOLOR2: '#E3EFF9',
+        ACCENT: '#1565c0',
+        ACCENT_LIGHT: '#42a5f5',
+        TXTCOLOR1: '#0b1020',
+        TXTCOLOR2: '#0d1b2a',
+        TXTCOLOR3: '#1e3a5f',
+    },
+    dark: {
+        BGCOLOR1: '#0b1020',
+        BGCOLOR2: '#151d30',
+        ACCENT: '#42a5f5',
+        ACCENT_LIGHT: '#64b5f6',
+        TXTCOLOR1: '#e3f2fd',
+        TXTCOLOR2: '#bbdefb',
+        TXTCOLOR3: '#90a4ae',
+    },
+};
+let ThemeColors = JSON.parse(JSON.stringify(ThemeColorsDefault));
+
+function applyThemeColors() {
+    const defaultTheme = typeof ThemeColorsDefault !== 'undefined' ? ThemeColorsDefault : {};
+    const src = typeof ThemeColors !== 'undefined' && ThemeColors ? ThemeColors : {};
+    const light = Object.assign({}, defaultTheme.light || {}, src.light);
+    const dark = Object.assign({}, defaultTheme.dark || {}, src.dark);
+    const cssVar = (key) => key === 'ACCENT_LIGHT' ? '--ACCENT-LIGHT' : '--' + key;
+    const toDecls = (obj) => Object.keys(obj).map((key) => cssVar(key) + ':' + obj[key]).join(';');
+    let el = document.getElementById('theme-colors-override');
+    if (!el) {
+        el = document.createElement('style');
+        el.id = 'theme-colors-override';
+        (document.head || document.documentElement).appendChild(el);
+    }
+    el.textContent = ':root{' + toDecls(light) + '}html.dark{' + toDecls(dark) + '}';
+}
+
 // -- Title Settings --------------------------------------
 // Show number of aircraft and/or messages per second in the page title
 let PlaneCountInTitle = false;
@@ -38,6 +78,20 @@ let showGrid = false;
 
 let SiteShow    = true;           // true to show a center marker
 let SiteName    = "My Radar Site"; // tooltip of the marker
+
+// Sidebar banner: inject HTML from a URL (e.g. banner.html). Empty = no banner. config.js can override.
+let SidebarBannerUrl = '';
+// Stylesheet to load when banner is shown (e.g. banner.css). Deployers can override to use their own CSS.
+let SidebarBannerCss = 'banner.css';
+
+// Aggregator mode: when true, shows credits, default banner, aggregator-selected-bg, and uses aggregator fast-path for backend config. Set true in config.js for aggregator installs.
+let aggregator = false;
+
+// Credits text shown in sidebar (#credits, #creditsSelected). Override in config.js for your install.
+let CreditsText = "retar";
+
+// Controls whether the large aggregator background image (:before on .aggregator-selected-bg) is shown behind the selected infoblock. Override in config.js.
+let AggregatorBgEnabled = true;
 
 // Update GPS location (keep map centered on GPS location)
 let updateLocation = false;
@@ -322,6 +376,7 @@ let HideCols = [
 //	"#route",
 	"#registration",
 //	"#type",
+	"#operator",
 //	"#squawk",
 //	"#altitude",
 //	"#speed",
@@ -361,10 +416,8 @@ let useRouteAPI = false;
 let useIataAirportCodes = true; // DEPRECATED, forces routeDisplay to icao when set to false
 // configure route display, possible values: iata, icao, city (can use multiple like this: 'iata,city')
 let routeDisplay = 'iata';
-// which routeApi service to use
-let routeApiUrl = "https://adsb.im/api/0/routeset";
-// alternative: "https://api.adsb.lol/api/0/routeset";
-// routeApiUrl = ""; // to disable route API so it can't be enabled by a website visitor
+// which routeApi service to use. Empty = route lookup disabled and "Lookup route" hidden in settings. Set in config.js to enable (e.g. "https://adsb.im/api/0/routeset").
+let routeApiUrl = "";
 let debugRoute = false; // bunch of debugging console output for route api
 
 // show a link to jetphotos, only works if planespottersAPI is disabled
