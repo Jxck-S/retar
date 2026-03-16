@@ -3565,7 +3565,7 @@ function displaySil() {
     let new_html="";
     let type = selected.icaoType ? selected.icaoType : 'ZZZZ';
     let hex = selected.icao.toUpperCase();
-    new_html = "<img id='silhouette' width='"+ 151 * globalScale + "' src='aircraft_sil/" + type + ".png' />";
+    new_html = "<img id='silhouette' width='"+ 151 * globalScale + "' src='aircraft_sil/" + type + ".png' onerror=\"this.style.display='none';if(window.adjustInfoBlock){adjustInfoBlock();}\" />";
     setPhotoHtml(new_html);
     selected.icao.toUpperCase();
 }
@@ -3593,10 +3593,10 @@ function displayPhoto() {
     let linkToPicture = photos[0]["link"];
     //console.log(linkToPicture);
     if (typeof customPhotosApi !== 'undefined' && customPhotosApi && typeof customPhotosClickable !== 'undefined' && !customPhotosClickable) {
-        new_html = '<img id="airplanePhoto" src=' + photoToPull + '>';
-   } else {
-        new_html = '<a class=\"link\" href="'+linkToPicture+'" target="_blank" rel="noopener noreferrer"><img id="airplanePhoto" src=' +photoToPull+'></a>';
-   }
+        new_html = '<img id="airplanePhoto" src="' + photoToPull + '" onerror="this.style.display=\'none\';if(window.adjustInfoBlock){adjustInfoBlock();}">';
+    } else {
+        new_html = '<a class="link" href="'+ linkToPicture +'" target="_blank" rel="noopener noreferrer"><img id="airplanePhoto" src="' + photoToPull + '" onerror="this.style.display=\'none\';if(window.adjustInfoBlock){adjustInfoBlock();}"></a>';
+    }
     let copyright = photos[0]["photographer"] || photos[0]["user"];
     jQuery('#copyrightInfo').html("<span>Image © " + copyright +"</span>");
     setPhotoHtml(new_html);
