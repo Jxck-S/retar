@@ -1766,38 +1766,30 @@ jQuery('#selected_altitude_geom1')
         }
     });
 
-    if (!showPictures) {
-        planespottingAPI = false;
-        planespottersAPI = false;
-    }
     new Toggle({
-        key: "planespottingAPI",
-        display: "Pictures planespotting.be",
+        key: "enableAircraftPhotos",
+        display: "Photos",
         container: "#settings_section_data",
-        init: planespottingAPI,
+        init: enableAircraftPhotos,
         setState: function(state) {
-            planespottingAPI = state;
-            if (state) {
-                toggles['planespottersAPI'] && toggles['planespottersAPI'].toggle(false);
-            }
+            enableAircraftPhotos = state;
             setPictureVisibility();
             refreshSelected();
-        }
+        },
     });
     new Toggle({
-        key: "planespottersAPI",
-        display: "Pictures planespotters.net",
+        key: "showSil",
+        display: "Sils",
         container: "#settings_section_data",
-        init: planespottersAPI,
+        init: showSil,
         setState: function(state) {
-            planespottersAPI = state;
-            if (state) {
-                toggles['planespottingAPI'] && toggles['planespottingAPI'].toggle(false);
-            }
+            showSil = state;
             setPictureVisibility();
             refreshSelected();
-        }
+        },
     });
+
+    setPictureVisibility();
 
     if (routeApiUrl) {
         if (location.protocol == 'http:' && routeApiUrl == "https://adsb.im/api/0/routeset") {
@@ -3555,26 +3547,65 @@ function refreshPageTitle() {
     }
 }
 
+/** True while a photo API request is in flight (response not yet applied). */
+function planePhotoFetchPending(plane) {
+    if (!plane || !enableAircraftPhotos) return false;
+    if (!planespottersAPI && !planespottingAPI && !customPhotosApi) return false;
+    return plane.psAPIresponse == null && plane.psAPIresponseTS != null &&
+        (Date.now() - plane.psAPIresponseTS < 120000);
+}
+
 function displaySil() {
     jQuery('#copyrightInfo').html("");
     if (!showSil) {
         setPhotoHtml("");
         return;
     }
+    // Don't show a silhouette while we're still waiting on a photo API response.
+    if (planePhotoFetchPending(SelectedPlane)) {
+        setPhotoHtml("<p>Loading image...</p>");
+        return;
+    }
+    // Don't replace a loaded aircraft photo with a silhouette (displaySil is called from many paths).
+    if (enableAircraftPhotos && SelectedPlane && SelectedPlane.psAPIresponse) {
+        const ph = SelectedPlane.psAPIresponse["photos"] || SelectedPlane.psAPIresponse["images"];
+        if (ph && ph.length > 0) {
+            displayPhoto();
+            return;
+        }
+    }
     let selected = SelectedPlane;
     let new_html="";
-    let type = selected.icaoType ? selected.icaoType : 'ZZZZ';
-    let hex = selected.icao.toUpperCase();
-    new_html = "<img id='silhouette' width='"+ 151 * globalScale + "' src='aircraft_sil/" + type + ".png' onerror=\"this.style.display='none';if(window.adjustInfoBlock){adjustInfoBlock();}\" />";
+    let typeRaw = selected.icaoType;
+    let type = (typeRaw && String(typeRaw).trim()) ? String(typeRaw).trim() : 'ZZZZ';
+    // Do not show the generic placeholder sil (ZZZZ.png); hide entirely when type is unknown or ZZZZ.
+    if (type.toUpperCase() === 'ZZZZ') {
+        setPhotoHtml("");
+        if (window.adjustInfoBlock) {
+            adjustInfoBlock();
+        }
+        return;
+    }
+    // If the loaded URL ends up as ZZZZ.png (e.g. redirect / try_files), hide after load.
+    const silOnLoad = "if((this.src&&this.src.indexOf('ZZZZ.png')!==-1)||(this.currentSrc&&this.currentSrc.indexOf('ZZZZ.png')!==-1)){if(typeof setPhotoHtml==='function'){setPhotoHtml('');}else{var w=this.closest('.silhouette_wrap');if(w){w.style.display='none';}}if(window.adjustInfoBlock){adjustInfoBlock();}}";
+    // Wrapped for banner-like styling; size controlled in CSS (smaller than full aircraft photos).
+    new_html = "<div class=\"silhouette_wrap\" title=\"Aircraft type silhouette\"><img id=\"silhouette\" class=\"silhouette_img\" src=\"aircraft_sil/" + type + ".png\" alt=\"\" onload=\"" + silOnLoad + "\" onerror=\"this.style.display='none';if(window.adjustInfoBlock){adjustInfoBlock();}\" /></div>";
     setPhotoHtml(new_html);
-    selected.icao.toUpperCase();
 }
 
 function displayPhoto() {
     if (!SelectedPlane)
         return;
-    if (!SelectedPlane.psAPIresponse) {
+    if (!enableAircraftPhotos) {
         displaySil();
+        return;
+    }
+    if (!SelectedPlane.psAPIresponse) {
+        if (planespottersAPI || planespottingAPI || customPhotosApi) {
+            setPhotoHtml("<p>Loading image...</p>");
+        } else {
+            displaySil();
+        }
         return;
     }
     let photos = SelectedPlane.psAPIresponse["photos"] || SelectedPlane.psAPIresponse["images"];
@@ -3589,8 +3620,14 @@ function displayPhoto() {
         return;
     }
     let new_html="";
-    let photoToPull = photos[0]["thumbnail"]["src"] || photos[0]["thumbnail"];
-    let linkToPicture = photos[0]["link"];
+    let thumb = photos[0]["thumbnail"];
+    let photoToPull = (thumb && typeof thumb === 'object' && thumb.src) ? thumb.src : thumb;
+    if (typeof photoToPull !== 'string' || !photoToPull.length) {
+        displaySil();
+        adjustInfoBlock();
+        return;
+    }
+    let linkToPicture = photos[0]["link"] || photoToPull;
     //console.log(linkToPicture);
     if (typeof customPhotosApi !== 'undefined' && customPhotosApi && typeof customPhotosClickable !== 'undefined' && !customPhotosClickable) {
         new_html = '<img id="airplanePhoto" src="' + photoToPull + '" onerror="this.style.display=\'none\';if(window.adjustInfoBlock){adjustInfoBlock();}">';
@@ -3603,15 +3640,27 @@ function displayPhoto() {
     adjustInfoBlock();
 }
 
+/** True if API JSON has at least one photo (planespotters / planespotting.be shape). */
+function responseHasPhotos(data) {
+    if (!data) return false;
+    const p = data.photos || data.images;
+    return p && p.length > 0;
+}
+
 function refreshPhoto(selected) {
-    if (!showPictures || selected.icao[0] == '~' || (!planespottingAPI && !planespottersAPI && !customPhotosApi)) {
+    if (!enableAircraftPhotos || selected.icao[0] == '~' || (!planespottingAPI && !planespottersAPI && !customPhotosApi)) {
         displaySil();
         return;
     }
     let urlTail;
     let param;
     if (!selected.dbinfoLoaded) {
-        displaySil();
+        // Don't paint a silhouette while DB is loading — it can stick until the next refresh and look like sil "wins" over photos.
+        if (planespottersAPI || planespottingAPI || customPhotosApi) {
+            setPhotoHtml("<p>Loading image...</p>");
+        } else {
+            displaySil();
+        }
         return;
     } else if (false && selected.registration != null && selected.registration.match(/^[0-9]{0,2}\+?[0-9]{0,2}$/)) {
         urlTail = '/hex/' + selected.icao.toUpperCase();
@@ -3635,94 +3684,122 @@ function refreshPhoto(selected) {
             displayPhoto();
             return;
         }
-        if (selected.psAPIresponseTS && selected.psAPIresponseTS - ts < 10000) {
+        // Throttle duplicate requests: time since last request start (was inverted and always true before).
+        if (selected.psAPIresponseTS && ts - selected.psAPIresponseTS < 10000) {
             return;
         }
     }
     selected.psAPIparam = param;
+    selected.psAPIresponse = null;
 
     setPhotoHtml("<p>Loading image...</p>");
     jQuery('#copyrightInfo').html("<span></span>");
     //console.log(ts/1000 + 'sending psAPI request');
     selected.psAPIresponseTS = ts;
 
-    if (customPhotosApi && customPhotosApiUrl && selected.registration) {
-        let req = jQuery.ajax({
-            url: customPhotosApiUrl + selected.registration,
+    const plane = selected;
+
+    function finishEmpty() {
+        plane.psAPIresponse = { photos: [] };
+        if (SelectedPlane === plane) {
+            displayPhoto();
+        }
+    }
+
+    function tryPlanespotting() {
+        if (!planespottingAPI || !plane.registration) {
+            finishEmpty();
+            return;
+        }
+        jQuery.ajax({
+            url: 'https://www.planespotting.be/api/objects/imagesRegistration.php?registration=' + encodeURIComponent(plane.registration),
             dataType: 'json',
-            plane: selected,
-        });
-
-        req.done(function(data) {
-            // Adapt the response to match what displayPhoto expects
-            let baseUrl = "";
-            if (customPhotosApiUrl.startsWith("http")) {
-                try {
-                    const urlObj = new URL(customPhotosApiUrl);
-                    baseUrl = urlObj.origin;
-                } catch (e) {
-                    // ignore
-                }
-            }
-
-            let fullUrl = data.retrieve_url;
-            if (baseUrl && fullUrl && fullUrl.startsWith("/")) {
-                fullUrl = baseUrl + fullUrl;
-            }
-
-            let adaptedData = {
-                "photos": [
-                    {
-                        "thumbnail": fullUrl,
-                        "link": fullUrl,
-                        "photographer": data.credit
-                    }
-                ]
-            };
-            this.plane.psAPIresponse = adaptedData;
-            if (SelectedPlane == this.plane) {
+        }).done(function(data) {
+            plane.psAPIresponse = data;
+            if (SelectedPlane === plane) {
                 displayPhoto();
             }
-        });
-        req.fail(function() {
-            this.plane.psAPIresponse = {'photos': []};
-            if (SelectedPlane == this.plane) {
-                displayPhoto();
-            }
-        });
-    } else if (planespottersAPI) {
-        let req = jQuery.ajax({
-            url: planespottersAPIurl + urlTail,
-            dataType: 'json',
-            plane: selected,
-        });
-
-        req.done(function(data) {
-            this.plane.psAPIresponse = data;
-            if (SelectedPlane == this.plane) {
-                displayPhoto();
-            }
-        });
-    } else if (planespottingAPI) {
-        let req = jQuery.ajax({
-            url: 'https://www.planespotting.be/api/objects/imagesRegistration.php?registration=' + selected.registration,
-            dataType: 'json',
-            plane: selected,
-        });
-
-        req.done(function(data) {
-            this.plane.psAPIresponse = data;
-            if (SelectedPlane == this.plane) {
-                displayPhoto();
-            }
-        });
-        req.fail(function() {
-            this.plane.psAPIresponse = {'photos': []};
-            if (SelectedPlane == this.plane) {
-                displayPhoto();
-            }
+        }).fail(function() {
+            finishEmpty();
         });
     }
+
+    function tryPlanespotters() {
+        if (!planespottersAPI) {
+            tryPlanespotting();
+            return;
+        }
+        jQuery.ajax({
+            url: planespottersAPIurl + urlTail,
+            dataType: 'json',
+        }).done(function(data) {
+            if (SelectedPlane !== plane) {
+                return;
+            }
+            if (responseHasPhotos(data)) {
+                plane.psAPIresponse = data;
+                displayPhoto();
+            } else {
+                tryPlanespotting();
+            }
+        }).fail(function() {
+            tryPlanespotting();
+        });
+    }
+
+    function tryCustom() {
+        if (typeof customPhotosApi !== 'undefined' && customPhotosApi && customPhotosApiUrl && plane.registration) {
+            jQuery.ajax({
+                url: customPhotosApiUrl + plane.registration,
+                dataType: 'json',
+            }).done(function(data) {
+                if (SelectedPlane !== plane) {
+                    return;
+                }
+                let baseUrl = "";
+                if (customPhotosApiUrl.startsWith("http")) {
+                    try {
+                        const urlObj = new URL(customPhotosApiUrl);
+                        baseUrl = urlObj.origin;
+                    } catch (e) {
+                        // ignore
+                    }
+                }
+
+                let fullUrl = data && data.retrieve_url;
+                if (!fullUrl) {
+                    tryPlanespotters();
+                    return;
+                }
+                if (baseUrl && fullUrl.startsWith("/")) {
+                    fullUrl = baseUrl + fullUrl;
+                }
+
+                let adaptedData = {
+                    photos: [
+                        {
+                            thumbnail: fullUrl,
+                            link: fullUrl,
+                            photographer: data.credit,
+                        },
+                    ],
+                };
+                if (responseHasPhotos(adaptedData)) {
+                    plane.psAPIresponse = adaptedData;
+                    displayPhoto();
+                } else {
+                    tryPlanespotters();
+                }
+            }).fail(function() {
+                tryPlanespotters();
+            });
+        } else {
+            tryPlanespotters();
+        }
+    }
+
+    // Order: custom → planespotters.net → planespotting.be (each source must be enabled in config)
+    tryCustom();
 }
 
 let selCall = null;
@@ -5352,12 +5429,27 @@ function adjustInfoBlock() {
     jQuery('#airplanePhoto').css("width", photoWidth + 'px');
     jQuery('#selected_photo').css("width", photoWidth + 'px');
 
-    if (showPictures) {
-        if (planespottersAPI || planespottingAPI) {
-            jQuery('#photo_container').css('height', photoWidth * 0.883 + 'px');
-        } else {
-            jQuery('#photo_container').css('height', '40px');
-        }
+    const hasAirplanePhoto = jQuery('#airplanePhoto').length > 0;
+    const hasSilhouette = jQuery('#silhouette').length > 0;
+    const loadingPhoto = !hasAirplanePhoto && !hasSilhouette && jQuery('#selected_photo').find('p').length > 0;
+
+    if (hasAirplanePhoto) {
+        jQuery('#photo_container').removeClass('photo_row_sil').addClass('photo_row_photo');
+        jQuery('#photo_container').css('height', photoWidth * 0.883 + 'px');
+    } else if (hasSilhouette) {
+        jQuery('#photo_container').removeClass('photo_row_photo').addClass('photo_row_sil');
+        // Silhouettes use less vertical space than full aspect aircraft photos
+        const silH = Math.max(84, Math.min(photoWidth * 0.5, 176));
+        jQuery('#photo_container').css('height', silH + 'px');
+    } else if (loadingPhoto) {
+        jQuery('#photo_container').removeClass('photo_row_sil photo_row_photo');
+        jQuery('#photo_container').css('height', '44px');
+    } else if (showPictures) {
+        jQuery('#photo_container').removeClass('photo_row_sil photo_row_photo');
+        jQuery('#photo_container').css('height', photoWidth * 0.883 + 'px');
+    } else {
+        jQuery('#photo_container').removeClass('photo_row_sil photo_row_photo');
+        jQuery('#photo_container').css('height', '');
     }
 }
 
@@ -9571,8 +9663,10 @@ function deleteTraces() {
 }
 
 function setPictureVisibility() {
-    showPictures = planespottersAPI || planespottingAPI;
-    if (showPictures) {
+    // Photo sources (config): custom → planespotters.net → planespotting.be — see refreshPhoto() / responseHasPhotos().
+    const hasPhotoSource = planespottersAPI || planespottingAPI || (typeof customPhotosApi !== 'undefined' && customPhotosApi && customPhotosApiUrl);
+    showPictures = enableAircraftPhotos && hasPhotoSource;
+    if (showPictures || showSil) {
         jQuery('#photo_container').removeClass('hidden');
     } else {
         jQuery('#photo_container').addClass('hidden');

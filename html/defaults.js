@@ -395,17 +395,16 @@ let HideCols = [
 ]
 
 
-// show aircraft pictures
+// show aircraft pictures (derived; Settings has only "Photos" + "Sils")
 let showPictures = true;
-// get pictures from planespotters.net
+// master switch for photo API fetches (Settings: "Photos")
+let enableAircraftPhotos = true;
+// Enable each source in config as needed. Fetch order when "Photos" is on: custom → planespotters.net → planespotting.be
 let planespottersAPI = true;
 let planespottersAPIurl = "https://api.planespotters.net/pub/photos/";
-// get pictures from planespotting.be
 let planespottingAPI = false;
 
-// Custom Photos API (e.g. for private collections or alternative providers)
-// Requires a URL that returns { "credit": "...", "retrieve_url": "..." }
-// The retrieve_url can be relative or absolute.
+// Custom Photos API — tried first if enabled (returns { "credit": "...", "retrieve_url": "..." })
 let customPhotosApi = false;
 let customPhotosApiUrl = "";
 let customPhotosClickable = false;
@@ -423,8 +422,8 @@ let debugRoute = false; // bunch of debugging console output for route api
 // show a link to jetphotos, only works if planespottersAPI is disabled
 let jetphotoLinks = false;
 
-// this feature is provided as is please don't expect tar1090's support for getting the pictures right.
-let showSil = false;
+// Aircraft type silhouettes (Settings: "Sils"); requires aircraft_sil/*.png or proxy
+let showSil = true;
 
 // Airline logos and banners from airline-logos-api
 let airlineLogos = false;

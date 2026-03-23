@@ -2438,10 +2438,16 @@ PlaneObject.prototype.getAircraftData = function() {
             delete this.dbLoad;
             if (data == null) {
                 //console.log(this.icao + ': Not found in database!');
+                if (typeof refreshSelected === 'function' && SelectedPlane === this) {
+                    refreshSelected();
+                }
                 return;
             }
             if (data == "strange") {
                 //console.log(this.icao + ': Database malfunction!');
+                if (typeof refreshSelected === 'function' && SelectedPlane === this) {
+                    refreshSelected();
+                }
                 return;
             }
 
@@ -2473,6 +2479,10 @@ PlaneObject.prototype.getAircraftData = function() {
 
             this.dataChanged();
 
+            if (typeof refreshSelected === 'function' && SelectedPlane === this) {
+                refreshSelected();
+            }
+
             data = null;
         },
         e => {
@@ -2481,9 +2491,15 @@ PlaneObject.prototype.getAircraftData = function() {
                 this.getAircraftData();
             } else if (e.http_status == 'other') {
                 this.dbinfoLoaded = true;
+                if (typeof refreshSelected === 'function' && SelectedPlane === this) {
+                    refreshSelected();
+                }
             } else {
                 console.log(this.icao + ': Unrecognized Database load error: ' + e);
                 this.dbinfoLoaded = true;
+                if (typeof refreshSelected === 'function' && SelectedPlane === this) {
+                    refreshSelected();
+                }
             }
         });
 };

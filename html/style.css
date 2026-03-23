@@ -1667,6 +1667,31 @@ table.infoSectionTable tr td {
     max-width: 100%;
     height: auto;
 }
+
+/* Aircraft type silhouette: smaller footprint + same white “card” treatment as airline banners */
+#photo_container.photo_row_sil #selected_photo {
+    text-align: center;
+}
+.silhouette_wrap {
+    display: inline-block;
+    max-width: 72%;
+    margin: 2px auto 0 auto;
+    background: #fff;
+    border-radius: 4px;
+    padding: 6px 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+.silhouette_wrap img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    max-height: 132px;
+}
 .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
     background: var(--BGCOLOR1);
     border: none;

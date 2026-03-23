@@ -364,16 +364,12 @@ HideCols = [
 ]
 */ // remove this line to modify columns (and the one at the start)
 
-// show aircraft pictures
-// showPictures = true;
-// get pictures from planespotters.net
+// Settings: only "Photos" and "Sils". Enable sources here; order is custom → planespotters.net → planespotting.be
+// enableAircraftPhotos = true;
 // planespottersAPI = true;
-// get pictures from planespotting.be
-// planespottingAPI = true;
-
-// Custom Photos API
-//customPhotosApi = true;
-//customPhotosApiUrl = "https://example.com/iapi/photos/details/";
+// planespottingAPI = false;
+// customPhotosApi = true;
+// customPhotosApiUrl = "https://example.com/iapi/photos/details/";
 
 // get flight route from routeApi service default setting (toggle via settings checkbox)
 // useRouteAPI = false;
@@ -387,12 +383,8 @@ HideCols = [
 // jetphotoLinks = false;
 
 showSil = true;
-// this shows small pictures in the details but they need to be provided by the user in the folder /usr/local/share/tar1090/aircraft_sil
-// showPictures needs to be enabled as well
-// to only get these pictures disable the planespottersAPI
-// pictures need to be named A330.png and so forth with the type code in the form TYPE.png
-// provide ZZZZ.png to be shown when the type is not known.
-// this feature is provided as is please don't expect tar1090's support for getting the pictures right.
+// Silhouettes use aircraft_sil/TYPE.png (local folder or dev proxy). Toggle in Settings: "Aircraft silhouettes".
+// Pictures need to be named A330.png etc.; provide ZZZZ.png when type unknown.
 
 // labelsGeom = false; // labels: uses geometric altitude (WGS84 ellipsoid unless geomUseEGM is enabled
 // geomUseEGM = false; // use EGM96 for displaying geometric altitudes (extra load time!)
