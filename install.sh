@@ -401,7 +401,7 @@
             fi
         fi
 
-        # Optional: put customIcon.svg in $ipath to override bundled html/images/favicon.svg
+        # Optional: put customIcon.svg in $ipath to override bundled html/images/icon.svg
         bash "$gpath/git/generate_web_icons.sh" "$TMP" "$ipath" || true
 
         # bust cache for all css and js files

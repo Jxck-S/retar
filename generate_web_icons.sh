@@ -2,12 +2,12 @@
 # Generate favicon / PWA icons from one SVG for tar1090 HTML staging.
 # Usage: generate_web_icons.sh <html_staging_dir> <install_path>
 #
-# Source: <install_path>/customIcon.svg if present, else <staging>/images/favicon.svg
-# Writes: images/icon.svg, images/favicon.png (32×32),
-#         images/apple-touch-icon.png (180×180 on white), images/icon-192.png,
-#         images/icon-512.png
+# Source: <install_path>/customIcon.svg overwrites <staging>/images/icon.svg; else bundled icon.svg
+# Overwrites images/icon.svg when customIcon.svg is present; always (re)writes:
+#   images/favicon.png (32×32), images/apple-touch-icon.png (180×180 on white),
+#   images/icon-192.png, images/icon-512.png
 #
-# Requires rsvg-convert (librsvg2-bin) and/or ImageMagick for rasterization.
+# Deps: rsvg-convert (package librsvg2-bin on Debian/Ubuntu) and/or ImageMagick — see docs/icons.md
 
 set -euo pipefail
 
@@ -29,17 +29,14 @@ elif command -v convert &>/dev/null; then
     MAGICK=convert
 fi
 
+mkdir -p "$IMG"
 if [[ -f "$IPATH/customIcon.svg" ]]; then
-    SRC_SVG="$IPATH/customIcon.svg"
-elif [[ -f "$IMG/favicon.svg" ]]; then
-    SRC_SVG="$IMG/favicon.svg"
-else
-    echo "generate_web_icons.sh: no SVG source (expected $IPATH/customIcon.svg or $IMG/favicon.svg)" >&2
+    cp -f "$IPATH/customIcon.svg" "$IMG/icon.svg"
+elif [[ ! -f "$IMG/icon.svg" ]]; then
+    echo "generate_web_icons.sh: no images/icon.svg in tree and no $IPATH/customIcon.svg" >&2
     exit 0
 fi
-
-mkdir -p "$IMG"
-cp -f "$SRC_SVG" "$IMG/icon.svg"
+SRC_SVG="$IMG/icon.svg"
 
 png_from_svg() {
     # args: width height out_png [background]
@@ -60,8 +57,8 @@ png_from_svg() {
         if [[ -n "$bg" ]]; then
             "$MAGICK" -size "${w}x${h}" "xc:${bg}" \( "$SRC_SVG" -resize "${w}x${h}" \) -gravity center -composite "$out"
         else
-            # PNG32 forces RGBA so transparency survives IM SVG rasterization quirks
-            "$MAGICK" -background none -alpha set "$SRC_SVG" -resize "${w}x${h}" "PNG32:${out}"
+            # Read SVG first, then operators (IM7 errors if -alpha runs before an image is loaded)
+            "$MAGICK" -background none "$SRC_SVG" -alpha set -resize "${w}x${h}" "PNG32:${out}"
         fi
         return 0
     fi
@@ -70,7 +67,7 @@ png_from_svg() {
 }
 
 if ! png_from_svg 32 32 "$IMG/favicon.png"; then
-    echo "generate_web_icons.sh: install librsvg2-bin or ImageMagick to build icons from SVG" >&2
+    echo "generate_web_icons.sh: install librsvg2-bin (apt) / librsvg2-tools (dnf) for rsvg-convert, or imagemagick" >&2
     exit 0
 fi
 
