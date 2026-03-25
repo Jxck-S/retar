@@ -320,6 +320,9 @@
         # keep some stuff around
         mv "$html_path/config.js" "$TMP/config.js" 2>/dev/null || true
         mv "$html_path/upintheair.json" "$TMP/upintheair.json" 2>/dev/null || true
+        # sidebar banner customizations (defaults reference banner.html / banner.css)
+        mv "$html_path/banner.html" "$TMP/banner.html" 2>/dev/null || true
+        mv "$html_path/banner.css" "$TMP/banner.css" 2>/dev/null || true
 
         # copy title / description into index.html and config.js so previews match config;
         # if PAGENAME / DESCRIPTION are unset, leave JS / HTML defaults in place
@@ -357,6 +360,21 @@
             fi
         fi
 
+        # manifest.webmanifest: match install title / meta / config (PAGENAME / DESCRIPTION)
+        if [[ -f "$TMP/manifest.webmanifest" ]] && { [[ -n "$inst_pagename" ]] || [[ -n "$inst_description" ]]; }; then
+            manifest_tmp=$(mktemp)
+            if jq --arg name "$inst_pagename" --arg desc "$inst_description" \
+                '(if ($name | length) > 0 then .name = $name | .short_name = $name else . end)
+                 | (if ($desc | length) > 0 then .description = $desc else . end)' \
+                "$TMP/manifest.webmanifest" > "$manifest_tmp" && mv "$manifest_tmp" "$TMP/manifest.webmanifest"
+            then
+                :
+            else
+                rm -f "$manifest_tmp"
+                echo "Warning: could not update manifest.webmanifest (jq failed?)" >&2
+            fi
+        fi
+
         # in case we have offlinemaps installed, modify config.js
         MAX_OFFLINE=""
         MAX_OFFLINE_OFM=""
@@ -383,7 +401,8 @@
             fi
         fi
 
-        cp "$ipath/customIcon.png" "$TMP/images/favicon.png" &>/dev/null || true
+        # Optional: put customIcon.svg in $ipath to override bundled html/images/favicon.svg
+        bash "$gpath/git/generate_web_icons.sh" "$TMP" "$ipath" || true
 
         # bust cache for all css and js files
 
