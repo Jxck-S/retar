@@ -50,7 +50,8 @@ png_from_svg() {
         if [[ -n "$bg" ]]; then
             "$RSVG" -b "$bg" -w "$w" -h "$h" "$SRC_SVG" -o "$out"
         else
-            "$RSVG" -w "$w" -h "$h" "$SRC_SVG" -o "$out"
+            # Explicit transparent page (some older rsvg defaulted PNG to white without -b)
+            "$RSVG" -b none -w "$w" -h "$h" "$SRC_SVG" -o "$out"
         fi
         return 0
     fi
@@ -59,7 +60,8 @@ png_from_svg() {
         if [[ -n "$bg" ]]; then
             "$MAGICK" -size "${w}x${h}" "xc:${bg}" \( "$SRC_SVG" -resize "${w}x${h}" \) -gravity center -composite "$out"
         else
-            "$MAGICK" -background none "$SRC_SVG" -resize "${w}x${h}" "$out"
+            # PNG32 forces RGBA so transparency survives IM SVG rasterization quirks
+            "$MAGICK" -background none -alpha set "$SRC_SVG" -resize "${w}x${h}" "PNG32:${out}"
         fi
         return 0
     fi

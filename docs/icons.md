@@ -38,14 +38,24 @@ So the **label** shown when “adding to home screen” comes from service defau
 
 ## Dependencies (regenerating from SVG)
 
-To actually rasterize the SVG on the machine running install, you need **at least one** of:
+**Raster tools (pick one chain — the script tries in this order):**
 
-- **`rsvg-convert`** — package is often named **`librsvg2-bin`** (Debian/Ubuntu) or **`librsvg2-tools`** (Fedora); on macOS, **`librsvg`** via Homebrew.
-- **ImageMagick** — **`imagemagick`** (provides `magick` or `convert`) as a fallback if `rsvg-convert` is not available.
+1. **`rsvg-convert`** (preferred) — Debian/Ubuntu: **`librsvg2-bin`** · Fedora: **`librsvg2-tools`** · macOS: **`librsvg`** (Homebrew). Also accepts **`rsvg-convert-qt`** if present.
+2. **ImageMagick** — package **`imagemagick`** (`magick` or `convert`) if `rsvg-convert` is not installed.
 
-If neither is installed, the script logs a message and leaves the **prebuilt** PNG/SVG files that came from **`cp -r html`** (the committed assets in the repo).
+**Fallback when no raster tool exists**
 
-**`jq`** is required by **`install.sh`** for updating **`manifest.webmanifest`**; it is not used by **`generate_web_icons.sh`**.
+- The script prints a short message and **exits without failing install** (`install.sh` uses `|| true`).
+- The live site keeps the **prebuilt** `images/*.png` and **`icon.svg`** that were copied from git with **`cp -r html`** before the generator ran. So **no extra packages are required** for a working UI; you only need a tool above if you want **install-time** regeneration from SVG (including **`customIcon.svg`**).
+
+**Partial failure**
+
+- If **32×32** rasterization fails, nothing is overwritten for that step and the script stops early for PNG generation.
+- **192 / 512 / Apple** use best-effort (`|| true`); a rare failure there could leave an old file from a previous install.
+
+**Other**
+
+- **`jq`** is used by **`install.sh`** for **`manifest.webmanifest`** only, not by **`generate_web_icons.sh`**.
 
 ## Quick reference
 
