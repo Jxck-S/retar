@@ -79,8 +79,8 @@
 
 
       <div id="selected_infoblock" style="display: none">
-        <div id="infoblock_close" class="infoblockCloseBox"></div>
         <div id="infoblock-container">
+          <div id="infoblock_close" class="infoblockCloseBox" title="Deselect aircraft"></div>
 
           <div class="highlightedTitle infoBlockSection">
             <div class="alignCS">
@@ -966,14 +966,11 @@
       </div> <!-- map_container-->
 
       <div id="sidebar_container" style="display: none; height: 100%;">
-        <header class="sidebar_mobile_header" aria-hidden="true">
-          <span class="settingsPanelHeaderTitle"></span>
-          <button type="button" id="sidebar_close_mobile" class="sidebar_close_mobile" title="Close Sidebar" aria-label="Close sidebar"></button>
-        </header>
         <div id="splitter" class="ui-resizable-handle ui-resizable-w" style="display: none;"></div>
         <div id="sidebar_canvas">
 
           <div id="sidebar-table">
+            <button type="button" id="sidebar_close_mobile" class="sidebar_close_mobile" title="Close Sidebar" aria-label="Close sidebar"></button>
             <table style="width: 100%">
               <tr>
                 <td>
