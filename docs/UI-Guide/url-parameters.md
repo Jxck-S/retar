@@ -72,6 +72,12 @@ See the main readme for more examples on how to use the filters
 - SiteLat=45.0 SiteLon=10.0 - Override the receiver location for this visit
 - routeDisplay=icao - Comma separated list of what shall be shown, valid values: iata, icao, city
 
+## Coverage Visualization (pTracks)
+
+- **pTracks** - Enable the persistence/coverage tracks view. Shows recently seen aircraft traces.
+- **pTracks=X** - Limit the shown coverage to the last **X** hours (e.g., `?pTracks=2`).
+- **pTracksInterval=X** - Reduce the number of dots drawn (higher value = faster performance). Default is 15.
+
 ## Toggles
 
 - mil - Military/Interesting.
@@ -81,22 +87,20 @@ See the main readme for more examples on how to use the filters
 - kiosk - force kiosk mode (tempTrails=true / hideButtons=true / userScale=2).
 - allTracks - enable tracks as if pressing T
 
-## heatmap / replay (only available with readsb --heatmap parameter)
+## Heatmap & Replay (Requires readsb --heatmap)
 
-- replay - replay history of all planes
-- replaySpeed - adjust replay speed
-- replayPaused - load replay paused
-- heatmap - show a heatmap for the last 24h by default (optional: supply the maximum number of dots drawn, default 32000)
-- heatDuration - how many hours to show in the heatmap
-- heatEnd - how many hours to shift the heatmap time window into the past
-- heatAlpha - 0.1 to 1.0 - how transparent the dots will be
-- heatRadius - dot size for heatmap
-- heatManualRedraw - only redraw dots when pressing r
-- heatFilters - significant slowdown / experimental: enable filtering by type code / type description / hex / DB flags / military / registration / country of registration / data source
-
-- realHeat - real heatmap instead of dots
-- heatBlur - parameter for realHeat
-- heatWeight - parameter for realHeat
+- **heatmap=X** - Enable heatmap visualization. **X** is the maximum number of dots to draw (default: 32,000). Shows the last 24h by default.
+- **heatDuration=X** - Number of hours to show in the heatmap (e.g., `&heatDuration=48`).
+- **heatEnd=X** - Shift the time window into the past by **X** hours.
+- **heatAlpha=0.1-1.0** - Set dot transparency.
+- **heatRadius=X** - Set dot size.
+- **heatManualRedraw** - Only redraw dots when pressing `R`.
+- **realHeat** - Enable an alternative "blurry" heatmap style instead of points.
+- **heatBlur=X** - Adjust blurriness for `realHeat`.
+- **heatWeight=X** - Adjust weight of each point for `realHeat`.
+- **replay** - Replay the history of all aircraft seen over the duration.
+- **replaySpeed=X** - Adjust the playback speed.
+- **replayPaused** - Start the replay in a paused state.
 
 ## showTrace (only available with readsb globe-history)
 

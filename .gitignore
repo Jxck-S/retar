@@ -364,3 +364,9 @@ MigrationBackup/
 FodyWeavers.xsd
 
 tat/*
+
+# Demo build output
+demo-dist/
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

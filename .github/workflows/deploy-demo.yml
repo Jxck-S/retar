@@ -1,0 +1,45 @@
+name: Deploy Demo to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage site
+        run: |
+          mkdir -p _deploy/demo _deploy/documentation
+
+          # Root landing page
+          cp index.html _deploy/
+
+          # Docs: docsify app + markdown source (docsify fetches docs/ client-side via basePath: '..')
+          cp -r documentation/. _deploy/documentation/
+          cp -r docs             _deploy/
+          cp    README.md        _deploy/
+          cp    _sidebar.md      _deploy/
+
+          # Demo: html/ app with demo data overlaid
+          cp -r html/. _deploy/demo/
+          cp -r demo/data    _deploy/demo/
+          cp -r demo/chunks  _deploy/demo/
+          cp -r demo/db2     _deploy/demo/
+          cp    demo/upintheair.json _deploy/demo/
+
+          # Inject demo params into demo/index.html (noVanish + limitUpdates)
+          sed -i 's|<!-- HEAD_ANCHOR -->|<!-- HEAD_ANCHOR -->\n    <script>if(!location.search.includes("limitUpdates"))location.replace(location.pathname+"?noVanish=true\&limitUpdates=2");</script>|' _deploy/demo/index.html
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _deploy
+          publish_branch: gh-pages
