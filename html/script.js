@@ -5651,33 +5651,61 @@ function invertMap(evt){
 (function (global, jQuery, TAR) {
     let altitudeChart = TAR.altitudeChart = TAR.altitudeChart || {};
 
-    function createLegendGradientStops() {
-        const mapOffsetToAltitude = [[0.033, 500], [0.066, 1000], [0.126, 2000], [0.19, 4000], [0.253, 6000], [0.316, 8000], [0.38, 10000], [0.59, 20000], [0.79, 30000], [1, 40000]];
+    // [gradient offset, altitude in feet] — same breakpoints as before
+    const ALT_MAP = [[0.033,500],[0.066,1000],[0.126,2000],[0.19,4000],[0.253,6000],[0.316,8000],[0.38,10000],[0.59,20000],[0.79,30000],[1,40000]];
 
-        let stops = '';
-        for (let i in mapOffsetToAltitude) {
-            let map = mapOffsetToAltitude[i];
-            const color = altitudeColor(map[1]);
-            stops += '<stop offset="' + map[0] + '" stop-color="hsl(' + color[0] + ',' + color[1] + '%,' + color[2] + '%)" />';
+    function fmtLabel(altFt, isMetric, isLast) {
+        let val;
+        if (isMetric) {
+            const m = Math.round(altFt * 0.3048);
+            val = m >= 1000 ? (m / 1000).toFixed(m % 1000 === 0 ? 0 : 1) + 'k' : String(m);
+        } else {
+            val = altFt >= 1000 ? (altFt / 1000) + 'k' : String(altFt);
         }
-        return stops;
+        return isLast ? val + '+' : val;
     }
 
-    function createLegendUrl(data) {
-        jQuery(data).find('#linear-gradient').html(createLegendGradientStops());
+    function createLegendSVG() {
+        const isMetric = DisplayUnits === 'metric';
+        const W = 920, H = 34;
+        const badgeW = 46, barX = badgeW + 7, barW = W - barX - 2, barH = 14, barY = 0;
+        const rx = barH / 2;
 
-        const svg = jQuery('svg', data).prop('outerHTML');
+        let stops = '';
+        for (const [offset, altFt] of ALT_MAP) {
+            const [h, s, l] = altitudeColor(altFt);
+            stops += `<stop offset="${offset}" stop-color="hsl(${h},${s}%,${l}%)"/>`;
+        }
 
-        return 'url("data:image/svg+xml;base64,' + global.btoa(svg) + '")';
+        let ticks = '', labels = '';
+        const allPoints = [[0, 0], ...ALT_MAP];
+        for (const [offset, altFt] of allPoints) {
+            const x = (barX + offset * barW).toFixed(1);
+            const anchor = offset === 0 ? 'start' : offset === 1 ? 'end' : 'middle';
+            ticks  += `<line x1="${x}" y1="${barY + barH + 2}" x2="${x}" y2="${barY + barH + 5}" stroke="currentColor" stroke-width="1" stroke-opacity="0.45"/>`;
+            labels += `<text x="${x}" y="${H}" text-anchor="${anchor}" font-size="9" fill="currentColor" opacity="0.75">${fmtLabel(altFt, isMetric, offset === 1)}</text>`;
+        }
+
+        const unit = isMetric ? 'm' : 'ft';
+
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible">
+  <rect x="0" y="0" width="${W}" height="${H}" rx="5" fill="var(--BGCOLOR1)" opacity="0.55"/>
+  <defs>
+    <linearGradient id="alt-grad" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient>
+    <clipPath id="alt-clip"><rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="${rx}"/></clipPath>
+  </defs>
+  <rect x="0" y="${barY + 1}" width="${badgeW}" height="${barH - 2}" rx="${(barH - 2) / 2}" fill="var(--ACCENT)" opacity="0.85"/>
+  <text x="${badgeW / 2}" y="${barY + barH - 4}" text-anchor="middle" font-size="9.5" font-weight="700" fill="white" letter-spacing="0.5">ALT ${unit}</text>
+  <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="${rx}" fill="url(#alt-grad)"/>
+  <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="${rx}" fill="none" stroke="currentColor" stroke-opacity="0.15" stroke-width="1"/>
+  ${ticks}${labels}
+</svg>`;
     }
 
     function loadLegend() {
-        let baseLegend = (DisplayUnits === 'metric') ? 'images/alt_legend_m.svg' : 'images/alt_legend_ft.svg';
-
-        jQuery.get(baseLegend, function (data) {
-            jQuery('#altitude_chart_button').css("background-image", createLegendUrl(data));
-            jQuery('#altitude_chart').show();
-        });
+        const btn = document.getElementById('altitude_chart_button');
+        if (btn) btn.innerHTML = createLegendSVG();
+        jQuery('#altitude_chart').show();
     }
 
     altitudeChart.render = function () {
