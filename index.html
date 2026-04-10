@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>retar</title>
+  <meta name="description" content="retar — A high-performance ADS-B UI fork of tar1090">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0b1020;
+      color: #e3f2fd;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .logo { font-size: 3rem; font-weight: 700; color: #42a5f5; letter-spacing: -1px; margin-bottom: 0.5rem; }
+    .tagline { color: #90a4ae; font-size: 1.1rem; margin-bottom: 3rem; text-align: center; }
+    .cards {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 700px;
+      width: 100%;
+    }
+    .card {
+      background: #151d30;
+      border: 1px solid #1e3a5f;
+      border-radius: 12px;
+      padding: 2rem 2.5rem;
+      text-decoration: none;
+      color: inherit;
+      flex: 1;
+      min-width: 240px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover { border-color: #42a5f5; transform: translateY(-3px); }
+    .card-icon { font-size: 2.2rem; margin-bottom: 0.75rem; }
+    .card-title { font-size: 1.25rem; font-weight: 600; color: #e3f2fd; margin-bottom: 0.4rem; }
+    .card-desc { font-size: 0.9rem; color: #90a4ae; line-height: 1.5; }
+    .github {
+      margin-top: 2.5rem;
+      color: #546e7a;
+      font-size: 0.85rem;
+    }
+    .github a { color: #42a5f5; text-decoration: none; }
+    .github a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="logo">retar</div>
+  <p class="tagline">A high-performance ADS-B map UI — fork of tar1090</p>
+  <div class="cards">
+    <a class="card" href="demo/">
+      <div class="card-icon">Demo</div>
+      <div class="card-title">Live Demo</div>
+      <div class="card-desc">Try the retar UI with real aircraft data. No setup required.</div>
+    </a>
+    <a class="card" href="documentation/">
+      <div class="card-icon">Docs</div>
+      <div class="card-title">Documentation</div>
+      <div class="card-desc">Configuration guides, user guide, technical reference, and more.</div>
+    </a>
+  </div>
+  <p class="github">
+    View source on <a href="https://github.com/Jxck-S/retar" target="_blank" rel="noreferrer">GitHub</a>
+  </p>
+</body>
+</html>
