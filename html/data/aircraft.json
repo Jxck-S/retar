@@ -1,0 +1,96 @@
+{
+  "now": 1712695200.0,
+  "messages": 8421,
+  "aircraft": [
+    {
+      "hex": "a3d4e1", "flight": "UAL2341 ", "r": "N37422", "t": "B739",
+      "lat": 41.38, "lon": -78.92, "alt_baro": 36000, "alt_geom": 36250,
+      "gs": 478, "track": 272, "baro_rate": 0, "squawk": "3471",
+      "category": "A3", "seen": 1.2, "seen_pos": 1.2, "messages": 312
+    },
+    {
+      "hex": "a14b82", "flight": "AAL1523 ", "r": "N137AA", "t": "A321",
+      "lat": 38.54, "lon": -77.21, "alt_baro": 34000, "alt_geom": 34200,
+      "gs": 452, "track": 195, "baro_rate": 0, "squawk": "2254",
+      "category": "A3", "seen": 0.8, "seen_pos": 0.8, "messages": 278
+    },
+    {
+      "hex": "a9f123", "flight": "DAL445  ", "r": "N301DU", "t": "BCS3",
+      "lat": 40.12, "lon": -75.88, "alt_baro": 32000, "alt_geom": 32180,
+      "gs": 441, "track": 212, "baro_rate": -64, "squawk": "1173",
+      "category": "A3", "seen": 2.1, "seen_pos": 2.1, "messages": 195
+    },
+    {
+      "hex": "a5c771", "flight": "SWA1234 ", "r": "N8601F", "t": "B738",
+      "lat": 41.98, "lon": -80.44, "alt_baro": 37000, "alt_geom": 37220,
+      "gs": 468, "track": 264, "baro_rate": 0, "squawk": "5623",
+      "category": "A3", "seen": 0.5, "seen_pos": 0.5, "messages": 401
+    },
+    {
+      "hex": "a72e3d", "flight": "JBU655  ", "r": "N958JT", "t": "A321",
+      "lat": 39.71, "lon": -82.33, "alt_baro": 39000, "alt_geom": 39240,
+      "gs": 511, "track": 278, "baro_rate": 0, "squawk": "4412",
+      "category": "A3", "seen": 1.8, "seen_pos": 1.8, "messages": 342
+    },
+    {
+      "hex": "400a75", "flight": "BAW176  ", "r": "G-VIIV", "t": "B77W",
+      "lat": 49.12, "lon": -42.77, "alt_baro": 37000, "alt_geom": 37275,
+      "gs": 524, "track": 290, "baro_rate": 0, "squawk": "1000",
+      "category": "A5", "seen": 3.1, "seen_pos": 3.1, "messages": 512
+    },
+    {
+      "hex": "3c6627", "flight": "DLH400  ", "r": "D-AIXA", "t": "A359",
+      "lat": 51.44, "lon": -35.62, "alt_baro": 38000, "alt_geom": 38240,
+      "gs": 531, "track": 288, "baro_rate": 0, "squawk": "1000",
+      "category": "A5", "seen": 2.4, "seen_pos": 2.4, "messages": 488
+    },
+    {
+      "hex": "896141", "flight": "UAE212  ", "r": "A6-EGA", "t": "B77W",
+      "lat": 44.88, "lon": -55.21, "alt_baro": 36000, "alt_geom": 36270,
+      "gs": 537, "track": 300, "baro_rate": 0, "squawk": "1000",
+      "category": "A5", "seen": 1.6, "seen_pos": 1.6, "messages": 390
+    },
+    {
+      "hex": "a46b10", "flight": "UAL47   ", "r": "N14001", "t": "B789",
+      "lat": 44.23, "lon": -63.88, "alt_baro": 37000, "alt_geom": 37260,
+      "gs": 519, "track": 68, "baro_rate": 0, "squawk": "1000",
+      "category": "A5", "seen": 0.9, "seen_pos": 0.9, "messages": 287
+    },
+    {
+      "hex": "a88b44", "flight": "UPS234  ", "r": "N571UP", "t": "B744",
+      "lat": 37.92, "lon": -79.41, "alt_baro": 33000, "alt_geom": 33180,
+      "gs": 490, "track": 15, "baro_rate": 192, "squawk": "3302",
+      "category": "A5", "seen": 1.4, "seen_pos": 1.4, "messages": 321
+    },
+    {
+      "hex": "a3e900", "flight": "FDX890  ", "r": "N601FE", "t": "MD11",
+      "lat": 40.55, "lon": -74.88, "alt_baro": 8000, "alt_geom": 8100,
+      "gs": 282, "track": 52, "baro_rate": -1216, "squawk": "5544",
+      "category": "A4", "seen": 0.3, "seen_pos": 0.3, "messages": 512
+    },
+    {
+      "hex": "a11f92", "flight": "ASA214  ", "r": "N521VA", "t": "A320",
+      "lat": 43.12, "lon": -71.04, "alt_baro": 35000, "alt_geom": 35200,
+      "gs": 455, "track": 287, "baro_rate": 0, "squawk": "3311",
+      "category": "A3", "seen": 2.8, "seen_pos": 2.8, "messages": 214
+    },
+    {
+      "hex": "a24d78", "flight": "SCX1901 ", "r": "N688NK", "t": "A320",
+      "lat": 36.44, "lon": -76.02, "alt_baro": 31000, "alt_geom": 31175,
+      "gs": 440, "track": 185, "baro_rate": -128, "squawk": "1542",
+      "category": "A3", "seen": 1.1, "seen_pos": 1.1, "messages": 267
+    },
+    {
+      "hex": "a7f301", "flight": "        ", "r": "N550GS", "t": "GLF5",
+      "lat": 40.88, "lon": -72.41, "alt_baro": 45000, "alt_geom": 45280,
+      "gs": 498, "track": 88, "baro_rate": 0, "squawk": "4441",
+      "category": "A3", "seen": 0.7, "seen_pos": 0.7, "messages": 144
+    },
+    {
+      "hex": "a01c34", "flight": "        ", "r": "N172SP", "t": "C172",
+      "lat": 40.64, "lon": -73.78, "alt_baro": 2500, "alt_geom": 2520,
+      "gs": 98, "track": 140, "baro_rate": 0, "squawk": "1200",
+      "category": "A1", "seen": 0.4, "seen_pos": 0.4, "messages": 88
+    }
+  ]
+}

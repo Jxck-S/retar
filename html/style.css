@@ -1,0 +1,2430 @@
+/* Theme colors (--BGCOLOR1, --ACCENT, etc.) are not defined here; they are applied from defaults.js + config.js via applyThemeColors() injected style. */
+:root {
+    --SCALE: 1;
+    --FS1: calc(10px * var(--SCALE));
+    --FS2: calc(13px * var(--SCALE));
+    --FS3: calc(17px * var(--SCALE));
+}
+
+html,
+body {
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+    margin: calc( 0px * var(--SCALE));
+    padding: calc( 0px * var(--SCALE));
+    background: var(--BGCOLOR1);
+    background-color: var(--BGCOLOR1);
+    font-family: "Helvetica Neue", Helvetica, Verdana, sans-serif;
+    font-size: var(--FS2);
+    overflow: hidden;
+    height: 100%;
+    color: var(--TXTCOLOR2);
+}
+
+select {
+    font-size: var(--FS2);
+    height: calc(22px * var(--SCALE));
+}
+
+#planesTable {
+    font-size: var(--FS2);
+    white-space: nowrap;
+    cursor: default;
+}
+
+#layout_container {
+    display: flex;
+    height: 100%;
+}
+
+#selected_infoblock {
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    width:  calc(180px * var(--SCALE));
+    height: 100%;
+    overflow: auto;
+    z-index: 1;
+    background-color: var(--BGCOLOR1);
+}
+
+#sidebar-table {
+    position: relative; /* Anchor for the mobile close button */
+    background-color: var(--BGCOLOR1);
+    border-radius: 12px;
+    padding: 10px;
+    margin: 10px 5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(0, 0, 0, 0.15);
+}
+
+.aggregator-selected-bg:before {
+    content: ' ';
+    position:absolute;
+    display:block;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background-size: calc( 148 * var(--SCALE)) calc( 148 * var(--SCALE));
+    background-repeat: no-repeat;
+    background-position: calc(7px * var(--SCALE)) calc(108px * var(--SCALE));
+    background-image: url("images/favicon.png");
+    z-index: 2;
+    opacity: 0.12;
+}
+#infoblock-container {
+    position:relative;
+    overflow: auto;
+    height: 100%;
+    z-index:3;
+}
+#sidebar_canvas {
+    padding: calc( 5px * var(--SCALE));
+    overflow: auto;
+}
+
+#sidebar_container {
+    display: flex;
+    flex-direction: column;
+    left: calc( 0px * var(--SCALE)) !important;
+    height: 100%;
+}
+
+
+#map_container {
+    flex: 1 1 auto;
+    position: relative;
+    height: 100%;
+}
+
+#map_canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+#iconTestCanvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.sidebar_button {
+    /* Compact standard size matching settings/zoom */
+    width: calc( 28px * var(--SCALE));
+    height: calc( 28px * var(--SCALE));
+    border-radius: calc( 8px * var(--SCALE));
+    
+    /* Using shorthand to enforce all background properties at once and prevent overrides */
+    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>') no-repeat center !important;
+    
+    /* Smaller icon (20px) creates more "spacing" inside the 28px button */
+    background-size: 20px !important;
+
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    /* Spacing around the button */
+    margin: calc( 2px * var(--SCALE));
+}
+
+.sidebar_button:hover {
+    background-color: var(--ACCENT-LIGHT) !important;
+}
+
+/* Dark mode adjustment if needed - assuming html.dark sets filters or we just let it be dark on dark? 
+   Ideally we want contrasting icon. 
+*/
+html.dark .sidebar_button {
+    /* Dark mode background logic - keep standard accent for consistency if it works, or slightly dimmer */
+    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>') no-repeat center !important;
+    background-size: 20px !important;
+    border-color: rgba(255,255,255,0.3);
+}
+
+#toggle_sidebar_button.show_sidebar {
+    /* Sidebar is hidden (on right). Want to Show (pull left). Icon should be LEFT (<). 
+       Default is Left, so no transform needed. */
+    transform: none;
+    background-image: none;
+}
+
+#toggle_sidebar_button.hide_sidebar {
+    /* Sidebar is visible. Want to Hide (push right). 
+       User requested this remains visible.
+       Icon: Right Chevron (>) indicating push to right.
+       We need to ensure the transform is correct.
+       Default icon is Left (<). So flip it.
+    */
+    transform: scaleX(-1);
+    background-image: none;
+    display: block !important;
+}
+
+#shrink_sidebar_button {
+    /* Shrink -> Restore / Minimize Sidebar. 
+       Icon: Restore/Arrows In style.
+    */
+    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>') no-repeat center !important;
+    background-size: 20px !important;
+    transform: none;
+    /* Default is hidden (since we start in normal map mode usually). 
+       JS will toggle `display: inline-block` or `none`. 
+       However, we must allow JS `show()`/`hide()` to work, which sets element.style display.
+       So we remove `display: inline-block` from CSS so it doesn't override `display: none` if usage is mixed,
+       BUT wait: `!important` was not used on `display` in CSS earlier, so inline style logic should work.
+       The issue is likely that `display: inline-block` in CSS sets it to visible if `style="display: none"` is removed,
+       or if `hidden` class is used which sets `display: none` but specificity matters.
+       
+       Let's set it to `display: none` by default in CSS, and let JS override with inline style `display: inline-block` or `block`.
+       Actually, standard JS `.show()` sets `display: block` or whatever content default is.
+       Better:
+    */
+    display: none; 
+}
+
+#expand_sidebar_button {
+    /* Expand -> Full Screen / Maximize Sidebar. 
+       Icon: Maximize/Arrows Out style to indicate full screen mode.
+    */
+    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>') no-repeat center !important;
+    background-size: 20px !important;
+    transform: none;
+    /* Default visible (normal state) */
+    display: inline-block; 
+    /* Add space to avoid hitting the external puller */
+    margin-left: 30px;
+}
+
+
+
+/* Ensure hidden class works if used */
+.hidden {
+    display: none !important;
+}
+
+
+#credits {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    position: absolute;
+    bottom: calc( 10px * var(--SCALE));
+    left: calc(50% - 60px * var(--SCALE));
+}
+.credits-text {
+    font-size: var(--FS2);
+}
+.credits-image {
+    display: block;
+    width: calc( 24px * var(--SCALE));
+    height: calc( 24px * var(--SCALE));
+    background-size: calc( 24px * var(--SCALE)) calc( 24px * var(--SCALE));
+    background-repeat: no-repeat;
+    background-position: 0;
+    background-color: transparent;
+    border: none;
+    background-image: url("images/favicon.png");
+    z-index: 99;
+    opacity: 0.7;
+    margin: 4px;
+}
+.withOverflowingBackground::before {
+    z-index: -1;
+    background-image: url(https://www.exratione.com/assets/color_background.png);
+}
+
+#splitter {
+    cursor: ew-resize;
+    display: block;
+    position: absolute;
+    z-index: 99;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--ACCENT);
+    border: none;
+    opacity: 0.8;
+}
+
+#splitter-infoblock {
+    cursor: ns-resize;
+    display: inline-block;
+    position: absolute	;
+    top: calc( 0px * var(--SCALE));
+    right: 0;
+    margin-left: auto;
+    width: calc( 24px * var(--SCALE));
+    height: calc( 4px * var(--SCALE));
+    background-size: calc( 24px * var(--SCALE)) calc( 25px * var(--SCALE));
+    background-repeat: no-repeat;
+    background-position: calc( 0px * var(--SCALE));
+    border: none;
+    width: 100%;
+    border-bottom: #234c75;
+    background-color: #65819e;
+    border-bottom-width: calc( 1px * var(--SCALE));
+    border-bottom-style: solid;
+}
+
+/* remove the blue highlighting around the map buttons */
+.ol-control button {
+    outline: none;
+    z-index: 999;
+}
+
+.ol-zoom-in, .ol-zoom-out {
+    background-image: none !important;
+    background-color: var(--ACCENT) !important;
+    color: white !important;
+    width: calc(28px * var(--SCALE)) !important;
+    height: calc(28px * var(--SCALE)) !important;
+    border-radius: 8px !important;
+    font-size: calc(20px * var(--SCALE)) !important;
+    font-weight: bold !important;
+    line-height: calc(28px * var(--SCALE)) !important; /* Center vertically */
+    text-align: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    border: none !important;
+    margin: calc(2px * var(--SCALE)) !important;
+}
+
+.ol-zoom-in:hover, .ol-zoom-out:hover {
+    background-color: var(--ACCENT-LIGHT) !important;
+    transform: translateY(-1px);
+}
+
+.ol-zoom-in {
+    margin-bottom: calc(5px * var(--SCALE)) !important;
+}
+
+.ol-zoom {
+    background-color: transparent !important;
+    left: calc(100% - calc( 65px * var(--SCALE)));
+    top: calc(100% - calc( 85px * var(--SCALE)));
+}
+
+.ol-attribution {
+    font-size: var(--FS1);
+}
+
+.warning {
+    margin-top: 1em;
+    border: calc( 2px * var(--SCALE)) solid yellow;
+    background-color: #FFFFA3;
+    padding: calc( 5px * var(--SCALE));
+    color: black;
+}
+
+.error_box {
+    position: absolute; bottom: calc( 90px * var(--SCALE)); left: calc( 25px * var(--SCALE));
+    background-color: rgba(33, 33, 33, 0.95);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: calc(6px * var(--SCALE));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    padding: calc( 8px * var(--SCALE));
+    font-weight: bold;
+    font-size: var(--FS3);
+    line-height: 150%;
+    text-align: center;
+    z-index: 2000;
+}
+
+.inaccurate_warning {
+    position: absolute; top: calc( 25px * var(--SCALE)); left: calc( 280px * var(--SCALE));
+    width: 50%;
+    background-color: var(--BGCOLOR1);
+    padding: calc( 5px * var(--SCALE));
+}
+
+#js_error {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    background-color: rgba(33, 33, 33, 0.95);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: calc(6px * var(--SCALE));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    padding: calc( 8px * var(--SCALE));
+    font-size: var(--FS2);
+    line-height: 150%;
+    text-align: center;
+    z-index: 999;
+    white-space: pre-line;
+}
+
+#loader {position: absolute; width: 25%; height: 30px; z-index: 9999; top: 50%; left: 37.5%}
+#loader_progress { width:  100%; height: 100%; position: absolute; }
+
+
+.aircraft_table_header {
+    background-color: var(--ACCENT);
+    color: #FFFFFF;
+    cursor: pointer;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow:
+        0 -2px 2px -1px rgba(0, 0, 0, 0.5),
+        0 2px 2px -1px rgba(0, 0, 0, 0.7);
+}
+.aircraft_table_header td {
+    font-size: smaller;
+    padding: calc( 5px * var(--SCALE));
+    text-align: center;
+}
+
+.verticalRateTriangle {
+    font-family: "Courier New",monospace;
+}
+
+.icaoCodeColumn {
+    font-family: monospace;
+    text-transform: uppercase;
+}
+
+.plane_table_row {
+    cursor: default;
+    height: var(--FS2);
+}
+
+.hidden { display: none; }
+
+.infoblock_heading a {
+    text-decoration: none;
+    color: var(--ACCENT-LIGHT);
+    font-size: x-small;
+}
+
+.dim {
+    opacity: 0.3;
+    filter: alpha(opacity=30);
+    /* For IE8 and earlier */
+}
+
+/* Box style shared by search and filter sections (same as filter blocks) */
+.sidebarPanelBox {
+    background-color: var(--BGCOLOR2);
+    border-radius: 8px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
+/* Spacing for Search and Filter Sections */
+#tab-search-table td,
+#filterTable td,
+#filterTable2 td,
+#filterTable3 td {
+    padding: 0px;
+    padding-bottom: 8px;
+    margin: 0px;
+    border-top-width: 0px;
+}
+
+/* Remove border/padding from the very last row's cell in each table to clean up bottom edge */
+#tab-search-table tr:last-child td,
+#filterTable tr:last-child td,
+#filterTable2 tr:last-child td,
+#filterTable3 tr:last-child td {
+    border-bottom: none;
+    padding-bottom: 0px;
+}
+
+.infoBlockTitleText {
+    margin-bottom: 2px;
+    /* Ensure header is close to its input */
+    font-weight: bold;
+    color: var(--ACCENT);
+}
+
+html.dark .infoBlockTitleText {
+    color: #fff;
+}
+
+/* Search/Jump Input Styles */
+.search-input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: auto;
+}
+
+.textInputWithClear {
+    padding-right: 30px !important;
+    /* Space for the X icon */
+}
+
+.search-clear-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--TXTCOLOR3);
+    border-radius: 50%;
+    user-select: none;
+    transition: color 0.2s, background-color 0.2s;
+    background: transparent;
+}
+
+.search-clear-btn:hover {
+    color: var(--TXTCOLOR1);
+    background-color: var(--BGCOLOR2);
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.sidebarButton {
+    background-color: #409EDF;
+    padding: calc( 4px * var(--SCALE));
+    color: #FFFFFF;
+    font-weight: normal;
+    font-size: var(--FS2);
+}
+
+.sidebarButton:hover {
+    background-color: #3c6ea3;
+}
+
+.altitudeFilterInput {
+    width: calc(70px * var(--SCALE));
+    height: calc(24px * var(--SCALE));
+    color:var(--TXTCOLOR2);
+    background-color: var(--BGCOLOR1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 0 4px;
+}
+.searchInput {
+    width: calc(100px * var(--SCALE));
+    height: calc(24px * var(--SCALE));
+    color: var(--TXTCOLOR2);
+    background-color: var(--BGCOLOR1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
+.formButton {
+    font-size: var(--FS2);
+    color: var(--TXTCOLOR2);
+    background-color: rgba(128, 128, 128, 0.35);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.formButton:hover {
+    background-color: rgba(128, 128, 128, 0.5);
+    border-color: rgba(0, 0, 0, 0.25);
+}
+.formButton:disabled {
+    color:var(--TXTCOLOR3);
+}
+
+select.error, textarea.error, input.error {
+    color: #FF0000;
+}
+
+.layer-switcher {
+    top: calc(2px * var(--SCALE)) !important;
+    right: calc(50px * var(--SCALE)) !important;
+    z-index: 999;
+}
+.layer-switcher button {
+    background-size: calc(20px * var(--SCALE)) calc(20px * var(--SCALE));
+    /* slightly smaller icon for 32px button */
+    background-repeat: no-repeat;
+    background-position: center;
+    width: calc(32px * var(--SCALE));
+    height: calc(32px * var(--SCALE));
+    border-radius: 8px;
+    background-color: white;
+    /* Keep white for icon visibility, or use var(--ACCENT) if icon allows */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: none;
+    /* .svgButton likely has no border or handled differently */
+    cursor: pointer;
+    transition: transform 0.1s;
+    margin: calc(2px * var(--SCALE));
+}
+
+.layer-switcher button:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.95);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.layer-switcher.shown {
+    top: calc(2px * var(--SCALE)) !important;
+    right: calc(50px * var(--SCALE)) !important;
+    width: calc(32px * var(--SCALE)) !important;
+    height: calc(32px * var(--SCALE)) !important;
+    overflow: visible !important;
+    z-index: 999;
+    display: block !important;
+}
+
+/* Force main button to stay visible and unchanged when shown */
+.layer-switcher.shown.layer-switcher-activation-mode-click>button {
+    display: block !important;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAACE1BMVEX///8A//8AgICA//8AVVVAQID///8rVVVJtttgv98nTmJ2xNgkW1ttyNsmWWZmzNZYxM4gWGgeU2JmzNNr0N1Rwc0eU2VXxdEhV2JqytQeVmMhVmNoydUfVGUgVGQfVGQfVmVqy9hqy9dWw9AfVWRpydVry9YhVmMgVGNUw9BrytchVWRexdGw294gVWQgVmUhVWPd4N6HoaZsy9cfVmQgVGRrytZsy9cgVWQgVWMgVWRsy9YfVWNsy9YgVWVty9YgVWRty9UgVWRsy9Zsy9UfVWRsy9YgVWVty9YgVWRty9Vsy9aM09sgVWRTws/AzM0gVWRtzNYgVWRuy9Zsy9cgVWRGcHxty9bb5ORbxdEgVWRty9bn6OZTws9mydRfxtLX3Nva5eRix9NFcXxOd4JPeINQeIMiVmVUws9Vws9Vw9BXw9BYxNBaxNBbxNBcxdJexdElWWgmWmhjyNRlx9IqXGtoipNpytVqytVryNNrytZsjZUuX210k5t1y9R2zNR3y9V4lp57zth9zdaAnKOGoaeK0NiNpquV09mesrag1tuitbmj1tuj19uktrqr2d2svcCu2d2xwMO63N+7x8nA3uDFz9DK4eHL4eLN4eIyYnDX5OM5Z3Tb397e4uDf4uHf5uXi5ePi5+Xj5+Xm5+Xm6OY6aHXQ19fT4+NfhI1Ww89gx9Nhx9Nsy9ZWw9Dpj2abAAAAWnRSTlMAAQICAwQEBgcIDQ0ODhQZGiAiIyYpKywvNTs+QklPUlNUWWJjaGt0dnd+hIWFh4mNjZCSm6CpsbW2t7nDzNDT1dje5efr7PHy9PT29/j4+Pn5+vr8/f39/f6DPtKwAAABTklEQVR4Xr3QVWPbMBSAUTVFZmZmhhSXMjNvkhwqMzMzMzPDeD+xASvObKePPa+ffHVl8PlsnE0+qPpBuQjVJjno6pZpSKXYl7/bZyFaQxhf98hHDKEppwdWIW1frFnrxSOWHFfWesSEWC6R/P4zOFrix3TzDFLlXRTR8c0fEEJ1/itpo7SVO9Jdr1DVxZ0USyjZsEY5vZfiiAC0UoTGOrm9PZLuRl8X+Dq1HQtoFbJZbv61i+Poblh/97TC7n0neCcK0ETNUrz1/xPHf+DNAW9Ac6t8O8WH3Vp98f5lCaYKAOFZMLyHL4Y0fe319idMNgMMp+zWVSybUed/+/h7I4wRAG1W6XDy4XmjR9HnzvDRZXUAYDFOhC1S/Hh+fIXxen+eO+AKqbs+wAo30zDTDvDxKoJN88sjUzDFAvBzEUGFsnADoIvAJzoh2BZ8sner+Ke/vwECuQAAAABJRU5ErkJggg==') !important;
+    background-color: white !important;
+    border-radius: 8px !important;
+    right: auto !important;
+    /* Let it sit naturally or reset */
+    position: static !important;
+    /* Reset absolute positioning if needed */
+    margin: calc(2px * var(--SCALE)) !important;
+    width: calc(32px * var(--SCALE)) !important;
+    height: calc(32px * var(--SCALE)) !important;
+}
+
+.layer-switcher-close-x {
+    /* Styles handled by unified close button class */
+}
+
+.layer-switcher-close-x:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Default layer switcher panel hidden; we use #layers_infoblock (same style as settings) instead */
+.layer-switcher .panel {
+    display: none !important;
+}
+.layer-switcher.shown .panel {
+    display: none !important;
+    position: absolute;
+    right: 0 !important;
+    top: calc(38px * var(--SCALE) + 12px) !important;
+    width: 300px !important;
+    max-width: 85vw !important; /* Prevent overflow on small screens */
+    max-height: 80vh;
+    height: auto !important;
+    min-height: 100px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Disable horizontal scroll */
+    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+    touch-action: pan-y; /* Explicitly allow vertical scroll, ignore map gestures */
+    overscroll-behavior: contain; /* Prevent scroll chaining to the map */
+    background-color: var(--BGCOLOR1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    white-space: normal;
+    text-align: left;
+}
+
+.layer-switcher.shown ul {
+    display: block !important;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.layer-switcher.shown li:not(.group) {
+    padding: 10px;
+    margin-bottom: 8px;
+    background-color: var(--BGCOLOR2);
+    border-radius: 12px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.layer-switcher.shown li:not(.group):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-color: var(--ACCENT);
+}
+
+.layer-switcher.shown li.group {
+    margin-bottom: 12px;
+    border: none;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+    /* Reverting flexbox which broke the list layout */
+    display: block; 
+    position: relative; /* Ensure absolute button is relative to this container */
+}
+
+.layer-switcher.shown li.group>label {
+    display: block;
+    /* Reverting flex: 1 */
+    font-weight: bold;
+    color: var(--ACCENT);
+    padding: 8px 12px;
+    /* Add padding-left to make room for the collapse button if it's absolute, 
+       OR ensures they sit correctly if flow. 
+       Assuming button is floated or inline. */
+    padding-left: 35px; /* Increase to 35px to clear the 24px button completely */
+    margin-bottom: 8px;
+    font-size: 1.1em;
+    border-bottom: 1px solid var(--ACCENT);
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+}
+
+.layer-switcher.shown li input {
+    margin-right: 12px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.layer-switcher.shown li label {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--TXTCOLOR1);
+    flex: 1;
+}
+
+/* Single "Aircraft positions" row: hide the icon/webgl sub-row and fold button */
+.layer-switcher.shown li.group.aircraft-positions-single-row > ul {
+    display: none !important;
+}
+.layer-switcher.shown li.group.aircraft-positions-single-row > button {
+    display: none !important;
+}
+
+/* new css */
+.dateTime
+{
+    font-weight: bold;
+    font-size: calc( 12px * var(--SCALE));
+    line-height: calc( 26px * var(--SCALE));
+    color: #FFFFFF;
+    color: rgb(255, 255, 255);
+    text-align: right;
+    display: inline-block;
+    padding-right: calc(20px * var(--SCALE));
+    padding-left: calc(20px * var(--SCALE));
+}
+
+@media screen and (max-width: calc(1000px * var(--SCALE))) {
+    .dateTime {
+        display: none;
+    }
+}
+
+.sectionTitle {
+    width: 100%;
+    text-transform: uppercase;
+    text-align: center;
+    color: #e8e8e8;
+    background: var(--ACCENT);
+}
+
+.section-title-content {
+    padding: calc( 3px * var(--SCALE)) calc( 20px * var(--SCALE));
+}
+
+.legend
+{
+    font-size: 110%;
+    color:var(--TXTCOLOR2);
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: calc( 10px * var(--SCALE));
+}
+
+
+.settingsText
+{
+    font-size: calc( 14px * var(--SCALE));
+    line-height: calc( 20px * var(--SCALE));
+
+}
+
+.link, .link a {
+    color: var(--TXTCOLOR1);
+    text-decoration: underline;
+}
+
+.share-link-icon {
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s;
+    opacity: 0.8;
+}
+
+.share-link-icon:hover {
+    transform: scale(1.2);
+    opacity: 1;
+    color: var(--ACCENT-LIGHT) !important;
+}
+
+.share-link-icon:active {
+    transform: scale(0.95);
+}
+
+#header_side {
+    position: absolute;
+    right: calc( 0px * var(--SCALE));
+    top:  calc( 0px * var(--SCALE));
+    width: calc( 38px * var(--SCALE));
+    z-index: 9;
+}
+#header_top {
+    text-align: right;
+    position: absolute;
+    right: calc( 94px * var(--SCALE));
+    top: calc( 0px * var(--SCALE));
+    height: calc( 38px * var(--SCALE));
+    z-index: 9;
+}
+
+.svgButton {
+    background-color: var(--ACCENT);
+    width: calc( 28px * var(--SCALE));
+    height: calc( 28px * var(--SCALE));
+    cursor: pointer;
+    background-position: center;
+    margin: calc( 2px * var(--SCALE));
+    display: inline-block;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s;
+    vertical-align: top;
+}
+
+.svgButton:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+.fullscreenButton {
+    background-image: url('images/fullscreen.svg');
+    background-size: 20px;
+    background-repeat: no-repeat;
+}
+
+.settingsCog {
+    width: calc(28px * var(--SCALE));
+    height: calc(28px * var(--SCALE));
+    cursor: pointer;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>');
+
+    /* Center the image */
+    background-size: 20px;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    /* Spacing - match .button margin */
+    margin: calc(2px * var(--SCALE));
+
+    /* Modern Look matching .button */
+    border-bottom: none;
+    border-radius: 8px;
+    background-color: var(--ACCENT);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    align-self: center;
+}
+
+.settingsCog:hover {
+    background-color: var(--ACCENT-LIGHT);
+    /* transform rule removed */
+}
+
+.layersButton {
+    /* Layers icon: stroked stacked layers SVG provided by user */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'></polygon><polyline points='2 17 12 22 22 17'></polyline><polyline points='2 12 12 17 22 12'></polyline></svg>");
+    background-size: 20px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.layersButton:hover {
+    background-color: var(--ACCENT-LIGHT);
+}
+
+.locationButton {
+    /* Target style: Filled center, Ring, 4 Ticks */
+    /* Adjusted spacing: Inner radius 3 (was 4) to increase gap to ring (r=7) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3' fill='white'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='white' stroke-width='2'/%3E%3Cline x1='12' y1='3' x2='12' y2='5' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='12' y1='19' x2='12' y2='21' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='3' y1='12' x2='5' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='19' y1='12' x2='21' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.militaryButton {
+    /* Military Rank style: Star + Chevrons (User Reference) */
+    /* Hollow Star (stroke) to match image, Thick Chevrons for visibility */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Star (Top) --%3E%3Cpolygon points='12 1 14.5 6 20 6 16 9.5 17.5 14.5 12 12 6.5 14.5 8 9.5 4 6 9.5 6' /%3E%3C!-- Chevrons (Bottom) --%3E%3Cpolyline points='4 15 12 19 20 15' /%3E%3Cpolyline points='4 19 12 23 20 19' /%3E%3C/svg%3E");
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Active state for Military button (when ON) */
+#U.activeButton {
+    /* Keep Red Background (var(--ACCENT)) to match other buttons */
+    /* Switch to Black Icon to indicate active state */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Star (Top) --%3E%3Cpolygon points='12 1 14.5 6 20 6 16 9.5 17.5 14.5 12 12 6.5 14.5 8 9.5 4 6 9.5 6' /%3E%3C!-- Chevrons (Bottom) --%3E%3Cpolyline points='4 15 12 19 20 15' /%3E%3Cpolyline points='4 19 12 23 20 19' /%3E%3C/svg%3E");
+}
+#U.activeButton:hover {
+    /* Removing custom hover bg to match standard button behavior */
+}
+
+
+.button {
+    background-color: var(--ACCENT);
+    width: calc(28px * var(--SCALE));
+    height: calc(28px * var(--SCALE));
+    border-radius: 8px;
+    margin: calc(2px * var(--SCALE));
+    display: inline-block;
+    cursor: pointer;
+    text-align: center;
+    background-clip: padding-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    vertical-align: top;
+}
+
+
+.buttonContainer {
+    display: block;
+    margin: calc( 1px * var(--SCALE));
+    text-align: center;
+}
+.buttonSpacer {
+    margin: calc( 9px * var(--SCALE));
+}
+
+.buttonText
+{
+    font-weight: bold;
+    font-size: calc( 15px * var(--SCALE));
+    line-height:  calc( 27px * var(--SCALE));
+    text-align: center;
+    margin: calc( 5px * var(--SCALE));
+}
+
+.activeButton {
+ color:#000
+}
+.inActiveButton {
+ color:#fff
+}
+
+#highlighted_infoblock {
+    background-color: var(--BGCOLOR1);
+    position: absolute;
+    left: calc( 40px * var(--SCALE));
+    top: calc( 60px * var(--SCALE));
+    min-width:  calc(132px * var(--SCALE));
+    padding-right: calc( 5px * var(--SCALE));
+    box-shadow: calc( 4px * var(--SCALE)) calc( 4px * var(--SCALE)) calc( 10px * var(--SCALE)) #444444;
+    cursor: pointer;
+    z-index: 9999;
+    display: none;
+}
+
+.highlightedTitle {
+    border-bottom: calc(1px * var(--SCALE)) solid var(--ACCENT);
+    display: inline-block;
+    width: 90%;
+}
+
+.identLarge {
+    font-size: calc( 22px * var(--SCALE));
+    line-height: calc( 24px * var(--SCALE));
+    color: var(--TXTCOLOR1);
+    font-weight: lighter;
+}
+
+.identMedium {
+    font-size: calc( 17px * var(--SCALE));
+    line-height: calc( 22px * var(--SCALE));
+    color: var(--TXTCOLOR1);
+    font-weight: lighter;
+}
+
+.identSmall {
+    font-size: calc( 14px * var(--SCALE));
+    font-weight: bold;
+    color: var(--TXTCOLOR1);
+}
+
+.infoSectionTable {
+    width: 100%;
+    border-collapse: collapse;
+    padding: 0;
+    margin: 0;
+    cursor: default;
+}
+
+table.infoSectionTable tr td {
+    padding: 0;
+    margin: 0;
+}
+
+.rSpacer {
+    padding-top: calc( 3px * var(--SCALE));
+    padding-bottom: calc( 3px * var(--SCALE));
+}
+
+.infoHeading {
+    margin-top: calc( 2px * var(--SCALE));
+    margin-bottom: calc( 2px * var(--SCALE));
+    display: inline-block;
+}
+
+.infoHeading sub {
+    font-weight: normal;
+}
+
+.infoData {
+    margin-top: calc( 2px * var(--SCALE));
+    margin-bottom: calc( 2px * var(--SCALE));
+    float: right;
+    text-align: right;
+    display: inline-block;
+}
+
+.infoBlockSection {
+    padding-top: calc(7px * var(--SCALE));
+    padding-bottom: calc(7px * var(--SCALE));
+    padding-left: calc(7px * var(--SCALE));
+    padding-right: calc(7px * var(--SCALE));
+}
+
+/* Compact filter blocks: title + actions on one line, controls on next */
+.filterBlock {
+    background-color: var(--BGCOLOR2);
+    border-radius: 8px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 6px 8px !important;
+}
+#tab-filters .filterForm {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+#tab-filters .filterFormHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    line-height: 1.2;
+}
+#tab-filters .filterFormHeader .infoBlockTitleText {
+    margin: 0;
+    font-size: 12px;
+}
+#tab-filters .filterFormActions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+#tab-filters .filterFormBtn {
+    padding: 2px 6px;
+    min-width: 24px;
+}
+#tab-filters .filterFormBtn svg {
+    display: block;
+}
+#tab-filters .filterFormBody {
+    margin-top: 0;
+    overflow: auto;
+}
+#tab-filters .filterFormBody .buttonFilter {
+    margin-bottom: 0;
+}
+#tab-filters .filterBlocksWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+#tab-filters #filterTable {
+    margin-bottom: 0;
+}
+#tab-filters #filterTable .filterBlock {
+    margin-bottom: 6px;
+}
+
+.largeText a {
+    font-weight: bold;
+    color: var(--TXTCOLOR1);
+    font-size: var(--FS3);
+}
+
+.largeText {
+    font-weight: bold;
+    color: var(--TXTCOLOR1);
+    font-size: var(--FS3);
+}
+
+.infoBlockTitleText {
+    font-weight: bold;
+    color:var(--TXTCOLOR3);
+}
+
+
+
+.legendTitle {
+    line-height: calc( 19px * var(--SCALE));
+    padding-right: calc( 3px * var(--SCALE));
+    padding-left: calc( 3px * var(--SCALE));
+    margin: calc( 2px * var(--SCALE));
+}
+
+#settings_infoblock {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(calc(360px * var(--SCALE)), 95vw);
+    max-width: 95vw;
+    height: 70vh;
+    max-height: 70vh;
+    overflow: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    z-index: 9999;
+    display: none;
+    background-color: var(--BGCOLOR2);
+    border-radius: 10px;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--TXTCOLOR2);
+    box-sizing: border-box;
+}
+@media (min-width: 768px) {
+    #settings_infoblock {
+        position: absolute;
+        left: auto;
+        right: calc(48px * var(--SCALE));
+        transform: translateY(-50%);
+    }
+}
+
+#settings_infoblock * {
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+/* Modern panel header (Settings & Layers) */
+.settingsPanelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(14px * var(--SCALE)) calc(44px * var(--SCALE)) calc(12px * var(--SCALE)) calc(16px * var(--SCALE));
+    margin: calc(-20px * var(--SCALE)) calc(-20px * var(--SCALE)) calc(16px * var(--SCALE)) calc(-20px * var(--SCALE));
+    margin-bottom: calc(16px * var(--SCALE));
+    background: linear-gradient(180deg, rgba(128, 128, 128, 0.08) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 10px 10px 0 0;
+    min-height: calc(44px * var(--SCALE));
+    box-sizing: border-box;
+}
+.settingsPanelHeaderTitle {
+    font-size: calc(15px * var(--SCALE));
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--TXTCOLOR2);
+    text-transform: none;
+}
+
+/* Layers picker: same look as settings */
+#layers_infoblock {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(calc(360px * var(--SCALE)), 95vw);
+    max-width: 95vw;
+    height: 70vh;
+    max-height: 70vh;
+    overflow: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    z-index: 9999;
+    display: none;
+    background-color: var(--BGCOLOR2);
+    border-radius: 10px;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--TXTCOLOR2);
+    box-sizing: border-box;
+}
+@media (min-width: 768px) {
+    #layers_infoblock {
+        position: absolute;
+        left: auto;
+        right: calc(48px * var(--SCALE));
+        transform: translateY(-50%);
+    }
+}
+#layers_infoblock * {
+    font-family: inherit;
+    box-sizing: border-box;
+}
+#layers_infoblock .settingsText {
+    flex: 1;
+    min-width: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+#layers_infoblock .settingsCheckbox {
+    width: calc(16px * var(--SCALE));
+    height: calc(16px * var(--SCALE));
+    float: left;
+    margin-right: calc(10px * var(--SCALE));
+    cursor: pointer;
+    background-color: transparent;
+    border: 2px solid rgba(128, 128, 128, 0.5);
+    border-radius: 3px;
+    position: relative;
+    transition: all 0.2s ease;
+    background-image: none;
+}
+#layers_infoblock .settingsCheckbox::after {
+    content: '';
+    position: absolute;
+    display: none;
+    width: calc(5px * var(--SCALE));
+    height: calc(9px * var(--SCALE));
+    left: 50%;
+    top: 50%;
+    margin-left: calc(-2.5px * var(--SCALE));
+    margin-top: calc(-4.5px * var(--SCALE));
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    box-sizing: border-box;
+}
+#layers_infoblock .settingsCheckbox:hover {
+    border-color: var(--ACCENT, #4a8fe7);
+}
+#layers_infoblock .settingsCheckboxChecked {
+    background-color: var(--ACCENT, #4a8fe7) !important;
+    border-color: var(--ACCENT, #4a8fe7) !important;
+}
+#layers_infoblock .settingsCheckboxChecked::after {
+    display: block;
+}
+#layers_infoblock .settingsOptionContainer {
+    cursor: pointer;
+}
+
+/* Styled radio for base map picker (circle + inner dot when selected) */
+#layers_infoblock .settingsRadio {
+    width: calc(16px * var(--SCALE));
+    height: calc(16px * var(--SCALE));
+    min-width: calc(16px * var(--SCALE));
+    float: left;
+    margin-right: calc(10px * var(--SCALE));
+    cursor: pointer;
+    background-color: transparent;
+    border: 2px solid rgba(128, 128, 128, 0.5);
+    border-radius: 50%;
+    position: relative;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    flex-shrink: 0;
+}
+#layers_infoblock .settingsRadio::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(8px * var(--SCALE));
+    height: calc(8px * var(--SCALE));
+    margin-left: calc(-4px * var(--SCALE));
+    margin-top: calc(-4px * var(--SCALE));
+    background-color: var(--ACCENT, #4a8fe7);
+    border-radius: 50%;
+    display: none;
+}
+#layers_infoblock .settingsRadio:hover {
+    border-color: var(--ACCENT, #4a8fe7);
+}
+#layers_infoblock .settingsRadioSelected {
+    border-color: var(--ACCENT, #4a8fe7);
+}
+#layers_infoblock .settingsRadioSelected::after {
+    display: block;
+}
+
+.settingsSections {
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+#settings_infoblock .settingsSliderContainer {
+    max-width: 100%;
+}
+
+.settingsSection {
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    overflow: hidden;
+}
+
+.settingsSection:last-child {
+    margin-bottom: 0;
+}
+
+.settingsSectionHeader {
+    cursor: pointer;
+    padding: 8px 10px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--TXTCOLOR2);
+    background-color: rgba(128, 128, 128, 0.1);
+    list-style: none;
+    user-select: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
+}
+
+.settingsSectionHeader::-webkit-details-marker {
+    display: none;
+}
+
+.settingsSectionHeader::before {
+    content: '▸ ';
+    display: inline-block;
+    width: 1em;
+    transition: transform 0.15s ease;
+}
+
+.settingsSection[open] .settingsSectionHeader::before {
+    transform: rotate(90deg);
+}
+
+.settingsSectionHeader:hover {
+    background-color: rgba(128, 128, 128, 0.15);
+}
+
+.settingsSectionContent {
+    padding: 8px 10px 10px;
+    border-top: 1px solid rgba(128, 128, 128, 0.15);
+}
+
+#settings_section_units .settingsOptionContainer {
+    cursor: pointer;
+    align-items: center;
+}
+
+.settingsOptionContainer {
+    display: flex;
+    align-items: flex-start;
+    padding: 6px 0;
+    font-size: 13px;
+    min-width: 0;
+}
+
+#settings_infoblock .settingsText {
+    flex: 1;
+    min-width: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#settings_infoblock .settingsCheckbox {
+    width: calc(16px * var(--SCALE));
+    height: calc(16px * var(--SCALE));
+    float: left;
+    margin-right: calc(10px * var(--SCALE));
+    cursor: pointer;
+    background-color: transparent;
+    border: 2px solid rgba(128, 128, 128, 0.5);
+    border-radius: 3px;
+    position: relative;
+    transition: all 0.2s ease;
+    background-image: none;
+}
+
+#settings_infoblock .settingsCheckbox::after {
+    content: '';
+    position: absolute;
+    display: none;
+}
+
+#settings_infoblock .settingsCheckbox:hover {
+    border-color: var(--ACCENT, #4a8fe7);
+}
+
+#settings_infoblock .settingsCheckboxChecked {
+    background-color: var(--ACCENT, #4a8fe7) !important;
+    border-color: var(--ACCENT, #4a8fe7) !important;
+}
+
+#settings_infoblock .settingsCheckboxChecked::after {
+    display: block;
+    width: calc(5px * var(--SCALE));
+    height: calc(9px * var(--SCALE));
+    left: 50%;
+    top: 50%;
+    margin-left: calc(-2.5px * var(--SCALE));
+    margin-top: calc(-4.5px * var(--SCALE));
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    box-sizing: border-box;
+}
+
+/* Unified Close Button Base Style */
+.settingsCloseBox, 
+.infoblockCloseBox, 
+.sidebar_close_mobile, 
+.layer-switcher-close-x {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(128, 128, 128, 0.1);
+    border: none;
+    border-radius: 50%;
+    transition: background-color 0.2s, transform 0.2s;
+    z-index: 100;
+}
+
+.settingsCloseBox:hover, 
+.infoblockCloseBox:hover, 
+.sidebar_close_mobile:hover, 
+.layer-switcher-close-x:hover {
+    background-color: rgba(128, 128, 128, 0.2);
+    transform: scale(1.05);
+}
+
+.settingsCloseBox::after, 
+.infoblockCloseBox::after, 
+.sidebar_close_mobile::after, 
+.layer-switcher-close-x::after {
+    content: '\2715'; /* Clean bold X */
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--TXTCOLOR1);
+    line-height: 1;
+}
+
+/* Specific overrides for settings/layers headers */
+.settingsPanelHeader .settingsCloseBox {
+    top: 5px;
+    right: 5px;
+}
+
+
+/* infoblock specific positioning and sizing override */
+.infoblockCloseBox {
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    background-color: transparent; /* Cleaner look for this smaller button */
+}
+
+.infoblockCloseBox:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+    transform: scale(1.1);
+}
+
+.infoblockCloseBox::after {
+    font-size: 16px; /* Smaller X to match callsign row */
+    opacity: 0.7;
+}
+
+
+.settingsText {
+    line-height: 1.4;
+    font-size: 13px;
+    color: var(--TXTCOLOR2);
+    letter-spacing: 0.2px;
+}
+
+#altitude_chart {
+    float: right;
+    width: calc(100% - calc( 5px * var(--SCALE)));
+    max-width:  calc(800px * var(--SCALE));
+    right: calc( 85px * var(--SCALE));
+    bottom: calc( 35px * var(--SCALE));
+    background-color: transparent !important;
+}
+
+#altitude_chart_button {
+    background-size: cover;
+    background-color: transparent;
+    width: 100%;
+    height: 0;
+    padding: 0;
+    padding-bottom: calc(100% * 56 / 1815);
+}
+
+
+#selected_flightaware_link a {
+    background-color: var(--ACCENT-LIGHT);
+    color: white;
+    text-decoration: none;
+    padding: calc( 4px * var(--SCALE));
+    line-height: calc( 22px * var(--SCALE));
+    border-radius: calc( 4px * var(--SCALE));
+}
+.bottom-info-container {
+    padding-top: calc( 10px * var(--SCALE));
+    padding-bottom: calc( 10px * var(--SCALE));
+    text-align: center;
+    color: var(--TXTCOLOR1);
+    line-height: calc( 18px * var(--SCALE));
+}
+.bottom-info-container img {
+    vertical-align: middle;
+}
+.bottom-info-container .bottom-info-text {
+    vertical-align: middle;
+    display: inline;
+}
+
+.ui-tabs {
+    background-color: var(--BGCOLOR1);
+}
+.ui-tabs-nav {
+    background-color: var(--BGCOLOR2);
+}
+.ui-tabs-panel {
+    background-color: var(--BGCOLOR1);
+}
+.greyButton {
+    background-color: var(--BGCOLOR2);
+    cursor: pointer;
+    padding: 8px 12px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: calc(15px * var(--SCALE));
+    font-weight: bold;
+    color: var(--TXTCOLOR1);
+    border-radius: 6px;
+    margin-bottom: 4px;
+    transition: background-color 0.2s;
+}
+
+.greyButton:hover {
+    filter: brightness(0.95);
+}
+
+.greyButton:after {
+    content: '\02795\FE0E'; /* Unicode character for "plus" sign (+) */
+    float: right;
+    margin-left: calc( 5px * var(--SCALE));
+}
+.greyButton.active:after {
+    content: "\2796\FE0E"; /* Unicode character for "minus" sign (-) */
+}
+
+.ui-tabs-nav li a:focus {
+    outline: none;
+}
+
+.ui-tabs .ui-tabs-panel {
+    padding: 1em 0.5em;
+}
+.ui-tabs .ui-tabs-nav {
+    padding: 2px;
+    margin: 1px;
+    margin-bottom: 1px;
+}
+.ui-tabs .ui-tabs-nav li.ui-tabs-active {
+    padding-bottom: 0px;
+}
+.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
+    border-radius: 3px;
+}
+
+.buttonFilter {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: calc( 240px * var(--SCALE));
+    cursor: pointer;
+}
+
+.ui-widget-content .ui-selectable .ui-selected {
+    background-color: color-mix(in srgb, var(--ACCENT-LIGHT) 20%, transparent) !important;
+    border-color: var(--ACCENT-LIGHT) !important;
+    color: inherit;
+}
+
+.buttonFilter li {
+    border-width: 1px;
+    border-color: var(--BGCOLOR2);
+    border-radius: 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    padding: 3px 4px;
+    float: left;
+    width: calc(85px * var(--SCALE));
+    color: var(--TXTCOLOR2);
+    font-size: var(--FS2);
+    text-align: center;
+    background-color: var(--BGCOLOR1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+#sortableColumns {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    /* Full width of container */
+    display: grid;
+    /* Use CSS Grid */
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    /* Compact grid, min 110px wide */
+    gap: 6px;
+    /* Tight spacing */
+}
+
+#sortableColumns li {
+    margin: 0;
+    padding: 6px 4px;
+    /* Very compact padding */
+    border: 1px solid var(--ACCENT);
+    border-radius: 6px;
+    /* Rounded corners */
+    background-color: var(--BGCOLOR2);
+    text-align: center;
+    cursor: pointer;
+    /* Show clickable cursor */
+    user-select: none;
+    transition: all 0.2s ease;
+    /* Smooth hover effect */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: calc(13px * var(--SCALE));
+    /* Slightly smaller text */
+}
+
+#sortableColumns li:hover {
+    background-color: var(--ACCENT);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Selected State for Columns - using the class applied by JS */
+#sortableColumns li.settingsCheckboxChecked {
+    background-color: var(--ACCENT);
+    color: white;
+    border-color: var(--ACCENT);
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
+    font-weight: 700;
+}
+
+/* Ensure hover doesn't weirdly interact with checked state */
+#sortableColumns li.settingsCheckboxChecked:hover {
+    filter: brightness(1.1);
+}
+
+#sortableColumns li.ui-sortable-helper {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    cursor: grabbing;
+}
+
+#copyrightInfo {
+    position: Relative;
+    font-size: var(--FS1);
+    text-align: center;
+}
+#selected_photo{
+    text-align: center;
+    display: block;
+    width: 100%;
+    margin: 0;
+}
+#airplanePhoto {
+    display: inline-block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Aircraft type silhouette: smaller footprint + same white “card” treatment as airline banners */
+#photo_container.photo_row_sil #selected_photo {
+    text-align: center;
+}
+.silhouette_wrap {
+    display: inline-block;
+    max-width: 72%;
+    margin: 2px auto 0 auto;
+    background: #fff;
+    border-radius: 4px;
+    padding: 6px 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+.silhouette_wrap img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    max-height: 132px;
+}
+.ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
+    background: var(--BGCOLOR1);
+    border: none;
+}
+
+.ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active,
+a.ui-button:active,
+.ui-button:active,
+.ui-button.ui-state-active:hover {
+    background: var(--ACCENT);
+}
+.ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited, a.ui-button, a:link.ui-button, a:visited.ui-button, .ui-button {
+  color:var(--TXTCOLOR2);
+}
+ .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
+  color:var(--TXTCOLOR2);
+}
+.ui-widget-header, .ui-widget.ui-widget-content {
+    border: none;
+}
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
+    color:var(--TXTCOLOR2);
+}
+.ui-widget-content {
+  color:var(--TXTCOLOR2);
+}
+
+.ui-slider {
+    background-color: rgba(128, 128, 128, 0.25);
+    border-radius: 4px;
+    height: 6px;
+    border: none;
+    margin: 8px 4px 14px;
+}
+.ui-slider .ui-slider-handle {
+    background-color: var(--ACCENT, #4a8fe7);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    top: -5px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease;
+}
+.ui-slider .ui-slider-handle:hover {
+    transform: scale(1.15);
+}
+
+/* Settings select dropdown */
+#settings_infoblock select {
+    max-width: 100%;
+    background-color: rgba(128, 128, 128, 0.15);
+    color: var(--TXTCOLOR2);
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+}
+#settings_infoblock select:hover {
+    border-color: var(--ACCENT, #4a8fe7);
+}
+
+/* jQuery UI selectmenu used for settings dropdowns */
+#settings_infoblock .ui-selectmenu-button.ui-button {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+#settings_infoblock .ui-selectmenu-text {
+    line-height: 1.6;
+}
+
+/* Globe table limit selector in sidebar */
+#sidebar-table .globe-table-limit-row {
+    gap: 8px;
+}
+
+#sidebar-table .globeTableSliderWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+#sidebar-table #globe_table_limit_slider {
+    width: 100%;
+}
+
+#sidebar-table .globeTableSliderLabel {
+    font-size: 11px;
+    color: var(--TXTCOLOR2);
+    opacity: 0.8;
+}
+
+/* Settings reset button and form buttons – opaque so they don’t blend in */
+#settings_infoblock .formButton {
+    background-color: rgba(128, 128, 128, 0.4);
+    color: var(--TXTCOLOR2);
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+#settings_infoblock .formButton:hover {
+    background-color: rgba(128, 128, 128, 0.55);
+    border-color: var(--ACCENT, #4a8fe7);
+}
+
+/* Settings divider */
+#settings_infoblock .rSpacer hr {
+    border: none;
+    border-top: 1px solid rgba(128, 128, 128, 0.15);
+    margin: 6px 0;
+}
+
+/* Settings infoblock title text */
+#settings_infoblock .infoBlockTitleText {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--TXTCOLOR2);
+    opacity: 0.9;
+}
+
+
+input{
+  color:var(--TXTCOLOR1);
+}
+#histDatePicker{
+    background: var(--BGCOLOR1);
+}
+
+#replayBar {
+    background: var(--BGCOLOR1);
+    display: none;
+    width: calc(100% - 80px);
+    padding-right: 80px;
+    position: absolute;
+    height: 10px;
+    bottom: 0%;
+    grid-template-columns: 1fr 1.5fr 5fr 2fr;
+    grid-template-rows: 20px 40px 20px 20px;
+    justify-items: center;
+    align-items: center;
+    grid-template-areas:
+        "timezone dateHint timeHint speedHint"
+        "play datepicker hours speedSelect"
+        ". dateHintLocal minutes loading "
+        ". . . .";
+}
+
+#replayLoading {
+    grid-area: loading;
+}
+
+#replayTimeZone{
+    grid-area: timezone;
+}
+#replayPlay{
+    grid-area: play;
+}
+#replayDatepicker{
+    grid-area: datepicker;
+}
+#hourSelect{
+    width: 90%;
+    grid-area: hours;
+}
+#minuteSelect{
+    width: 90%;
+    grid-area: minutes;
+}
+#replaySpeedSelect{
+    grid-area: speedSelect;
+    width: 90%;
+}
+#replayTimeHint{
+    grid-area: timeHint;
+}
+#replayDateHintLocal{
+    grid-area: dateHintLocal;
+}
+#replayDateHint{
+    grid-area: dateHint;
+}
+#replaySpeedHint{
+    grid-area: speedHint;
+}
+
+/* Modded Additions */
+.identOppIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.identOppIcon img {
+    max-height: calc(26px * var(--SCALE));
+    /* Slightly taller than the line-height for better visibility */
+    height: auto;
+    width: auto;
+    background: white;
+    border-radius: 6px;
+    padding: 3px;
+    /* Total height: 26px + 6px = 32px */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    display: block; /* Ensure it behaves as a block in the flex container */
+}
+
+.alignCS {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1; /* Reset line-height to ensure the flex box fits the content tightly */
+}
+
+.flag {
+    padding: 5px;
+    color: white;
+    display: inline-block;
+    margin-right: 5px;
+    font-weight: bold;
+    /* Make text bold */
+    margin-bottom: 5px;
+    /* Add space below each flag */
+}
+
+.flag a {
+    color: inherit;
+    /* Ensure link text is the same color as the parent */
+    text-decoration: none;
+    /* Remove underline from links */
+}
+
+.flag a:hover,
+.flag a:active {
+    color: white;
+    /* Keep text white on hover*/
+    text-decoration: none;
+    /* Remove underline from links */
+}
+
+/* KML Export Layout */
+/* KML Export Layout */
+.kml-export-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    /* constrain padding */
+}
+
+.kml-export-actions button {
+    background-color: var(--BGCOLOR2);
+    cursor: pointer;
+    padding: 8px 12px;
+    width: 100%;
+    max-width: 100%;
+    /* Fit to container */
+    border: none;
+    text-align: center;
+    outline: none;
+    font-size: calc(14px * var(--SCALE));
+    font-weight: 500;
+    color: var(--TXTCOLOR1);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    /* ensure padding doesn't overflow */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.kml-export-actions button:hover {
+    filter: brightness(0.95);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.kml-export-actions button:active {
+    transform: translateY(0);
+}
+
+/* Base DB flag classes (used for map markers) */
+.LADD {
+    background-color: orange;
+}
+
+.PIA {
+    background-color: red;
+}
+
+.Military {
+    background-color: green;
+}
+
+.Intresting {
+    background-color: magenta;
+}
+
+.Heavy {
+    background-color: blue;
+}
+
+.SuperHeavy {
+    background-color: darkblue;
+}
+
+/* Ensure DB flag filter buttons use the same colors, overriding jQuery UI backgrounds */
+#flagFilter .LADD {
+    background-color: orange;
+}
+
+#flagFilter .PIA {
+    background-color: red;
+}
+
+#flagFilter .Military {
+    background-color: green;
+}
+
+#selected_dbFlags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    /* Ensure flags wrap to next line */
+}
+
+.dbFlagBadge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 2px;
+}
+
+.dbFlagBadge,
+.dbFlagBadge:link,
+.dbFlagBadge:visited,
+.dbFlagBadge:hover,
+.dbFlagBadge:active {
+    color: inherit;
+    text-decoration: none;
+}
+
+.smallText a {
+    font-weight: bold;
+    color: var(--TXTCOLOR1);
+    font-size: var(--FS1);
+}
+
+.smallText {
+    font-weight: bold;
+    color: var(--TXTCOLOR1);
+    font-size: var(--FS1);
+    background-color: var(--ACCENT);
+}
+
+#selected_airline_banner {
+    text-align: center;
+    display: block;
+    width: 100%;
+    margin: 5px 0 0 0;
+}
+
+#selected_airline_banner img {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 70%;
+    background: white;
+    border-radius: 4px;
+    padding: 1px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile Sidebar Overrides */
+@media screen and (max-width: 768px) {
+    #sidebar_container {
+        width: 100% !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1000; /* Ensure it covers the map */
+        margin: 0 !important; /* Override JS margins */
+        height: 100% !important;
+    }
+    /* Hide the sidebar puller/splitter on mobile */
+    #splitter, #splitter-infoblock {
+        display: none !important;
+    }
+
+    /* Hide the extra sidebar buttons on mobile */
+    #shrink_sidebar_button, #expand_sidebar_button {
+        display: none !important;
+    }
+
+    /* Adjust the main toggle button if needed */
+    #toggle_sidebar_button {
+        display: block !important;
+        z-index: 1001; /* Ensure it is above the sidebar if it is outside, or inside */
+    }
+}
+
+/* Mobile sidebar close button (now inside #sidebar-table) */
+@media screen and (max-width: 768px) {
+    .sidebar_close_mobile {
+        display: flex !important;
+        background: rgba(128, 128, 128, 0.15); /* Slightly darker on mobile for visibility */
+    }
+}
+
+@media screen and (max-width: 768px) {
+    /* Hide map buttons when mobile sidebar is open */
+    body.mobile_sidebar_open #header_top,
+    body.mobile_sidebar_open #header_side .button,
+    body.mobile_sidebar_open #header_side .svgButton:not(.sidebar_close_mobile),
+    body.mobile_sidebar_open .buttonContainer,
+    .fullscreenButton { /* Hide fullscreen button on mobile entirely */
+        display: none !important;
+    }
+}
+
+/* Mobile Table Toggle */
+.mobile_table_toggle {
+    display: none;
+    width: 96%;
+    margin: 5px 2%;
+    padding: 10px;
+    font-size: var(--FS2); /* Use var(--FS2) instead of calc if possible, or just standard size */
+    font-weight: bold;
+    color: var(--TXTCOLOR1);
+    background-color: var(--BGCOLOR2);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+    /* Mobile Table Toggle: Hide contents of sidebar-table by default, except the toggle button and tabs */
+    #sidebar-table:not(.mobile_visible) > #planesTable,
+    #sidebar-table:not(.mobile_visible) > #legend,
+    #sidebar-table:not(.mobile_visible) > .settingsOptionContainer {
+        display: none !important;
+    }
+
+    /* Ensure the toggle button is always visible */
+    .mobile_table_toggle {
+        display: block !important;
+    }
+    
+    /* Hide table by default if not covered by above or specific overrides needed */
+    #planesTable {
+        display: none;
+    }
+    /* But show it if parent has mobile_visible (overriding the line above) */
+    #sidebar-table.mobile_visible > #planesTable {
+        display: table;
+    }
+    
+    /* Same for legend */
+    #legend {
+        display: none;
+    }
+    #sidebar-table.mobile_visible > #legend {
+        display: block;
+    }
+    
+    /* settingsOptionContainer (More Table Lines etc) default hidden by the :not rule above, 
+       so just need to ensure they show when parent is visible? 
+       They are divs, so display: block is default. 
+       The :not rule handles the hiding. The absence of that rule handles the showing. */
+}
+@media screen and (max-width: 768px) {
+    /* Hide the extra table controls layout container on mobile by default */
+    /* #sidebar-table { display: none; } - REVERTED: this hides everything */
+
+    /* Show it when toggled */
+    /* #sidebar-table.mobile_visible { display: table; } - REVERTED */
+}
+
+/* Hide layer switcher when mobile sidebar is open */
+body.mobile_sidebar_open .layer-switcher {
+    display: none !important;
+}
+
+/* Custom Layer Switcher Button Style */
+.layer-switcher button {
+    background-color: var(--ACCENT) !important; /* Use red accent color */
+    border-radius: 6px !important;
+    border: none !important;
+    /* Use a white SVG icon for the layers */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 11l-2.5-1.25L12 11zm0 2.5l-5-2.5-2.5 1.25L12 16l7.5-3.75-2.5-1.25L12 13.5zm0 2.5l-5-2.5-2.5 1.25L12 18.5l7.5-3.75-2.5-1.25L12 16z"/><path d="M22 13.5l-10 5-10-5L2 15l10 5 10-5zM22 17.5l-10 5-10-5L2 19l10 5 10-5z" opacity="0.5"/></svg>');
+    /* A simpler, cleaner layers icon */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>') !important;
+    background-size: 20px 20px !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important; /* Ensure no-repeat is set */
+    width: 32px !important;
+    height: 32px !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.layer-switcher > button:hover, .layer-switcher > button:focus {
+    background-color: var(--ACCENT-LIGHT) !important; /* Lighter red on hover */
+    outline: none;
+}
+
+/* Fix for Group Collapse Buttons being styled as main button */
+/* Give them a proper Chevron icon */
+.layer-switcher .group button {
+    background-color: transparent !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='grey' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 24px !important;
+    height: 24px !important;
+    margin-right: 5px;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 0 !important;
+    
+    /* Position absolutely to sit inside the header padding */
+    position: absolute;
+    left: 2px; /* Sit at the start of the line */
+    margin-top: 8px; /* Push down to align with text */
+    z-index: 10;
+}
+
+/* Rotate chevron when collapsed (if class distinguishes it, usually standard is expanded by default) */
+/* Assuming 'ol-layerswitcher' behavior: button usually toggles visibility. 
+   If standard lib, it might not have 'collapsed' class on button but on parent. 
+   For now, just ensuring it's not a Layer icon is the fix. */
+
+@media screen and (max-width: 768px) {
+    /* Duplicate zoom hide rule if needed or simple revert. 
+       Actually, I can just remove the specific block I added. 
+       The user wants to keep zoom hidden on mobile. 
+    */
+    /* Hide zoom buttons on mobile */
+    .ol-zoom {
+        display: none !important;
+    }
+}
+
+/* Label Configuration Menu (same styling as Settings & Layers, no sub-dividers) */
+#labelConfigMenu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    width: min(calc(360px * var(--SCALE)), 95vw);
+    max-width: 95vw;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: var(--BGCOLOR2);
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--TXTCOLOR2);
+}
+@media (min-width: 768px) {
+    #labelConfigMenu {
+        position: absolute;
+        left: auto;
+        right: calc(48px * var(--SCALE));
+        transform: translateY(-50%);
+    }
+}
+#labelConfigMenu * {
+    font-family: inherit;
+    box-sizing: border-box;
+}
+#labelConfigMenu .labelConfigInput {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+#labelConfigMenu .settingsCheckbox {
+    width: calc(16px * var(--SCALE));
+    height: calc(16px * var(--SCALE));
+    flex-shrink: 0;
+    margin-right: calc(10px * var(--SCALE));
+    cursor: pointer;
+    background-color: transparent;
+    border: 2px solid rgba(128, 128, 128, 0.5);
+    border-radius: 3px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+#labelConfigMenu .settingsCheckbox::after {
+    content: '';
+    position: absolute;
+    display: none;
+    width: calc(5px * var(--SCALE));
+    height: calc(9px * var(--SCALE));
+    left: 50%;
+    top: 50%;
+    margin-left: calc(-2.5px * var(--SCALE));
+    margin-top: calc(-4.5px * var(--SCALE));
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    box-sizing: border-box;
+}
+#labelConfigMenu .settingsCheckbox:hover {
+    border-color: var(--ACCENT, #4a8fe7);
+}
+#labelConfigMenu .settingsCheckboxChecked {
+    background-color: var(--ACCENT, #4a8fe7) !important;
+    border-color: var(--ACCENT, #4a8fe7) !important;
+}
+#labelConfigMenu .settingsCheckboxChecked::after {
+    display: block;
+}
+#labelConfigMenu .settingsOptionContainer {
+    cursor: pointer;
+}
+#labelConfigMenu .settingsText {
+    flex: 1;
+    min-width: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 13px;
+}
+#labelConfigMenu #labelConfigMenuBody {
+    padding-top: 0;
+}
+
+#labelConfigMenuOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: transparent;
+}
+
+/* ==========================================================================
+   MODERN UI ICON OVERRIDES (Replaces legacy PNG sprites with SVGs)
+   ========================================================================== */
+
+/* 1. Reset standard jQuery UI icons to use masks instead of background images */
+.ui-icon, 
+.ui-widget-content .ui-icon, 
+.ui-widget-header .ui-icon, 
+.ui-state-default .ui-icon, 
+.ui-state-hover .ui-icon, 
+.ui-state-active .ui-icon {
+    background-image: none !important;
+    background-color: currentColor; /* Use the text color for the icon */
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+}
+
+/* 2. Define SVG Paths for used icons */
+
+/* Close Icon (X) */
+.ui-icon-closethick, .ui-icon-close {
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>');
+    mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/></svg>');
+}
+
+/* Triangle Right (Next Month / Forward) */
+.ui-icon-circle-triangle-e, .ui-icon-triangle-1-e, .ui-icon-seek-next {
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg>');
+    mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg>');
+}
+
+/* Triangle Left (Prev Month / Backward) */
+.ui-icon-circle-triangle-w, .ui-icon-triangle-1-w, .ui-icon-seek-prev {
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/></svg>');
+    mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/></svg>');
+}
+
+/* Triangle Down (Select Menu / Dropdowns) */
+.ui-icon-triangle-1-s {
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/></svg>');
+    mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/></svg>');
+}
+
+/* Checkmark */
+.ui-icon-check {
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>');
+    mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>');
+}
+
+/* 3. Handle specific colors for various states */
+.ui-state-default .ui-icon { background-color: #777; }
+.ui-state-hover .ui-icon, .ui-state-focus .ui-icon { background-color: var(--ACCENT); }
+.ui-state-active .ui-icon { background-color: #fff; }
+html.dark .ui-state-default .ui-icon { background-color: #bbb; }
