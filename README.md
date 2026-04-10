@@ -6,9 +6,7 @@ This is a **detached fork of wiedehopf's tar1090**. While the original tar1090 p
 
 This fork cleans up the user experience under the name **retar**. It provides a cleaner look and feel.
 
-<p align="center">
-  <img src="docs/example.png" alt="retar web interface example" width="800">
-</p>
+![retar web interface example](docs/example.png)
 
 
 ###  [Documentation Hub (docs/)](docs/README.md)
