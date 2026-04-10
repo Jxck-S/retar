@@ -365,8 +365,26 @@ html.dark .sidebar_button {
     white-space: pre-line;
 }
 
-#loader {position: absolute; width: 25%; height: 30px; z-index: 9999; top: 50%; left: 37.5%}
-#loader_progress { width:  100%; height: 100%; position: absolute; }
+#loader {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    z-index: 9999;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+#loader_progress {
+    width: 52px;
+    height: 52px;
+    border: 5px solid rgba(128, 128, 128, 0.2);
+    border-top-color: var(--ACCENT);
+    border-radius: 50%;
+    animation: loader-spin 0.75s linear infinite;
+}
+@keyframes loader-spin {
+    to { transform: rotate(360deg); }
+}
 
 
 .aircraft_table_header {
@@ -1480,19 +1498,20 @@ table.infoSectionTable tr td {
 #altitude_chart {
     float: right;
     width: calc(100% - calc( 5px * var(--SCALE)));
-    max-width:  calc(800px * var(--SCALE));
+    max-width:  calc(520px * var(--SCALE));
     right: calc( 85px * var(--SCALE));
     bottom: calc( 35px * var(--SCALE));
     background-color: transparent !important;
 }
 
 #altitude_chart_button {
-    background-size: cover;
-    background-color: transparent;
-    width: 100%;
-    height: 0;
+    background: none;
+    border: none;
     padding: 0;
-    padding-bottom: calc(100% * 56 / 1815);
+    width: 100%;
+    display: block;
+    color: var(--TXTCOLOR2);
+    cursor: default;
 }
 
 
