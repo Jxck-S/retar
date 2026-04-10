@@ -21,4 +21,4 @@ If you are making modifications to the HTML, CSS, or JavaScript and want to see 
 ---
 
 ## Technical Architecture
-For details on how the frontend interacts with the decoder and web server, please refer to the **[Technical Guide](TECHNICAL.md)**.
+For details on how the frontend interacts with the decoder and web server, please refer to the **[Technical Guide](docs/TECHNICAL.md)**.

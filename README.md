@@ -8,14 +8,16 @@ This fork cleans up the user experience under the name **retar**. It provides a 
 
 ![retar web interface example](docs/example.png)
 
+## [Live Demo](https://jxck-s.github.io/retar/demo/)
 
-###  [Documentation Hub (docs/)](docs/README.md)
-*   **[Configuration Guide](docs/CONFIG.md)**: Configuring retar.
-*   **[User Guide](docs/USER_GUIDE.md)**: How to use the map, filters, and UI features.
+No hardware required. The demo loads static sample data so you can explore the map, filters, and interface in your browser.
+
+## [Documentation](https://jxck-s.github.io/retar/documentation/)
+
+*   **[Configuration Guide](https://jxck-s.github.io/retar/documentation/#/docs/CONFIG)**: Configuring retar.
+*   **[User Guide](https://jxck-s.github.io/retar/documentation/#/docs/USER_GUIDE)**: How to use the map, filters, and UI features.
 
 ---
-
-
 
 ## Installation
 
@@ -33,8 +35,6 @@ If you are curious about your coverage, try this URL:
 
 http://[IP_ADDRESS]/?pTracks
 
-Check further down for keyboard shortcuts.
-
 ## Update (same command as installation)
 
 ```
@@ -43,20 +43,8 @@ sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/master/install
 
 Configuration should be preserved.
 
-
-
-
-
-
-
-## UI Guide
-
-For user interface details such as filters, keyboard shortcuts, and URL parameters, please see the **[User Guide](docs/USER_GUIDE.md)**.
-
-
 ## Remove / Uninstall
 
 ```
 sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/master/uninstall.sh)"
 ```
-

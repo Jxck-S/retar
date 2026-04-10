@@ -20,28 +20,28 @@ The most common way to customize the map (changing link behavior, enabling/disab
 
 ## Web Server & Caching
 Detailed instructions for setting up and optimizing your web server.
-- **[Web Server Configuration](CONFIG/WEBSERVER.md)** (Nginx, Lighttpd)
-- **[Caching & Proxy Configuration](CONFIG/CACHING.md)** (Cloudflare)
+- **[Web Server Configuration](docs/CONFIG/WEBSERVER.md)** (Nginx, Lighttpd)
+- **[Caching & Proxy Configuration](docs/CONFIG/CACHING.md)** (Cloudflare)
 
 ## User Interface Configuration
 Settings to customize the look and feel of the web interface.
-- **[UI Links & Features](CONFIG/UI-CONFIG.md)** (FlightAware links, share buttons)
-- **[Coverage Range Outlines](CONFIG/RANGE-OUTLINE.md)** (heywhatsthat.com integration)
-- **[Offline Map Setup](CONFIG/OFFLINEMAP.md)** (Self-hosted map tiles)
+- **[UI Links & Features](docs/CONFIG/UI-CONFIG.md)** (FlightAware links, share buttons)
+- **[Coverage Range Outlines](docs/CONFIG/RANGE-OUTLINE.md)** (heywhatsthat.com integration)
+- **[Offline Map Setup](docs/CONFIG/OFFLINEMAP.md)** (Self-hosted map tiles)
 
 ## System Configuration
 Settings for the decoder, history, and advanced deployments.
-- **[Aircraft History & Persistence](CONFIG/HISTORY.md)** (pTracks, Heatmaps, long-term storage)
-- **[Multiple Instances](CONFIG/INSTANCES.md)** (Running concurrent maps/feeds)
-- **[UAT (978 MHz) Setup](CONFIG/UAT.md)** (Secondary receiver configuration)
-- **[AIS Marine Tracking](CONFIG/AISCATCHER.md)** (Vessel visualization)
+- **[Aircraft History & Persistence](docs/CONFIG/HISTORY.md)** (pTracks, Heatmaps, long-term storage)
+- **[Multiple Instances](docs/CONFIG/INSTANCES.md)** (Running concurrent maps/feeds)
+- **[UAT (978 MHz) Setup](docs/CONFIG/UAT.md)** (Secondary receiver configuration)
+- **[AIS Marine Tracking](docs/CONFIG/AISCATCHER.md)** (Vessel visualization)
 
 ### Home / receiver location
 This is set in the decoder (e.g., `readsb`). If you used one of the standard install scripts, refer to the decoder's documentation for instructions on how to set the antenna location.
 
 ### Advanced Setup
-- Refer to the main [README.md](../README.md) for core settings like history interval and multiple instance setup.
-- Technical details can be found in **[Technical Architecture](TECHNICAL.md)**.
+- Refer to the main [README.md](README.md) for core settings like history interval and multiple instance setup.
+- Technical details can be found in **[Technical Architecture](docs/TECHNICAL.md)**.
 
 ---
 
