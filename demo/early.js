@@ -3,6 +3,14 @@
 
 console.time("Page Load");
 
+/** Error overlays use class .hidden with display:none !important — toggle class, not .css('display'). */
+function showErrorBox(sel) {
+    jQuery(sel).removeClass('hidden');
+}
+function hideErrorBox(sel) {
+    jQuery(sel).addClass('hidden');
+}
+
 // TAR1090 application object
 let TAR;
 TAR = (function (global, jQuery, TAR) {
@@ -554,7 +562,7 @@ if (uuid != null) {
         setTimeout(function() {
             jQuery("#loader").addClass("hidden");
             jQuery("#update_error_detail").text("Seems the decoder / receiver / backend isn't working correctly!");
-            jQuery("#update_error").css('display','block');
+            showErrorBox('#update_error');
         }, 2000);
 
         setTimeout(function() {
@@ -892,7 +900,7 @@ function webAssemblyFail(e) {
         inhibitFetch = true;
         reApi = false;
         jQuery("#generic_error_detail").text("Your browser is not supporting webassembly, this website does not work without webassembly.");
-        jQuery("#generic_error").css('display','block');
+        showErrorBox('#generic_error');
     }
     if (e) {
         console.log(e);

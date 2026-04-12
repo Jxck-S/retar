@@ -195,14 +195,14 @@
               <tr>
                 <td>
                   <div class="infoHeading">
-                    <span title="Database flags (military / PIA / LAD)">DB flags: </span>
+                    <span title="Database flags (military / PIA / LAD)">Database flags: </span>
                   </div>
                   <div class="infoData"><span id="selected_dbFlags">n/a</span></div>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <span class="infoHeading" title="ICAO type code (A320/B738)">Type: </span>
+                  <span class="infoHeading" title="ICAO type code (A320/B738)">Type code: </span>
                   <span class="infoData" id="selected_icaotype"></span>
                 </td>
               </tr>
@@ -218,7 +218,7 @@
               </tr>
               <tr>
                 <td>
-                  <span class="infoHeading" title="ICAO type description (L/S/H Landplane/Seaplane/Helicopter 1/2/3/4 Number of P/T/J Reciprocating/Turboprop/Jet Engines">Type Desc.: </span>
+                  <span class="infoHeading" title="ICAO type description (L/S/H Landplane/Seaplane/Helicopter 1/2/3/4 Number of P/T/J Reciprocating/Turboprop/Jet Engines">Type description: </span>
                   <span class="infoData" id="selected_typedesc"></span>
                 </td>
               </tr>
@@ -753,7 +753,7 @@
       </div> <!-- selected_infoblock -->
 
       <div id="loader">
-          <progress id="loader_progress"></progress>
+          <div id="loader_progress"></div>
       </div>
 
       <div id="map_container" style="background-color:#D2D2D2;">
@@ -1038,14 +1038,13 @@
 
             <!-- ABOVE_TABS_ANCHOR -->
 
-            <div id="tabs" style="min-height: 10px; overflow: auto">
-              <ul>
-                <li><a href="#tab-search">Search</a></li>
-                <li><a href="#tab-filters">Filters</a></li>
-                <li><a href="#tab-columns">Columns</a></li>
+            <div id="tabs" class="ui-sidebar-tabs" style="min-height: 10px; overflow: auto">
+              <ul class="ui-sidebar-tabs-nav" role="tablist">
+                <li role="presentation" aria-selected="true"><a href="#tab-search" role="tab">Search</a></li>
+                <li role="presentation" aria-selected="false"><a href="#tab-filters" role="tab">Filters</a></li>
               </ul>
               <div id="tab-search">
-                <div class="sidebarPanelBox">
+                <div class="sidebar-panel-sheet">
                   <table id="tab-search-table" cellpadding="0" cellspacing="0">
                     <tr>
                       <td>
@@ -1053,66 +1052,90 @@
                           <div class="infoBlockTitleText">Search:</div>
                           <div class="search-input-wrapper">
                             <input id="search_input" name="searchBox" type="text" class="searchInput textInputWithClear"
-                              maxlength="128" title="Searches on the hex ID, callsign, registration, and type.">
+                              maxlength="128" title="Tail number, callsign, ICAO hex, aircraft type; airport code (e.g. KATL); lat/lon e.g. 33.64,-84.42 or 33.64 -84.42">
                             <div id="search_clear_button" class="search-clear-btn" title="Clear Search">×</div>
                           </div>
-                          <button class="formButton" type="submit">Search</button>
-                        </form>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <form id="jump_form">
-                          <div class="infoBlockTitleText">Jump to Airport or Latitude, Longitude:</div>
-                          <div class="search-input-wrapper">
-                            <input id="jump_input" name="jumpBox" type="text" class="searchInput textInputWithClear"
-                              maxlength="128" title="Search by airport code like KATL, ZBAA, or LAX">
-                            <div id="jump_clear_button" class="search-clear-btn" title="Clear">×</div>
-                          </div>
+                          <button class="formButton search-submit-btn" type="submit">Search</button>
+                          <p class="search-form-hint">Tail number, callsign, ICAO hex, airport code, latitude and longitude</p>
                         </form>
                       </td>
                     </tr>
                   </table>
-                  <div class="warning" id="search_warning" style="display:none">
-                  </div>
+                  <div class="search-warning sidebar-notice-amber" id="search_warning" style="display:none" role="status" aria-live="polite"></div>
                 </div>
               </div>
               <div id="tab-filters">
-                <table cellpadding="0" cellspacing="0" id="filterTable">
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div class="infoBlockSection filterBlock">
-                          <form id="altitude_filter_form" class="filterForm">
-                            <div class="filterFormHeader">
-                              <span class="infoBlockTitleText">ALTITUDE:</span>
-                              <span class="filterFormActions">
-                                <button class="formButton filterFormBtn" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                                <button class="formButton filterFormBtn" id="altitude_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                              </span>
-                            </div>
-                            <div class="filterFormBody">
-                              <input id="altitude_filter_min" name="minAltitude" type="text" class="altitudeFilterInput" maxlength="6">
-                              <label for="altitude_filter_min" class="altitudeUnit"></label>
-                              <span> to </span>
-                              <input id="altitude_filter_max" name="maxAltitude" type="text" class="altitudeFilterInput" maxlength="6">
-                              <label for="altitude_filter_max" class="altitudeUnit"></label>
-                            </div>
-                          </form>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                
-                <div class="filterBlocksWrap">
-                  <div class="infoBlockSection filterBlock">
-                    <form id="source_filter_form" class="filterForm">
-                      <div class="filterFormHeader">
-                        <span class="infoBlockTitleText">SOURCE:</span>
+                <div class="sidebar-panel-sheet filters-panel-sheet">
+                <div id="filters_active_bar" class="filters-active-bar">
+                  <div id="filters_active_summary" class="filters-active-summary">No active filters</div>
+                  <button type="button" id="filters_clear_all" class="formButton filters-clear-all-btn" title="Clear all filters">Clear all</button>
+                </div>
+
+                <details class="filter-accordion" id="filter_acc_altitude">
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Altitude</span><span class="filter-accordion-badge" id="filter_badge_altitude" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <form id="altitude_filter_form" class="filterForm" aria-label="Altitude range filter">
+                      <div class="filterFormHeader filterFormHeader--toolbar">
                         <span class="filterFormActions">
-                          <button class="formButton filterFormBtn" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                          <button class="formButton filterFormBtn" id="source_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                          <button class="formButton filterFormBtn" type="submit" title="Apply altitude filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                          <button class="formButton filterFormBtn" id="altitude_filter_reset_button" title="Reset altitude filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                        </span>
+                      </div>
+                      <div class="filterFormBody">
+                        <input id="altitude_filter_min" name="minAltitude" type="text" class="altitudeFilterInput" maxlength="6">
+                        <label for="altitude_filter_min" class="altitudeUnit"></label>
+                        <span> to </span>
+                        <input id="altitude_filter_max" name="maxAltitude" type="text" class="altitudeFilterInput" maxlength="6">
+                        <label for="altitude_filter_max" class="altitudeUnit"></label>
+                      </div>
+                    </form>
+                  </div>
+                </details>
+
+                <details class="filter-accordion" id="filter_acc_callsign">
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Callsign</span><span class="filter-accordion-badge" id="filter_badge_callsign" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <table cellpadding="0" cellspacing="0" id="filterTable_callsign">
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </details>
+
+                <details class="filter-accordion" id="filter_acc_squawk">
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Squawk</span><span class="filter-accordion-badge" id="filter_badge_squawk" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <table cellpadding="0" cellspacing="0" id="filterTable_squawk">
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </details>
+
+                <details class="filter-accordion" id="filter_acc_type">
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Aircraft type</span><span class="filter-accordion-badge" id="filter_badge_type" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <table cellpadding="0" cellspacing="0" id="filterTable_type">
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </details>
+
+                <details class="filter-accordion" id="filter_acc_icao">
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">ICAO hex</span><span class="filter-accordion-badge" id="filter_badge_icao" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <table cellpadding="0" cellspacing="0" id="filterTable_icao">
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </details>
+
+                <details class="filter-accordion" id="filter_acc_source">
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Source</span><span class="filter-accordion-badge" id="filter_badge_source" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <form id="source_filter_form" class="filterForm" aria-label="Data source filter">
+                      <div class="filterFormHeader filterFormHeader--toolbar">
+                        <span class="filterFormActions">
+                          <button class="formButton filterFormBtn" type="submit" title="Apply source filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                          <button class="formButton filterFormBtn" id="source_filter_reset_button" title="Reset source filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                         </span>
                       </div>
                       <div class="filterFormBody">
@@ -1120,14 +1143,16 @@
                       </div>
                     </form>
                   </div>
+                </details>
 
-                  <div class="infoBlockSection filterBlock">
-                    <form id="flag_filter_form" class="filterForm">
-                      <div class="filterFormHeader">
-                        <span class="infoBlockTitleText">DB FLAGS:</span>
+                <details class="filter-accordion" id="filter_acc_flags">
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Database flags</span><span class="filter-accordion-badge" id="filter_badge_flags" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <form id="flag_filter_form" class="filterForm" aria-label="Database flags filter">
+                      <div class="filterFormHeader filterFormHeader--toolbar">
                         <span class="filterFormActions">
-                          <button class="formButton filterFormBtn" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                          <button class="formButton filterFormBtn" id="flag_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                          <button class="formButton filterFormBtn" type="submit" title="Apply database flags filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                          <button class="formButton filterFormBtn" id="flag_filter_reset_button" title="Reset database flags filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                         </span>
                       </div>
                       <div class="filterFormBody">
@@ -1135,14 +1160,43 @@
                       </div>
                     </form>
                   </div>
+                </details>
 
-                  <div class="infoBlockSection filterBlock">
-                    <form id="nodb_filter_form" class="filterForm">
-                      <div class="filterFormHeader">
-                        <span class="infoBlockTitleText">MISSING DB INFO:</span>
+                <details class="filter-accordion" id="filter_acc_reg">
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Registration</span><span class="filter-accordion-badge" id="filter_badge_reg" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <table cellpadding="0" cellspacing="0" id="filterTable_reg" class="filter-table-reg-below">
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </details>
+
+                <details class="filter-accordion" id="filter_acc_route" hidden>
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Route</span><span class="filter-accordion-badge" id="filter_badge_route" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <table cellpadding="0" cellspacing="0" id="filterTable_route">
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </details>
+
+                <details class="filter-accordion" id="filter_acc_emitter">
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Emitter category</span><span class="filter-accordion-badge" id="filter_badge_emitter" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <table cellpadding="0" cellspacing="0" id="filterTable_emitter">
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </details>
+
+                <details class="filter-accordion" id="filter_acc_nodb">
+                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Missing database</span><span class="filter-accordion-badge" id="filter_badge_nodb" aria-hidden="true"></span></summary>
+                  <div class="filter-accordion-body">
+                    <form id="nodb_filter_form" class="filterForm" aria-label="Missing database filter">
+                      <div class="filterFormHeader filterFormHeader--toolbar">
                         <span class="filterFormActions">
-                          <button class="formButton filterFormBtn" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                          <button class="formButton filterFormBtn" id="nodb_filter_reset_button" title="Reset"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                          <button class="formButton filterFormBtn" type="submit" title="Apply missing database filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                          <button class="formButton filterFormBtn" id="nodb_filter_reset_button" title="Reset missing database filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                         </span>
                       </div>
                       <div class="filterFormBody">
@@ -1150,26 +1204,30 @@
                       </div>
                     </form>
                   </div>
+                </details>
                 </div>
-
-                <table cellpadding="0" cellspacing="0" id="filterTable3" style="margin-top: 8px;">
-                  <tbody>
-                  </tbody>
-                </table>
               </div>
-              <div id="tab-columns">
+            </div>
+
+            <button type="button" id="mobile_table_toggle" class="formButton mobile_table_toggle" style="display: none;">Show Aircraft List</button>
+            <div id="sidebar_table_sheet" class="sidebar-table-sheet">
+              <div class="planes-table-toolbar">
+                <button type="button" id="columns_picker_toggle" class="columns-picker-btn" title="Table columns — show, hide, reorder" aria-label="Open table columns picker" aria-expanded="false" aria-controls="columns_picker_panel">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"></rect><rect x="9.5" y="4" width="5" height="16" rx="1"></rect><rect x="16" y="4" width="5" height="16" rx="1"></rect></svg>
+                </button>
+              </div>
+              <div id="columns_picker_panel" class="columns-picker-panel hidden" role="region" aria-label="Table columns" aria-hidden="true">
+                <p class="columns-picker-hint">Drag to reorder. Click a column to show or hide.</p>
                 <ul id="sortableColumns"></ul>
               </div>
+              <table id="planesTable" style="width: 100%">
+              </table>
+
+              <div id="legend" class="legend">
+              </div>
+
+              <!-- BELOW_LEGEND_ANCHOR -->
             </div>
-
-            <button id="mobile_table_toggle" class="mobile_table_toggle" style="display: none;">Show Aircraft List</button>
-            <table id="planesTable" style="width: 100%">
-            </table>
-
-            <div id="legend" class="legend">
-            </div>
-
-            <!-- BELOW_LEGEND_ANCHOR -->
           </div>
 
         </div> <!-- sidebar_canvas -->
@@ -1178,16 +1236,16 @@
 
     </div> <!-- layout_container -->
 
-    <div id="update_error" class="hidden error_box">
-      Problem fetching data from the server
-      <span id="update_error_detail" style="display: none;"></span>
+    <div id="update_error" class="hidden error_box sidebar-notice-amber" role="alert">
+      <div class="error_box_main">Problem fetching data from the server</div>
+      <div id="update_error_detail" class="error_box_detail"></div>
     </div>
 
-    <div id="timers_paused" class="hidden error_box">
+    <div id="timers_paused" class="hidden error_box sidebar-notice-amber">
       <span id="timers_paused_detail"></span>
     </div>
 
-    <div id="generic_error" class="hidden error_box">
+    <div id="generic_error" class="hidden error_box sidebar-notice-amber" role="alert">
       <span id="generic_error_detail"></span><br>
     </div>
 

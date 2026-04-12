@@ -104,7 +104,6 @@ let traceOpts = {};
 let icaoParam = null;
 let newWidth = lineWidth;
 let SiteOverride = (SiteLat != null && SiteLon != null);
-let onJumpInput = null;
 let labelFill = null;
 let blackFill = null;
 let labelStroke = null;
@@ -365,7 +364,7 @@ function fetchFail(jqxhr, status, error) {
         console.log(error);
         if (status != 429 && status != '429') {
             jQuery("#update_error_detail").text(errText);
-            jQuery("#update_error").css('display','block');
+            showErrorBox('#update_error');
             StaleReceiverCount++;
         } else {
             if (C429++ > 16) {
@@ -394,7 +393,7 @@ function fetchDone(data) {
                 let errText = e.message;
                 console.log(errText);
                 jQuery("#update_error_detail").text(errText);
-                jQuery("#update_error").css('display','block');
+                showErrorBox('#update_error');
                 return;
             }
             let arrayBuffer = res.buffer
@@ -412,7 +411,7 @@ function fetchDone(data) {
             let error = data.error;
             if (error) {
                 jQuery("#update_error_detail").text(error);
-                jQuery("#update_error").css('display','block');
+                showErrorBox('#update_error');
                 StaleReceiverCount++;
             }
             return;
@@ -432,6 +431,9 @@ function fetchDone(data) {
             processReceiverUpdate(uat_data);
             uat_data = null;
         }
+
+        jQuery("#update_error_detail").text('');
+        hideErrorBox('#update_error');
 
         if (pendingFetches <= 0 && !tabHidden) {
             triggerRefresh++;
@@ -467,11 +469,11 @@ function fetchDone(data) {
             StaleReceiverCount++;
             if (StaleReceiverCount > 5) {
                 jQuery("#update_error_detail").text("The data from the server hasn't been updated in a while.");
-                jQuery("#update_error").css('display','block');
+                showErrorBox('#update_error');
             }
         } else if (StaleReceiverCount > 0){
             StaleReceiverCount = 0;
-            jQuery("#update_error").css('display','none');
+            hideErrorBox('#update_error');
         }
     } catch (e) {
         console.error(e);
@@ -855,7 +857,7 @@ function initGlobeTableLimitControl() {
     }
     applyGlobeTableLimitFromPreset(preset);
 
-    const container = jQuery('#sidebar-table');
+    const container = jQuery('#sidebar_table_sheet');
     const currentIndex = Math.max(0, GLOBE_TABLE_LIMIT_PRESETS.findIndex(p => p.value === preset));
     const maxIndex = GLOBE_TABLE_LIMIT_PRESETS.length - 1;
 
@@ -893,6 +895,46 @@ function initGlobeTableLimitControl() {
     });
 
     container.append(row);
+}
+
+function initColumnsPickerUI() {
+    const $panel = jQuery('#columns_picker_panel');
+    const $btn = jQuery('#columns_picker_toggle');
+    if (!$panel.length || !$btn.length)
+        return;
+
+    function setOpen(open) {
+        $panel.toggleClass('hidden', !open);
+        $panel.attr('aria-hidden', open ? 'false' : 'true');
+        $btn.attr('aria-expanded', open ? 'true' : 'false');
+        $btn.toggleClass('columns-picker-btn-active', open);
+        if (open) {
+            try {
+                jQuery('#sortableColumns').sortable('refresh');
+            } catch (e) { /* sortable not ready */ }
+        }
+    }
+
+    $btn.on('click', function (e) {
+        e.stopPropagation();
+        setOpen($panel.hasClass('hidden'));
+    });
+
+    jQuery(document).off('click.columnsPicker').on('click.columnsPicker', function (e) {
+        if ($panel.hasClass('hidden'))
+            return;
+        const t = e.target;
+        if ($btn[0] === t || jQuery.contains($btn[0], t))
+            return;
+        if ($panel[0] === t || jQuery.contains($panel[0], t))
+            return;
+        setOpen(false);
+    });
+
+    jQuery(document).off('keydown.columnsPicker').on('keydown.columnsPicker', function (e) {
+        if (e.key === 'Escape' && !$panel.hasClass('hidden'))
+            setOpen(false);
+    });
 }
 
 function initPage() {
@@ -1226,9 +1268,9 @@ function earlyInitPage() {
 
     if (false && iOSVersion() <= 12 && !('PointerEvent' in window)) {
         jQuery("#generic_error_detail").text("Enable Settings - Safari - Advanced - Experimental features - Pointer Events");
-        jQuery("#generic_error").css('display','block');
+        showErrorBox('#generic_error');
         setTimeout(function() {
-            jQuery("#generic_error").css('display','none');
+            hideErrorBox('#generic_error');
         }, 30000);
     }
 
@@ -1251,12 +1293,20 @@ function earlyInitPage() {
         buttonActive('#P', noVanish);
     }
 
+    let tabActive = parseInt(loStore['active_tab'], 10);
+    if (isNaN(tabActive) || tabActive < 0)
+        tabActive = 0;
+    if (tabActive > 1)
+        tabActive = 0;
+    loStore['active_tab'] = tabActive;
+
     jQuery('#tabs').tabs({
-        active: loStore['active_tab'],
+        active: tabActive,
         activate: function (event, ui) {
             loStore['active_tab'] = jQuery("#tabs").tabs("option", "active");
         },
-        collapsible: true
+        /* false: otherwise clicking the active tab collapses it and both labels look inactive (gray) */
+        collapsible: false
     });
 
     // Set page basics
@@ -1268,6 +1318,7 @@ function earlyInitPage() {
 
     initializeUnitsSelector();
     TAR.planeMan.init();
+    initColumnsPickerUI();
 
     if (loStore['sidebar_width'] != null)
         jQuery('#sidebar_container').width(loStore['sidebar_width']);
@@ -1301,15 +1352,14 @@ function earlyInitPage() {
     jQuery("#source_filter_reset_button").click(onResetSourceFilter);
     jQuery("#flag_filter_reset_button").click(onResetFlagFilter);
 
+    jQuery('#filters_clear_all').on('click', function (e) {
+        e.preventDefault();
+        clearAllFilters();
+    });
+
     // Initialize other controls
     jQuery("#search_form").submit(onSearch);
     jQuery("#search_clear_button").click(onSearchClear);
-    jQuery("#jump_clear_button").click(function() {
-        jQuery("#jump_input").val("");
-        jQuery("#jump_input").blur();
-    });
-    jQuery("#jump_form").submit(onJump);
-
     jQuery("#show_trace").click(toggleShowTrace);
     jQuery("#trace_back_1d").click(function() {shiftTrace(-1)});
     jQuery("#trace_jump_1d").click(function() {shiftTrace(1)});
@@ -1350,6 +1400,8 @@ function earlyInitPage() {
         hideCustomLayersPanel();
         closeLabelMenu();
         jQuery('#settings_infoblock').toggle();
+        if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+            TAR.altitudeChart.syncMobileCollapse();
     });
 
     if (!onMobile) {
@@ -1368,6 +1420,8 @@ function earlyInitPage() {
 
     jQuery('#settings_close').on('click', function() {
         jQuery('#settings_infoblock').hide();
+        if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+            TAR.altitudeChart.syncMobileCollapse();
     });
 
     jQuery('#groundvehicle_filter').on('click', function() {
@@ -1740,6 +1794,9 @@ jQuery('#selected_altitude_geom1')
                  jQuery("body").removeClass("mobile_sidebar_open");
             }
 
+            if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+                TAR.altitudeChart.syncMobileCollapse();
+
             if (loadFinished) {
                 updateMapSize();
             }
@@ -1752,6 +1809,8 @@ jQuery('#selected_altitude_geom1')
         } else {
              jQuery("#sidebar_container").hide();
         }
+        if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+            TAR.altitudeChart.syncMobileCollapse();
     });
 
     jQuery("#mobile_table_toggle").click(function() {
@@ -1764,6 +1823,8 @@ jQuery('#selected_altitude_geom1')
             container.addClass("mobile_visible");
             btn.text("Hide Aircraft List");
         }
+        if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+            TAR.altitudeChart.syncMobileCollapse();
     });
 
     new Toggle({
@@ -1818,6 +1879,7 @@ jQuery('#selected_altitude_geom1')
                         jQuery('#dd_route').hide();
                     }
                 }
+                syncRouteFilterAccordionVisibility();
             }
         });
         if (useIataAirportCodes == false) {
@@ -2045,8 +2107,8 @@ function initNoDbFilter() {
     };
 
     let html = '';
-    html += createFilter('NO REG', nodbFilterValues[0]);
-    html += createFilter('NO TYPE', nodbFilterValues[1]);
+    html += createFilter('No registration', nodbFilterValues[0]);
+    html += createFilter('No type', nodbFilterValues[1]);
 
     document.getElementById('nodbFilter').innerHTML = html;
 
@@ -2248,7 +2310,7 @@ function clearIntervalTimers(arg) {
     if (loadFinished && arg != 'silent') {
         console.log(localTime(new Date()) + ' clear timers');
         jQuery("#timers_paused_detail").text('Timers paused (tab hidden).');
-        jQuery("#timers_paused").css('display','block');
+        showErrorBox('#timers_paused');
     }
     const entries = Object.entries(timers);
     for (let i in entries) {
@@ -2267,7 +2329,7 @@ function setIntervalTimers() {
     }
 
     if (loadFinished) {
-        jQuery("#timers_paused").css('display','none');
+        hideErrorBox('#timers_paused');
     }
     console.log(localTime(new Date()) + " set timers ");
     if (dynGlobeRate && !uuid) {
@@ -4304,6 +4366,7 @@ function refreshSelected() {
 
 let somethingHighlighted = false;
 function refreshHighlighted() {
+    try {
     // this is following nearly identical logic, etc, as the refreshSelected function, but doing less junk for the highlighted pane
     let highlighted = HighlightedPlane;
 
@@ -4433,6 +4496,10 @@ function refreshHighlighted() {
     jQuery('#highlighted_pf_route').text((highlighted.pfRoute ? highlighted.pfRoute : highlighted.icao.toUpperCase()));
 
     jQuery('#highlighted_rssi').text(highlighted.rssi != null ? highlighted.rssi.toFixed(1) + ' dBFS' : "n/a");
+    } finally {
+        if (TAR && TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+            TAR.altitudeChart.syncMobileCollapse();
+    }
 }
 
 function removeHighlight() {
@@ -5326,7 +5393,7 @@ function resetMap() {
         OLMap.getView().setRotation(g.mapOrientation);
 
         //selectPlaneByHex(null,false);
-        jQuery("#update_error").css('display','none');
+        hideErrorBox('#update_error');
     });
 }
 
@@ -5451,6 +5518,9 @@ function adjustInfoBlock() {
         jQuery('#photo_container').removeClass('photo_row_sil photo_row_photo');
         jQuery('#photo_container').css('height', '');
     }
+
+    if (TAR && TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+        TAR.altitudeChart.syncMobileCollapse();
 }
 
 function initializeUnitsSelector() {
@@ -5651,6 +5721,28 @@ function invertMap(evt){
 (function (global, jQuery, TAR) {
     let altitudeChart = TAR.altitudeChart = TAR.altitudeChart || {};
 
+    altitudeChart.syncMobileCollapse = function () {
+        const $c = jQuery('#altitude_chart');
+        if (!onMobile) {
+            $c.removeClass('altitude_chart_mobile_hidden');
+            return;
+        }
+        const t = toggles['altitudeChart'];
+        if (!t || !t.state) {
+            $c.removeClass('altitude_chart_mobile_hidden');
+            return;
+        }
+        const hide =
+            jQuery('#selected_infoblock').is(':visible') ||
+            jQuery('#highlighted_infoblock').is(':visible') ||
+            jQuery('#settings_infoblock').is(':visible') ||
+            jQuery('#layers_infoblock').is(':visible') ||
+            jQuery('body').hasClass('mobile_sidebar_open') ||
+            jQuery('#sidebar-table').hasClass('mobile_visible') ||
+            (jQuery('#labelConfigMenu').length && jQuery('#labelConfigMenu').is(':visible'));
+        $c.toggleClass('altitude_chart_mobile_hidden', hide);
+    };
+
     // [gradient offset, altitude in feet] — same breakpoints as before
     const ALT_MAP = [[0.033,500],[0.066,1000],[0.126,2000],[0.19,4000],[0.253,6000],[0.316,8000],[0.38,10000],[0.59,20000],[0.79,30000],[1,40000]];
 
@@ -5667,9 +5759,25 @@ function invertMap(evt){
 
     function createLegendSVG() {
         const isMetric = DisplayUnits === 'metric';
-        const W = 920, H = 34;
-        const badgeW = 46, barX = badgeW + 7, barW = W - barX - 2, barH = 14, barY = 0;
-        const rx = barH / 2;
+        const padX = 18;
+        const innerW = 920;
+        const W = innerW + 2 * padX;
+        const H = 62;
+        const badgeW = 64;
+        const barX = padX + badgeW + 8;
+        const barW = W - barX - padX;
+        const barH = 22;
+        const barY = 12;
+        const labelY = H - 11;
+        const fontLabel = 13;
+        const fontBadge = 14;
+        const gs = (typeof globalScale === 'number' && globalScale > 0) ? globalScale : 1;
+        const legendMaxCssPx = 520 * gs;
+        /* Outer shell: ~8px screen corners — a bit squarer than before, still soft */
+        const panelRx = Math.min(H / 2, W / 2, Math.max(6, Math.round((8 * W) / legendMaxCssPx)));
+        /* Bar + badge: not full pills; proportional to shell but capped (squarer than barH/2) */
+        const innerRx = Math.max(3, Math.min(barH / 2 - 2, Math.round(panelRx * 0.45)));
+        const rx = innerRx;
 
         let stops = '';
         for (const [offset, altFt] of ALT_MAP) {
@@ -5682,22 +5790,21 @@ function invertMap(evt){
         for (const [offset, altFt] of allPoints) {
             const x = (barX + offset * barW).toFixed(1);
             const anchor = offset === 0 ? 'start' : offset === 1 ? 'end' : 'middle';
-            ticks  += `<line x1="${x}" y1="${barY + barH + 2}" x2="${x}" y2="${barY + barH + 5}" stroke="currentColor" stroke-width="1" stroke-opacity="0.45"/>`;
-            labels += `<text x="${x}" y="${H}" text-anchor="${anchor}" font-size="9" fill="currentColor" opacity="0.75">${fmtLabel(altFt, isMetric, offset === 1)}</text>`;
+            ticks  += `<line x1="${x}" y1="${barY + barH + 4}" x2="${x}" y2="${barY + barH + 9}" stroke="currentColor" stroke-width="1.15" stroke-opacity="0.5"/>`;
+            labels += `<text x="${x}" y="${labelY}" text-anchor="${anchor}" font-size="${fontLabel}" fill="currentColor" opacity="0.92">${fmtLabel(altFt, isMetric, offset === 1)}</text>`;
         }
 
         const unit = isMetric ? 'm' : 'ft';
 
         return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible">
-  <rect x="0" y="0" width="${W}" height="${H}" rx="5" fill="var(--BGCOLOR1)" opacity="0.55"/>
   <defs>
     <linearGradient id="alt-grad" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient>
     <clipPath id="alt-clip"><rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="${rx}"/></clipPath>
   </defs>
-  <rect x="0" y="${barY + 1}" width="${badgeW}" height="${barH - 2}" rx="${(barH - 2) / 2}" fill="var(--ACCENT)" opacity="0.85"/>
-  <text x="${badgeW / 2}" y="${barY + barH - 4}" text-anchor="middle" font-size="9.5" font-weight="700" fill="white" letter-spacing="0.5">ALT ${unit}</text>
+  <rect x="0" y="0" width="${W}" height="${H}" rx="${panelRx}" ry="${panelRx}" fill="var(--BGCOLOR1)"/>
+  <rect x="${padX}" y="${barY + 1}" width="${badgeW}" height="${barH - 2}" rx="${rx}" fill="var(--ACCENT)" opacity="0.9"/>
+  <text x="${padX + badgeW / 2}" y="${barY + barH - 6}" text-anchor="middle" font-size="${fontBadge}" font-weight="700" fill="white" letter-spacing="0.5">ALT ${unit}</text>
   <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="${rx}" fill="url(#alt-grad)"/>
-  <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="${rx}" fill="none" stroke="currentColor" stroke-opacity="0.15" stroke-width="1"/>
   ${ticks}${labels}
 </svg>`;
     }
@@ -5706,6 +5813,7 @@ function invertMap(evt){
         const btn = document.getElementById('altitude_chart_button');
         if (btn) btn.innerHTML = createLegendSVG();
         jQuery('#altitude_chart').show();
+        altitudeChart.syncMobileCollapse();
     }
 
     altitudeChart.render = function () {
@@ -5714,6 +5822,7 @@ function invertMap(evt){
         } else {
             jQuery('#altitude_chart').hide();
         }
+        altitudeChart.syncMobileCollapse();
     }
 
     altitudeChart.init = function () {
@@ -5728,6 +5837,10 @@ function invertMap(evt){
             init: chartOn,
             setState: altitudeChart.render
         });
+        /* Toggle reads loStore after init — a saved "on" from desktop would enable on phone. */
+        if (onMobile && !usp.has('altitudeChart')) {
+            toggles['altitudeChart'].toggle(false, true);
+        }
     }
 
     return TAR;
@@ -5870,6 +5983,8 @@ function closeLabelMenu() {
     const overlay = document.getElementById('labelConfigMenuOverlay');
     if (menu) menu.style.display = 'none';
     if (overlay) overlay.style.display = 'none';
+    if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+        TAR.altitudeChart.syncMobileCollapse();
 }
 
 function toggleLabelMenu() {
@@ -5893,6 +6008,8 @@ function toggleLabelMenu() {
     } else {
         closeLabelMenu();
     }
+    if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+        TAR.altitudeChart.syncMobileCollapse();
 }
 
 
@@ -5924,49 +6041,85 @@ function toggleMultiSelect(newState) {
     buttonActive('#M', multiSelect);
 }
 
-function onJump(e) {
+function jumpMapToLatLon(lat, lon) {
+    console.log("jumping to: " + lat + " " + lon);
+    OLMap.getView().setCenter(ol.proj.fromLonLat([lon, lat]));
+    if (g.zoomLvl >= 7) {
+        fetchData({force: true});
+    }
+    refreshFilter();
+    hideSearchWarning();
+}
+
+/**
+ * Try ICAO/IATA-style airport code (3–4 letters). On miss, run onMiss (e.g. aircraft search).
+ */
+function tryAirportJumpThen(airportUpper, onMiss) {
+    function lookup() {
+        const coords = g.airport_cache[airportUpper];
+        if (coords) {
+            jumpMapToLatLon(coords[0], coords[1]);
+            return true;
+        }
+        return false;
+    }
+    if (!g.airport_cache) {
+        jQuery.getJSON(databaseFolder + "/airport-coords.js")
+            .done(function (data) {
+                g.airport_cache = data;
+                if (!lookup())
+                    onMiss();
+            })
+            .fail(function () {
+                onMiss();
+            });
+        return;
+    }
+    if (!lookup())
+        onMiss();
+}
+
+function parseLatLonPair(s) {
+    const latLon = /^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/.exec(s.trim());
+    if (latLon) {
+        return [parseFloat(latLon[1]), parseFloat(latLon[2])];
+    }
+    const latLonSpace = /^(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)$/.exec(s.trim());
+    if (latLonSpace) {
+        return [parseFloat(latLonSpace[1]), parseFloat(latLonSpace[2])];
+    }
+    return null;
+}
+
+function runPlaneSearchList(searchTerm) {
+    let results = [];
+    if (searchTerm) {
+        results = findPlanes(searchTerm, "byIcao", "byCallsign", "byReg", "byType", true);
+    }
+    if (results.length > 0 && haveTraces) {
+        toggleIsolation("on");
+        if (results.length < 100) {
+            getTrace(null, null, {list: results});
+        }
+    }
+}
+
+/** URL `?airport=` — airport code or lat,lon / lat lon */
+function jumpToLocationFromQuery(q) {
+    if (q == null || String(q).trim() === "")
+        return;
+    const raw = String(q).trim();
+    const coords = parseLatLonPair(raw);
+    if (coords && !isNaN(coords[0]) && !isNaN(coords[1])
+        && coords[0] >= -90 && coords[0] <= 90 && coords[1] >= -180 && coords[1] <= 180) {
+        toggleFollow(false);
+        jumpMapToLatLon(coords[0], coords[1]);
+        return;
+    }
     toggleFollow(false);
-    if (e) {
-        e.preventDefault();
-        onJumpInput = jQuery("#jump_input").val();
-        jQuery("#jump_input").val("");
-        jQuery("#jump_input").blur();
-    }
-    let coords = null;
-    let airport = null;
-    if (onJumpInput.indexOf(",") >= 0) {
-        let values = onJumpInput.split(',');
-        if (!values || values.length != 2) {
-            showSearchWarning('Input format decimal coordinates: LATI.TUDE, LONGI.TUDE');
-        }
-        coords = [parseFloat(values[0]), parseFloat(values[1])];
-    } else {
-        airport = onJumpInput.trim().toUpperCase();
-    }
-    if (airport) {
-        if (!g.airport_cache) {
-            jQuery.getJSON(databaseFolder + "/airport-coords.js")
-                .done(function(data) {
-                    g.airport_cache = data;
-                    onJump();
-                });
-            return;
-        }
-        coords = g.airport_cache[airport];
-    }
-    if (coords) {
-        console.log("jumping to: " + coords[0] + " " + coords[1]);
-        OLMap.getView().setCenter(ol.proj.fromLonLat([coords[1], coords[0]]));
-
-        if (g.zoomLvl >= 7) {
-            fetchData({force: true});
-        }
-
-        refreshFilter();
-        hideSearchWarning();
-    } else {
-        showSearchWarning('Failed to find airport ' + airport);
-    }
+    tryAirportJumpThen(raw.toUpperCase(), function () {
+        showSearchWarning("Failed to find airport: " + raw);
+    });
 }
 
 function hideSearchWarning() {
@@ -5992,19 +6145,44 @@ function onSearch(e) {
     const searchTerm = jQuery("#search_input").val().trim();
     jQuery("#search_input").val("");
     jQuery("#search_input").blur();
-    let results = [];
-    if (searchTerm)
-        results = findPlanes(searchTerm, "byIcao", "byCallsign", "byReg", "byType", true);
-    if (results.length > 0 && haveTraces) {
-        toggleIsolation("on");
-        if (results.length < 100) {
-            getTrace(null, null, {list: results});
-        }
+
+    function closeMobileSidebar() {
+        if (onMobile)
+            toggles.sidebar_visible.toggle(false);
     }
 
-    if (onMobile) {
-         toggles.sidebar_visible.toggle(false);
+    if (!searchTerm) {
+        closeMobileSidebar();
+        return false;
     }
+
+    const coords = parseLatLonPair(searchTerm);
+    if (coords) {
+        const lat = coords[0];
+        const lon = coords[1];
+        if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+            showSearchWarning("Invalid coordinates. Use decimal latitude and longitude (e.g. 51.47,-0.46 or 51.47 -0.46).");
+            closeMobileSidebar();
+            return false;
+        }
+        toggleFollow(false);
+        jumpMapToLatLon(lat, lon);
+        closeMobileSidebar();
+        return false;
+    }
+
+    if (/^[A-Za-z]{3,4}$/.test(searchTerm)) {
+        toggleFollow(false);
+        const code = searchTerm.toUpperCase();
+        tryAirportJumpThen(code, function () {
+            runPlaneSearchList(searchTerm);
+        });
+        closeMobileSidebar();
+        return false;
+    }
+
+    runPlaneSearchList(searchTerm);
+    closeMobileSidebar();
     return false;
 }
 function onSearchClear(e) {
@@ -6121,6 +6299,13 @@ function updateNoDbFilter(e) {
 const filters = {};
 const filter_list = [];
 const filters_active = [];
+const FILTER_FIELD_KEYS_CALLSIGN = new Set(['callsign']);
+const FILTER_FIELD_KEYS_TYPE = new Set(['type', 'description']);
+const FILTER_FIELD_KEYS_SQUAWK = new Set(['squawk']);
+const FILTER_FIELD_KEYS_ICAO = new Set(['icao']);
+const FILTER_FIELD_KEYS_REG = new Set(['registration', 'country']);
+const FILTER_FIELD_KEYS_ROUTE = new Set(['route']);
+const FILTER_FIELD_KEYS_EMITTER = new Set(['category']);
 
 function Filter(arg) {
     this.key = arg.key;
@@ -6160,11 +6345,25 @@ Filter.prototype.set = function(val) {
         filters_active.push(this);
     }
     if (!val && list_index >= 0) {
-        filters_active.splice(list_index);
+        filters_active.splice(list_index, 1);
     }
 
     refreshFilter();
 }
+
+/** Update filter value and filters_active without refresh (for bulk clear). */
+Filter.prototype.setQuiet = function (val) {
+    val = val == null ? '' : String(val);
+    this.input.val(val);
+    this.pattern = val;
+    this.PATTERN = val.toUpperCase();
+    const list_index = filters_active.indexOf(this);
+    if (!val && list_index >= 0) {
+        filters_active.splice(list_index, 1);
+    } else if (val && list_index < 0) {
+        filters_active.push(this);
+    }
+};
 
 Filter.prototype.reset = function(e) {
     if (e) {
@@ -6179,17 +6378,17 @@ Filter.prototype.init = function() {
     const row = this.tbody.insertRow();
     row.innerHTML =
         `<td>
-            <div class="infoBlockSection filterBlock">
-                <form id="${this.id}" class="filterForm">
-                    <div class="filterFormHeader">
-                        <span class="infoBlockTitleText" style="text-transform: uppercase;">${this.name}:</span>
+            <div class="filter-field-item">
+                <form id="${this.id}" class="filterForm" aria-label="${this.name} filter">
+                    <div class="filterFormHeader filterFormHeader--toolbar">
                         <span class="filterFormActions">
-                            <button class="formButton filterFormBtn" type="submit" title="Filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                            <button class="formButton filterFormBtn" id="${this.id}_reset" title="Reset"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                            <button class="formButton filterFormBtn" type="submit" title="Apply ${this.name} filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
+                            <button class="formButton filterFormBtn" id="${this.id}_reset" title="Reset ${this.name} filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                         </span>
                     </div>
-                    <div class="filterFormBody">
-                        <input id="${this.id}_input" name="${this.id}_name" type="text" class="searchInput" maxlength="1024" style="width: 100%;">
+                    <div class="filterFormBody filterFormBody--field">
+                        <label class="filter-field-label" for="${this.id}_input">${this.name}</label>
+                        <input id="${this.id}_input" name="${this.id}_name" type="text" class="searchInput filter-field-input" maxlength="1024" placeholder="" autocomplete="off">
                     </div>
                 </form>
             </div>
@@ -6200,6 +6399,29 @@ Filter.prototype.init = function() {
     jQuery(this.sid + '_reset').click((e) => { return this.reset(e); });
 }
 
+/** Show route filter accordion only when route API is configured and "Lookup route" (useRouteAPI) is on. */
+function syncRouteFilterAccordionVisibility() {
+    const acc = document.getElementById('filter_acc_route');
+    if (!acc)
+        return;
+    if (!routeApiUrl) {
+        acc.hidden = true;
+        return;
+    }
+    const show = useRouteAPI;
+    acc.hidden = !show;
+    const r = filters.route;
+    if (!r)
+        return;
+    if (!show)
+        r.setQuiet('');
+    const dis = !show;
+    r.input.prop('disabled', dis);
+    jQuery(r.form).find('button').prop('disabled', dis);
+    if (typeof loadFinished !== 'undefined' && loadFinished)
+        refreshFilter();
+}
+
 function initFilters() {
     initSourceFilter(tableColors.unselected);
     initFlagFilter();
@@ -6207,60 +6429,59 @@ function initFilters() {
     new Filter({
         key: 'callsign',
         field: 'name',
-        name: 'callsign',
-        table: "filterTable",
-    });
-    new Filter({
-        key: 'squawk',
-        field: 'squawk',
-        name: 'squawk',
-        table: "filterTable",
+        name: 'Callsign',
+        table: 'filterTable_callsign',
     });
     new Filter({
         key: 'type',
         field: 'icaoType',
-        name: 'type code',
-        table: "filterTable",
+        name: 'Type code',
+        table: 'filterTable_type',
     });
     new Filter({
         key: 'description',
         field: 'typeDescription',
-        name: 'type description',
-        table: "filterTable",
+        name: 'Type description',
+        table: 'filterTable_type',
+    });
+    new Filter({
+        key: 'squawk',
+        field: 'squawk',
+        name: 'Squawk',
+        table: 'filterTable_squawk',
     });
     new Filter({
         key: 'icao',
         field: 'icao',
-        name: 'ICAO hex id',
-        table: "filterTable",
+        name: 'ICAO hex',
+        table: 'filterTable_icao',
     });
-
 
     new Filter({
         key: 'registration',
         field: 'registration',
-        name: 'registration',
-        table: 'filterTable3'
+        name: 'Registration',
+        table: 'filterTable_reg'
     });
     if (routeApiUrl) {
         new Filter({
             key: 'route',
             field: 'routeString',
-            name: 'route',
-            table: 'filterTable3'
+            name: 'Route',
+            table: 'filterTable_route',
         });
     }
     new Filter({
         key: 'country',
         field: 'country',
-        name: 'country of registration',
-        table: 'filterTable3'
+        name: 'Country of registration',
+        table: 'filterTable_reg'
     });
     new Filter({
         key: 'category',
         field: 'category',
-        name: 'category (A3,B0,..)',
-        table: 'filterTable3'
+        name: 'Emitter category',
+        table: 'filterTable_emitter'
     });
 
     if (PlaneFilter) {
@@ -6292,6 +6513,9 @@ function initFilters() {
             nodbFilter.map((f) => jQuery('#nodb-filter-' + f).addClass('ui-selected'))
         }
     }
+
+    syncRouteFilterAccordionVisibility();
+    syncFiltersSummaryUI();
 }
 
 
@@ -6639,6 +6863,123 @@ function refresh(redraw) {
     triggerRefresh = 0;
 }
 
+function setFilterAccordionBadge(elId, count) {
+    const el = document.getElementById(elId);
+    if (!el)
+        return;
+    el.textContent = count > 0 ? ' (' + count + ')' : '';
+}
+
+function syncFiltersSummaryUI() {
+    const sumEl = document.getElementById('filters_active_summary');
+    if (!sumEl)
+        return;
+
+    const parts = [];
+
+    const amin = jQuery('#altitude_filter_min').val().trim();
+    const amax = jQuery('#altitude_filter_max').val().trim();
+    if (amin !== '' || amax !== '') {
+        parts.push('Altitude ' + (amin || '…') + '–' + (amax || '…'));
+    }
+
+    if (sourcesFilter && sourcesFilter.length > 0) {
+        const labels = jQuery('#sourceFilter .ui-selected').map(function () {
+            return jQuery(this).text().trim().replace(/\s+/g, ' ');
+        }).get().filter(Boolean);
+        parts.push(labels.length ? ('Source: ' + labels.join(', ')) : ('Source: ' + sourcesFilter.length + ' selected'));
+    }
+
+    if (flagFilter && flagFilter.length > 0) {
+        const labels = jQuery('#flagFilter .ui-selected').map(function () {
+            return jQuery(this).text().trim();
+        }).get().filter(Boolean);
+        parts.push(labels.length ? ('Database flags: ' + labels.join(', ')) : ('Database flags: ' + flagFilter.length));
+    }
+
+    if (nodbFilter && nodbFilter.length > 0) {
+        const labels = jQuery('#nodbFilter .ui-selected').map(function () {
+            return jQuery(this).text().trim();
+        }).get().filter(Boolean);
+        parts.push(labels.length ? ('Missing database: ' + labels.join(', ')) : ('Missing database: ' + nodbFilter.length));
+    }
+
+    for (let i = 0; i < filter_list.length; i++) {
+        const f = filter_list[i];
+        if (f.key === 'route' && !useRouteAPI)
+            continue;
+        if (f.pattern && String(f.pattern).trim() !== '') {
+            parts.push((f.name || f.key) + ': ' + String(f.pattern).trim());
+        }
+    }
+
+    sumEl.textContent = parts.length ? parts.join(' · ') : 'No active filters';
+
+    let nCallsign = 0;
+    let nType = 0;
+    let nSquawk = 0;
+    let nIcao = 0;
+    let nReg = 0;
+    let nRoute = 0;
+    let nEmitter = 0;
+    for (let i = 0; i < filter_list.length; i++) {
+        const f = filter_list[i];
+        if (!f.pattern || !String(f.pattern).trim())
+            continue;
+        if (f.key === 'route' && !useRouteAPI)
+            continue;
+        if (FILTER_FIELD_KEYS_CALLSIGN.has(f.key))
+            nCallsign++;
+        if (FILTER_FIELD_KEYS_TYPE.has(f.key))
+            nType++;
+        if (FILTER_FIELD_KEYS_SQUAWK.has(f.key))
+            nSquawk++;
+        if (FILTER_FIELD_KEYS_ICAO.has(f.key))
+            nIcao++;
+        if (FILTER_FIELD_KEYS_REG.has(f.key))
+            nReg++;
+        if (FILTER_FIELD_KEYS_ROUTE.has(f.key))
+            nRoute++;
+        if (FILTER_FIELD_KEYS_EMITTER.has(f.key))
+            nEmitter++;
+    }
+
+    setFilterAccordionBadge('filter_badge_altitude', (amin !== '' || amax !== '') ? 1 : 0);
+    setFilterAccordionBadge('filter_badge_source', sourcesFilter && sourcesFilter.length > 0 ? sourcesFilter.length : 0);
+    setFilterAccordionBadge('filter_badge_flags', flagFilter && flagFilter.length > 0 ? flagFilter.length : 0);
+    setFilterAccordionBadge('filter_badge_nodb', nodbFilter && nodbFilter.length > 0 ? nodbFilter.length : 0);
+    setFilterAccordionBadge('filter_badge_callsign', nCallsign);
+    setFilterAccordionBadge('filter_badge_type', nType);
+    setFilterAccordionBadge('filter_badge_squawk', nSquawk);
+    setFilterAccordionBadge('filter_badge_icao', nIcao);
+    setFilterAccordionBadge('filter_badge_reg', nReg);
+    setFilterAccordionBadge('filter_badge_route', nRoute);
+    setFilterAccordionBadge('filter_badge_emitter', nEmitter);
+}
+
+function clearAllFilters() {
+    jQuery('#altitude_filter_min').val('');
+    jQuery('#altitude_filter_max').val('');
+    updateAltFilter();
+
+    jQuery('#sourceFilter .ui-selected').removeClass('ui-selected');
+    sourcesFilter = null;
+    jQuery('#flagFilter .ui-selected').removeClass('ui-selected');
+    flagFilter = null;
+    jQuery('#nodbFilter .ui-selected').removeClass('ui-selected');
+    nodbFilter = null;
+
+    for (let i = 0; i < filter_list.length; i++) {
+        filter_list[i].setQuiet('');
+    }
+
+    PlaneFilter.sources = sourcesFilter;
+    PlaneFilter.flagFilter = flagFilter;
+    PlaneFilter.nodbFilter = nodbFilter;
+
+    refreshFilter();
+}
+
 function refreshFilter() {
     if (filterTracks)
         remakeTrails();
@@ -6649,6 +6990,8 @@ function refreshFilter() {
     if (toggles.shareFilters && toggles.shareFilters.state) {
         updateAddressBar();
     }
+
+    syncFiltersSummaryUI();
 }
 
 
@@ -6871,8 +7214,7 @@ function processURLParams(){
         toggleMilitary();
 
     if (usp.has('airport')) {
-        onJumpInput = usp.get('airport').trim().toUpperCase();
-        onJump();
+        jumpToLocationFromQuery(usp.get('airport'));
     }
 
     if (usp.has('leg')) {
@@ -8579,7 +8921,7 @@ function loadReplay(ts) {
 
         replay.abortController = new AbortController();
 
-        jQuery("#update_error").css('display','none');
+        hideErrorBox('#update_error');
         clearTimeout(replay.errorTimeout);
 
         const ff = () => {
@@ -8595,8 +8937,8 @@ function loadReplay(ts) {
                 return;
             }
             jQuery("#update_error_detail").text(error.message + ' --> No data for this timestamp!');
-            jQuery("#update_error").css('display','block');
-            replay.errorTimeout = setTimeout(() => { jQuery("#update_error").css('display','none'); }, 5000);
+            showErrorBox('#update_error');
+            replay.errorTimeout = setTimeout(() => { hideErrorBox('#update_error'); }, 5000);
         };
 
         fetch(chunk.url, { signal: replay.abortController.signal })
@@ -9236,7 +9578,7 @@ function handleVisibilityChange() {
 
     // tab is no longer hidden
     if (!tabHidden && !timersActive) {
-        loadFinished && jQuery("#timers_paused").css('display','none');
+        loadFinished && hideErrorBox('#timers_paused');
         globeRateUpdate();
         if (heatmap || replay || globeIndex || pTracks) {
             noLongerHidden();
@@ -10109,10 +10451,14 @@ function showCustomLayersPanel() {
     closeLabelMenu();
     buildLayersPanel();
     jQuery('#layers_infoblock').show();
+    if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+        TAR.altitudeChart.syncMobileCollapse();
 }
 
 function hideCustomLayersPanel() {
     jQuery('#layers_infoblock').hide();
+    if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+        TAR.altitudeChart.syncMobileCollapse();
 }
 
 $(document).ready(function () {
