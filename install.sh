@@ -9,7 +9,6 @@
 
     srcdir=$RUNBASE/readsb
     repo="https://github.com/Jxck-S/retar"
-    db_repo="https://github.com/wiedehopf/tar1090-db"
 
     # optional command line options for this install script
     # $1: data source directory
@@ -92,10 +91,6 @@
 
     dir=$(pwd)
 
-    if (( $( { du -s "$gpath/git-db" 2>/dev/null || echo 0; } | cut -f1) > 150000 )); then
-        rm -rf "$gpath/git-db"
-    fi
-
     function copyNoClobber() {
         if ! [[ -f "$2" ]]; then
             cp "$1" "$2"
@@ -115,26 +110,6 @@
         fi
         rm -rf "$tmp" "$tmp.folder"; popd > /dev/null; return 1;
     }
-    function revision() {
-        git rev-parse --short HEAD 2>/dev/null || echo "$RANDOM-$RANDOM"
-    }
-
-    if ! { [[ "$1" == "test" ]] && cd "$gpath/git-db"; }; then
-        DB_VERSION_NEW=$(curl --silent --show-error "https://raw.githubusercontent.com/wiedehopf/tar1090-db/master/version")
-        if  [[ "$(cat "$gpath/git-db/version" 2>/dev/null)" != "$DB_VERSION_NEW" ]]; then
-            getGIT "$db_repo" "master" "$gpath/git-db" || true
-        fi
-    fi
-
-    if ! cd "$gpath/git-db"
-    then
-        echo "Unable to download files, exiting! (Maybe try again?)"
-        exit 1
-    fi
-
-    DB_VERSION=$(revision)
-
-    cd "$dir"
 
     if [[ "$1" == "test" ]] || [[ -n "$git_source" ]]; then
         mkdir -p "$gpath/git"
@@ -313,9 +288,17 @@
             -e "s?RUNBASE?$RUNBASE?g" tar1090.service
 
         cp -r -T html "$TMP"
-        cp -r -T "$gpath/git-db/db" "$TMP/db-$DB_VERSION"
-        sed -i -e "s/let databaseFolder = .*;/let databaseFolder = \"db-$DB_VERSION\";/" "$TMP/index.html"
-        echo "{ \"tar1090Version\": \"$TAR_VERSION\", \"databaseVersion\": \"$DB_VERSION\" }" > "$TMP/version.json"
+
+        # Aircraft DB bundle is not installed here; preserve databaseVersion from a prior install when present.
+        existing_db_ver=""
+        if [[ -f "$html_path/version.json" ]]; then
+            existing_db_ver=$(jq -r '.databaseVersion // empty | if type == "string" or type == "number" then tostring else empty end' "$html_path/version.json" 2>/dev/null || true)
+        fi
+        if [[ -n "$existing_db_ver" ]]; then
+            sed -i -e "s/let databaseFolder = .*;/let databaseFolder = \"db-$existing_db_ver\";/" "$TMP/index.html"
+        fi
+        jq -n --arg tv "$TAR_VERSION" --arg dv "$existing_db_ver" \
+            '{tar1090Version: $tv, databaseVersion: $dv}' > "$TMP/version.json"
 
         # keep some stuff around
         mv "$html_path/config.js" "$TMP/config.js" 2>/dev/null || true
