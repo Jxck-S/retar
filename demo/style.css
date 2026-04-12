@@ -10,6 +10,8 @@
     --UI-RADIUS-CONTROL: calc(5px * var(--SCALE));
     /* Search, filters, column chips, tabs — tighter than panel corners */
     --UI-RADIUS-TIGHT: calc(4px * var(--SCALE));
+    /* Tab pills: outer top corners nest inside #tabs panel radius minus nav padding (~6px*SCALE) */
+    --UI-RADIUS-TABS-OUTER: max(3px, calc(var(--UI-RADIUS-PANEL) - 6px * var(--SCALE) - 1px));
 }
 
 html,
@@ -447,6 +449,8 @@ html.dark .sidebar_button {
     position: absolute;
     bottom: calc( 10px * var(--SCALE));
     left: calc(50% - 60px * var(--SCALE));
+    z-index: 2;
+    pointer-events: none;
 }
 .credits-text {
     font-size: var(--FS2);
@@ -1075,6 +1079,12 @@ select.error, textarea.error, input.error {
 
 .share-link-icon:active {
     transform: scale(0.95);
+}
+
+.share-link-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #header_side {
@@ -1864,10 +1874,9 @@ html.dark .mobile_table_toggle.formButton:hover {
     box-sizing: border-box;
 }
 
-/* Unified Close Button Base Style */
-.settingsCloseBox, 
-.infoblockCloseBox, 
-.sidebar_close_mobile, 
+/* Close buttons — absolute top-right (settings, layers, selected aircraft) */
+.settingsCloseBox,
+.infoblockCloseBox,
 .layer-switcher-close-x {
     position: absolute;
     right: 8px;
@@ -1885,17 +1894,39 @@ html.dark .mobile_table_toggle.formButton:hover {
     z-index: 100;
 }
 
-.settingsCloseBox:hover, 
-.infoblockCloseBox:hover, 
-.sidebar_close_mobile:hover, 
+/* Mobile sidebar only: X in a flow row above the table so it never covers the injected banner */
+.sidebar_close_mobile {
+    position: static;
+    right: auto;
+    top: auto;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(128, 128, 128, 0.1);
+    border: none;
+    border-radius: 50%;
+    transition: background-color 0.2s, transform 0.2s;
+    z-index: auto;
+}
+
+.settingsCloseBox:hover,
+.infoblockCloseBox:hover,
 .layer-switcher-close-x:hover {
     background-color: rgba(128, 128, 128, 0.2);
     transform: scale(1.05);
 }
 
-.settingsCloseBox::after, 
-.infoblockCloseBox::after, 
-.sidebar_close_mobile::after, 
+.sidebar_close_mobile:hover {
+    background-color: rgba(128, 128, 128, 0.2);
+    transform: scale(1.05);
+}
+
+.settingsCloseBox::after,
+.infoblockCloseBox::after,
+.sidebar_close_mobile::after,
 .layer-switcher-close-x::after {
     content: '\2715'; /* Clean bold X */
     font-size: 18px;
@@ -1910,14 +1941,13 @@ html.dark .mobile_table_toggle.formButton:hover {
     right: 5px;
 }
 
-
-/* infoblock specific positioning and sizing override */
+/* Selected aircraft panel — smaller X, previous corner placement */
 .infoblockCloseBox {
     top: 10px;
     right: 10px;
     width: 28px;
     height: 28px;
-    background-color: transparent; /* Cleaner look for this smaller button */
+    background-color: transparent;
 }
 
 .infoblockCloseBox:hover {
@@ -1926,8 +1956,13 @@ html.dark .mobile_table_toggle.formButton:hover {
 }
 
 .infoblockCloseBox::after {
-    font-size: 16px; /* Smaller X to match callsign row */
+    font-size: 16px;
     opacity: 0.7;
+}
+
+/* Mobile sidebar: full-width row above table (banner, stats, tabs sit below the X) */
+.sidebar-table-top-chrome {
+    display: none;
 }
 
 
@@ -1943,9 +1978,15 @@ html.dark .mobile_table_toggle.formButton:hover {
     width: calc(100% - calc( 5px * var(--SCALE)));
     max-width:  calc(520px * var(--SCALE));
     right: calc( 92px * var(--SCALE));
-    bottom: calc( 42px * var(--SCALE));
+    /* Closer to map bottom than before; ~clear of .ol-scale-line */
+    bottom: calc(34px * var(--SCALE));
     background-color: transparent !important;
     overflow: visible;
+}
+
+/* Credits strip: tighter than before but still clears icon + text */
+body.map-credits-visible #altitude_chart {
+    bottom: calc(44px * var(--SCALE) + 1.85em);
 }
 
 #altitude_chart_button {
@@ -2031,7 +2072,7 @@ html.dark #tabs.ui-sidebar-tabs {
     background-color: var(--BGCOLOR1);
     border: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0;
+    border-radius: calc(var(--UI-RADIUS-PANEL) - 1px) calc(var(--UI-RADIUS-PANEL) - 1px) 0 0;
 }
 
 html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
@@ -2084,6 +2125,19 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
     border: 1px solid rgba(0, 0, 0, 0.2) !important;
     box-shadow: none !important;
     transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Outer tab corners follow the panel radius; inner meeting edge stays CONTROL (must come after rule above) */
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:first-child > a.ui-tabs-anchor {
+    border-radius: var(--UI-RADIUS-TABS-OUTER) var(--UI-RADIUS-CONTROL) var(--UI-RADIUS-CONTROL) var(--UI-RADIUS-TABS-OUTER) !important;
+}
+
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:last-child > a.ui-tabs-anchor {
+    border-radius: var(--UI-RADIUS-CONTROL) var(--UI-RADIUS-TABS-OUTER) var(--UI-RADIUS-TABS-OUTER) var(--UI-RADIUS-CONTROL) !important;
+}
+
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:only-child > a.ui-tabs-anchor {
+    border-radius: var(--UI-RADIUS-TABS-OUTER) !important;
 }
 
 /* jQuery UI sets aria-selected on <li>, not on <a> — scope inactive dark styles so they never override accent */
@@ -2661,10 +2715,47 @@ input{
 }
 
 .alignCS {
-    display: flex;
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 5px;
-    line-height: 1; /* Reset line-height to ensure the flex box fits the content tightly */
+    gap: calc(6px * var(--SCALE));
+    line-height: 1;
+    max-width: 100%;
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+
+/* Callsign + operator logo stay one line; logo does not wrap under */
+.highlightedTitle > .alignCS .identLarge {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.highlightedTitle > .alignCS .identOppIcon {
+    flex: 0 0 auto;
+}
+
+/* Extra gap before hex row when a logo is shown (share link row breathing room) */
+.highlightedTitle > .alignCS:has(.identOppIcon img) + #selected_icao {
+    margin-top: calc(8px * var(--SCALE));
+}
+
+#selected_icao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: calc(6px * var(--SCALE)) calc(12px * var(--SCALE));
+    min-width: 0;
+}
+
+#selected_icao > .identSmall {
+    min-width: 0;
+}
+
+#selected_icao .share-link-icon {
+    flex-shrink: 0;
+    margin-left: calc(4px * var(--SCALE));
 }
 
 .flag {
@@ -2877,8 +2968,18 @@ input{
     }
 }
 
-/* Mobile sidebar close button (now inside #sidebar-table) */
+/* Mobile sidebar close button — row above injected banner / table */
 @media screen and (max-width: 768px) {
+    .sidebar-table-top-chrome {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        min-height: calc(42px * var(--SCALE));
+        padding: calc(4px * var(--SCALE)) calc(8px * var(--SCALE)) calc(4px * var(--SCALE));
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+
     .sidebar_close_mobile {
         display: flex !important;
         background: rgba(128, 128, 128, 0.15); /* Slightly darker on mobile for visibility */
@@ -2946,9 +3047,13 @@ input{
         right: auto;
         width: min(92vw, 340px);
         max-width: min(92vw, 340px);
-        bottom: calc(58px * var(--SCALE) + env(safe-area-inset-bottom, 0px));
+        bottom: calc(48px * var(--SCALE) + env(safe-area-inset-bottom, 0px));
         transform: translateX(-50%) scale(0.82);
         transform-origin: center bottom;
+    }
+
+    body.map-credits-visible #altitude_chart {
+        bottom: calc(82px * var(--SCALE) + env(safe-area-inset-bottom, 0px));
     }
 
     #altitude_chart.altitude_chart_mobile_hidden {

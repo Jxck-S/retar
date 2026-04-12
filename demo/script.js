@@ -1445,7 +1445,7 @@ function earlyInitPage() {
     new Toggle({
         key: 'airlineLogos',
         checkbox: '#airline_logos_filter',
-        init: true,
+        init: !!airlineLogos,
         setState: function(state) {
             airlineLogos = state;
             refreshHighlighted();
@@ -1456,13 +1456,29 @@ function earlyInitPage() {
     new Toggle({
         key: 'airlineBanners',
         checkbox: '#airline_banners_filter',
-        init: true,
+        init: !!airlineBanners,
         setState: function(state) {
             airlineBanners = state;
             refreshHighlighted();
             refreshSelected();
         }
     });
+
+    (function hideAirlineMediaSettingsIfNoApi() {
+        const base = typeof airlineLogosApiUrl === 'string' ? airlineLogosApiUrl.trim() : '';
+        if (base)
+            return;
+        airlineLogos = false;
+        airlineBanners = false;
+        if (toggles.airlineLogos) {
+            toggles.airlineLogos.toggle(false, true);
+            toggles.airlineLogos.hideCheckbox();
+        }
+        if (toggles.airlineBanners) {
+            toggles.airlineBanners.toggle(false, true);
+            toggles.airlineBanners.hideCheckbox();
+        }
+    })();
 
     // Make entire row clickable for Units section checkboxes (airline logos/banners, ground vehicles, non-ICAO)
     jQuery('#settings_section_units').on('click', '.settingsOptionContainer', function(e) {
@@ -1958,6 +1974,7 @@ jQuery('#selected_altitude_geom1')
 
     if (aggregator) {
         jQuery('#credits').show();
+        jQuery('body').addClass('map-credits-visible');
         if (!onMobile) {
             jQuery('#creditsSelected').show();
         }
@@ -3926,7 +3943,7 @@ function refreshSelected() {
 
     if (customKey) {
         if (airlineLogos) {
-            var src = airlineLogosApiUrl + 'custom/logos/' + customKey;
+            var src = airlineCustomLogoUrl(customKey);
             if ($icon_img.length === 0) {
                  $selected_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
             } else {
@@ -3940,7 +3957,7 @@ function refreshSelected() {
         }
 
         if (airlineBanners) {
-            var src = airlineLogosApiUrl + 'custom/banners/' + customKey;
+            var src = airlineCustomBannerUrl(customKey);
             if ($banner_img.length === 0) {
                  $selected_airline_banner.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
             } else {
@@ -3955,7 +3972,7 @@ function refreshSelected() {
     } else if (opperatorICAO) {
         if (airlineLogos) {
             // Replace with your element's ID
-            var src = airlineLogosApiUrl + 'logos/' + opperatorICAO;
+            var src = airlineOperatorLogoUrl(opperatorICAO);
             if ($icon_img.length === 0) {
                 // If no img sub-element exists, add it
                 $selected_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
@@ -3972,7 +3989,7 @@ function refreshSelected() {
         }
 
         if (airlineBanners) {
-            var src = airlineLogosApiUrl + 'banners/' + opperatorICAO;
+            var src = airlineOperatorBannerUrl(opperatorICAO);
             if ($banner_img.length === 0) {
                 // If no img sub-element exists, add it
                 $selected_airline_banner.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
@@ -4438,7 +4455,7 @@ function refreshHighlighted() {
         if (airlineLogos) {
             var $highlighted_opp_icon = $('#highlighted_opp_icon');
             var $icon_img = $highlighted_opp_icon.find('img');
-            var src = airlineLogosApiUrl + 'custom/logos/' + customKey;
+            var src = airlineCustomLogoUrl(customKey);
             
             if ($icon_img.length === 0) {
                 $highlighted_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
@@ -4454,7 +4471,7 @@ function refreshHighlighted() {
     } else if (airlineLogos && highlighted.opp_icao) {
         var $highlighted_opp_icon = $('#highlighted_opp_icon');
         var $icon_img = $highlighted_opp_icon.find('img');
-        var src = airlineLogosApiUrl + 'logos/' + highlighted.opp_icao;
+        var src = airlineOperatorLogoUrl(highlighted.opp_icao);
         if ($icon_img.length === 0) {
             $highlighted_opp_icon.append(`<img src="${src}" onerror="this.style.display='none'" onload="this.style.display='inline-block'"/>`);
         } else {
@@ -10103,7 +10120,7 @@ function setSelectedIcao() {
         
         const shareIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-top: -1px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`;
         
-        let copy_link_content = (copiedIcao != null) ? "<span style='color: #4CAF50; font-weight: bold; margin-left: 12px;'>Copied!</span>" : `<span style="margin-left: 12px; display: inline-flex;">${shareIcon}</span>`;
+        let copy_link_content = (copiedIcao != null) ? "<span style='color: #4CAF50; font-weight: bold;'>Copied!</span>" : `<span class="share-link-icon-wrap">${shareIcon}</span>`;
         let icao_link = "<span class=identSmall><a class='link share-link-icon' title='Copy shareable link' target=\"_blank\" href=\"" + shareLink +
             "\" onclick=\"copyShareLink(); return false;\">" + copy_link_content + "</a></span>";
         hex_html = hex_html + icao_link;
@@ -10256,11 +10273,10 @@ globeRateUpdate();
 function fetchCustomLogoIndex() {
     if (!airlineLogos && !airlineBanners) return;
     
-    // Derive custom index URL from the configured logos API URL base
-    if (airlineLogosApiUrl) {
-         // airlineLogosApiUrl is now the base e.g. "https://api.../logba/"
-         customIndexUrl = airlineLogosApiUrl;
-    }
+    // JSON index lives at service root (…/logba/), not under …/logos/
+    const logoRoot = airlineLogosServiceRoot();
+    if (logoRoot)
+        customIndexUrl = logoRoot + '/';
 
     jQuery.ajax({
         url: customIndexUrl,

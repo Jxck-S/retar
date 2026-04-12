@@ -1068,7 +1068,7 @@ PlaneObject.prototype.updateIcon = function() {
             
             let opIconStyle = new ol.style.Style({
                 image: new ol.style.Icon({
-                    src: airlineLogosApiUrl + 'logos/' + this.opp_icao,
+                    src: airlineOperatorLogoUrl(this.opp_icao),
                     scale: iconHeight / 100, // Logos are usually 100px high in API
                     displacement: [iconX, iconY],
                 }),
