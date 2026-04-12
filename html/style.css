@@ -4,6 +4,12 @@
     --FS1: calc(10px * var(--SCALE));
     --FS2: calc(13px * var(--SCALE));
     --FS3: calc(17px * var(--SCALE));
+    /* Settings/Layers modals used literal 10px — only for large surfaces */
+    --UI-RADIUS-PANEL: 10px;
+    /* Map/header buttons: keep visibly squarer than the 10px panels (was 8px) */
+    --UI-RADIUS-CONTROL: calc(5px * var(--SCALE));
+    /* Search, filters, column chips, tabs — tighter than panel corners */
+    --UI-RADIUS-TIGHT: calc(4px * var(--SCALE));
 }
 
 html,
@@ -47,14 +53,242 @@ select {
     background-color: var(--BGCOLOR1);
 }
 
+/* Outer shell uses the same border, radius, and shadow as inner sidebar cards */
 #sidebar-table {
     position: relative; /* Anchor for the mobile close button */
     background-color: var(--BGCOLOR1);
-    border-radius: 12px;
-    padding: 10px;
-    margin: 10px 5px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border: 2px solid rgba(0, 0, 0, 0.15);
+    border-radius: var(--UI-RADIUS-PANEL);
+    padding: calc(10px * var(--SCALE)) calc(8px * var(--SCALE));
+    margin: calc(10px * var(--SCALE)) calc(5px * var(--SCALE));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* Table block, Search tab, Filters tab — identical chrome */
+.sidebar-table-sheet,
+.sidebar-panel-sheet {
+    margin-top: calc(8px * var(--SCALE));
+    padding: calc(10px * var(--SCALE)) calc(8px * var(--SCALE)) calc(8px * var(--SCALE));
+    background-color: var(--BGCOLOR2);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: var(--UI-RADIUS-PANEL);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.filters-panel-sheet .filter-table-reg-below {
+    margin-top: 0;
+}
+
+.filters-panel-sheet .filters-active-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: calc(8px * var(--SCALE));
+    margin-bottom: calc(10px * var(--SCALE));
+    padding-bottom: calc(8px * var(--SCALE));
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.filters-panel-sheet .filters-active-summary {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: calc(11px * var(--SCALE));
+    line-height: 1.4;
+    color: var(--TXTCOLOR2);
+}
+
+.filters-panel-sheet .filters-clear-all-btn {
+    flex: 0 0 auto;
+    padding: calc(4px * var(--SCALE)) calc(10px * var(--SCALE));
+}
+
+.filters-panel-sheet .filter-accordion {
+    margin-top: calc(6px * var(--SCALE));
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--UI-RADIUS-CONTROL);
+    background-color: var(--BGCOLOR1);
+    overflow: hidden;
+}
+
+.filters-panel-sheet .filter-accordion:first-of-type {
+    margin-top: calc(2px * var(--SCALE));
+}
+
+.filters-panel-sheet .filter-accordion-summary {
+    display: flex;
+    align-items: center;
+    gap: calc(6px * var(--SCALE));
+    padding: calc(8px * var(--SCALE)) calc(10px * var(--SCALE));
+    cursor: pointer;
+    font-weight: 600;
+    font-size: calc(12px * var(--SCALE));
+    color: var(--TXTCOLOR1);
+    background-color: var(--BGCOLOR1);
+    list-style: none;
+}
+
+.filters-panel-sheet .filter-accordion-summary::-webkit-details-marker {
+    display: none;
+}
+
+.filters-panel-sheet .filter-accordion-summary::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--TXTCOLOR2);
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+    opacity: 0.75;
+}
+
+.filters-panel-sheet .filter-accordion[open] > .filter-accordion-summary {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.filters-panel-sheet .filter-accordion[open] > .filter-accordion-summary::after {
+    transform: rotate(180deg);
+}
+
+.filters-panel-sheet .filter-accordion-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
+}
+
+.filters-panel-sheet .filter-accordion-badge {
+    font-weight: 500;
+    font-size: calc(10px * var(--SCALE));
+    color: var(--TXTCOLOR2);
+    opacity: 0.9;
+}
+
+.filters-panel-sheet .filter-accordion-body {
+    padding: calc(8px * var(--SCALE)) calc(10px * var(--SCALE)) calc(10px * var(--SCALE));
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background-color: var(--BGCOLOR1);
+}
+
+.filters-panel-sheet .filter-accordion-body .buttonFilter li {
+    background-color: var(--BGCOLOR2);
+}
+
+.sidebar-table-sheet .legend {
+    padding-top: calc(8px * var(--SCALE));
+    padding-bottom: calc(2px * var(--SCALE));
+}
+
+.planes-table-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 0 0 calc(6px * var(--SCALE));
+    min-height: calc(28px * var(--SCALE));
+}
+
+.columns-picker-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(30px * var(--SCALE));
+    height: calc(30px * var(--SCALE));
+    padding: 0;
+    margin: 0;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: var(--UI-RADIUS-CONTROL);
+    background-color: var(--BGCOLOR1);
+    color: var(--TXTCOLOR2);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.columns-picker-btn:hover {
+    background-color: var(--ACCENT);
+    color: #fff;
+    border-color: var(--ACCENT);
+    transform: translateY(-1px);
+}
+
+.columns-picker-btn-active,
+.columns-picker-btn-active:hover {
+    background-color: var(--ACCENT);
+    color: #fff;
+    border-color: var(--ACCENT);
+}
+
+.columns-picker-panel {
+    margin: 0 0 calc(8px * var(--SCALE));
+    padding: calc(10px * var(--SCALE)) calc(8px * var(--SCALE));
+    max-height: min(42vh, 320px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: var(--UI-RADIUS-PANEL);
+    background-color: var(--BGCOLOR1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.columns-picker-hint {
+    margin: 0 0 calc(8px * var(--SCALE));
+    font-size: calc(11px * var(--SCALE));
+    line-height: 1.35;
+    color: var(--TXTCOLOR2);
+    opacity: 0.85;
+}
+
+#tab-search .search-form-hint {
+    margin: calc(8px * var(--SCALE)) 0 0;
+    padding: 0;
+    font-size: calc(11px * var(--SCALE));
+    line-height: 1.4;
+    color: var(--TXTCOLOR2);
+    opacity: 0.85;
+}
+
+#tab-search #search_form .search-input-wrapper {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin-top: calc(4px * var(--SCALE));
+}
+
+#tab-search #search_form .searchInput {
+    width: 100%;
+    max-width: 100%;
+    height: calc(26px * var(--SCALE));
+    box-sizing: border-box;
+}
+
+#tab-search #search_form .search-submit-btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: calc(7px * var(--SCALE));
+    padding: calc(7px * var(--SCALE)) calc(12px * var(--SCALE));
+    font-size: calc(12px * var(--SCALE));
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background-color: var(--ACCENT);
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    border-radius: var(--UI-RADIUS-CONTROL);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+#tab-search #search_form .search-submit-btn:hover {
+    filter: brightness(1.06);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
+}
+
+#tab-search #search_form .search-submit-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .aggregator-selected-bg:before {
@@ -112,7 +346,7 @@ select {
     /* Compact standard size matching settings/zoom */
     width: calc( 28px * var(--SCALE));
     height: calc( 28px * var(--SCALE));
-    border-radius: calc( 8px * var(--SCALE));
+    border-radius: var(--UI-RADIUS-CONTROL);
     
     /* Using shorthand to enforce all background properties at once and prevent overrides */
     background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>') no-repeat center !important;
@@ -283,7 +517,7 @@ html.dark .sidebar_button {
     color: white !important;
     width: calc(28px * var(--SCALE)) !important;
     height: calc(28px * var(--SCALE)) !important;
-    border-radius: 8px !important;
+    border-radius: var(--UI-RADIUS-CONTROL) !important;
     font-size: calc(20px * var(--SCALE)) !important;
     font-weight: bold !important;
     line-height: calc(28px * var(--SCALE)) !important; /* Center vertically */
@@ -314,29 +548,64 @@ html.dark .sidebar_button {
     font-size: var(--FS1);
 }
 
-.warning {
-    margin-top: 1em;
-    border: calc( 2px * var(--SCALE)) solid yellow;
-    background-color: #FFFFA3;
-    padding: calc( 5px * var(--SCALE));
-    color: black;
+/* Amber notice shell — search tab warnings + floating error_box toasts */
+.sidebar-notice-amber {
+    border: 1px solid rgba(180, 150, 0, 0.42);
+    border-left: 4px solid #c9a000;
+    border-radius: var(--UI-RADIUS-CONTROL);
+    background: linear-gradient(165deg, #fffef5 0%, #fff9c4 45%, #fff176 100%);
+    color: #1a1508;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.06),
+        0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+html.dark .sidebar-notice-amber {
+    border-color: rgba(255, 214, 80, 0.35);
+    border-left-color: #ffd54f;
+    background: linear-gradient(165deg, #4a4528 0%, #3d381f 100%);
+    color: #fffde7;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.25),
+        0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* Search tab: no-match / airport / coordinate messages */
+.search-warning {
+    margin-top: calc(10px * var(--SCALE));
+    padding: calc(10px * var(--SCALE)) calc(12px * var(--SCALE));
+    font-size: calc(12px * var(--SCALE));
+    line-height: 1.45;
 }
 
 .error_box {
-    position: absolute; bottom: calc( 90px * var(--SCALE)); left: calc( 25px * var(--SCALE));
-    background-color: rgba(33, 33, 33, 0.95);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: calc(6px * var(--SCALE));
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    padding: calc( 8px * var(--SCALE));
-    font-weight: bold;
-    font-size: var(--FS3);
-    line-height: 150%;
+    position: absolute;
+    bottom: calc(90px * var(--SCALE));
+    left: calc(25px * var(--SCALE));
+    padding: calc(10px * var(--SCALE)) calc(12px * var(--SCALE));
+    font-size: calc(12px * var(--SCALE));
+    line-height: 1.45;
+    font-weight: 600;
     text-align: center;
     z-index: 2000;
+    max-width: min(92vw, 420px);
+}
+
+.error_box_main {
+    font-weight: 700;
+}
+
+.error_box_detail {
+    margin-top: calc(6px * var(--SCALE));
+    font-weight: 600;
+    font-size: calc(12px * var(--SCALE));
+    line-height: 1.35;
+    opacity: 0.9;
+    word-break: break-word;
+}
+
+.error_box_detail:empty {
+    display: none;
 }
 
 .inaccurate_warning {
@@ -353,7 +622,7 @@ html.dark .sidebar_button {
     background-color: rgba(33, 33, 33, 0.95);
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: calc(6px * var(--SCALE));
+    border-radius: var(--UI-RADIUS-TIGHT);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
@@ -432,21 +701,16 @@ html.dark .sidebar_button {
     /* For IE8 and earlier */
 }
 
-/* Box style shared by search and filter sections (same as filter blocks) */
-.sidebarPanelBox {
-    background-color: var(--BGCOLOR2);
-    border-radius: 8px;
-    border: 1px solid rgba(128, 128, 128, 0.2);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    margin-bottom: 8px;
-}
-
 /* Spacing for Search and Filter Sections */
 #tab-search-table td,
-#filterTable td,
+#filterTable_squawk td,
 #filterTable2 td,
-#filterTable3 td {
+#filterTable_reg td,
+#filterTable_callsign td,
+#filterTable_type td,
+#filterTable_icao td,
+#filterTable_route td,
+#filterTable_emitter td {
     padding: 0px;
     padding-bottom: 8px;
     margin: 0px;
@@ -455,9 +719,14 @@ html.dark .sidebar_button {
 
 /* Remove border/padding from the very last row's cell in each table to clean up bottom edge */
 #tab-search-table tr:last-child td,
-#filterTable tr:last-child td,
+#filterTable_squawk tr:last-child td,
 #filterTable2 tr:last-child td,
-#filterTable3 tr:last-child td {
+#filterTable_reg tr:last-child td,
+#filterTable_callsign tr:last-child td,
+#filterTable_type tr:last-child td,
+#filterTable_icao tr:last-child td,
+#filterTable_route tr:last-child td,
+#filterTable_emitter tr:last-child td {
     border-bottom: none;
     padding-bottom: 0px;
 }
@@ -531,7 +800,7 @@ html.dark .infoBlockTitleText {
     color:var(--TXTCOLOR2);
     background-color: var(--BGCOLOR1);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     padding: 0 4px;
 }
 .searchInput {
@@ -540,7 +809,7 @@ html.dark .infoBlockTitleText {
     color: var(--TXTCOLOR2);
     background-color: var(--BGCOLOR1);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     padding: 0 4px;
     box-sizing: border-box;
 }
@@ -550,7 +819,7 @@ html.dark .infoBlockTitleText {
     color: var(--TXTCOLOR2);
     background-color: rgba(128, 128, 128, 0.35);
     border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 6px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     padding: 4px 10px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -580,7 +849,7 @@ select.error, textarea.error, input.error {
     background-position: center;
     width: calc(32px * var(--SCALE));
     height: calc(32px * var(--SCALE));
-    border-radius: 8px;
+    border-radius: var(--UI-RADIUS-CONTROL);
     background-color: white;
     /* Keep white for icon visibility, or use var(--ACCENT) if icon allows */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -612,7 +881,7 @@ select.error, textarea.error, input.error {
     display: block !important;
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAACE1BMVEX///8A//8AgICA//8AVVVAQID///8rVVVJtttgv98nTmJ2xNgkW1ttyNsmWWZmzNZYxM4gWGgeU2JmzNNr0N1Rwc0eU2VXxdEhV2JqytQeVmMhVmNoydUfVGUgVGQfVGQfVmVqy9hqy9dWw9AfVWRpydVry9YhVmMgVGNUw9BrytchVWRexdGw294gVWQgVmUhVWPd4N6HoaZsy9cfVmQgVGRrytZsy9cgVWQgVWMgVWRsy9YfVWNsy9YgVWVty9YgVWRty9UgVWRsy9Zsy9UfVWRsy9YgVWVty9YgVWRty9Vsy9aM09sgVWRTws/AzM0gVWRtzNYgVWRuy9Zsy9cgVWRGcHxty9bb5ORbxdEgVWRty9bn6OZTws9mydRfxtLX3Nva5eRix9NFcXxOd4JPeINQeIMiVmVUws9Vws9Vw9BXw9BYxNBaxNBbxNBcxdJexdElWWgmWmhjyNRlx9IqXGtoipNpytVqytVryNNrytZsjZUuX210k5t1y9R2zNR3y9V4lp57zth9zdaAnKOGoaeK0NiNpquV09mesrag1tuitbmj1tuj19uktrqr2d2svcCu2d2xwMO63N+7x8nA3uDFz9DK4eHL4eLN4eIyYnDX5OM5Z3Tb397e4uDf4uHf5uXi5ePi5+Xj5+Xm5+Xm6OY6aHXQ19fT4+NfhI1Ww89gx9Nhx9Nsy9ZWw9Dpj2abAAAAWnRSTlMAAQICAwQEBgcIDQ0ODhQZGiAiIyYpKywvNTs+QklPUlNUWWJjaGt0dnd+hIWFh4mNjZCSm6CpsbW2t7nDzNDT1dje5efr7PHy9PT29/j4+Pn5+vr8/f39/f6DPtKwAAABTklEQVR4Xr3QVWPbMBSAUTVFZmZmhhSXMjNvkhwqMzMzMzPDeD+xASvObKePPa+ffHVl8PlsnE0+qPpBuQjVJjno6pZpSKXYl7/bZyFaQxhf98hHDKEppwdWIW1frFnrxSOWHFfWesSEWC6R/P4zOFrix3TzDFLlXRTR8c0fEEJ1/itpo7SVO9Jdr1DVxZ0USyjZsEY5vZfiiAC0UoTGOrm9PZLuRl8X+Dq1HQtoFbJZbv61i+Poblh/97TC7n0neCcK0ETNUrz1/xPHf+DNAW9Ac6t8O8WH3Vp98f5lCaYKAOFZMLyHL4Y0fe319idMNgMMp+zWVSybUed/+/h7I4wRAG1W6XDy4XmjR9HnzvDRZXUAYDFOhC1S/Hh+fIXxen+eO+AKqbs+wAo30zDTDvDxKoJN88sjUzDFAvBzEUGFsnADoIvAJzoh2BZ8sner+Ke/vwECuQAAAABJRU5ErkJggg==') !important;
     background-color: white !important;
-    border-radius: 8px !important;
+    border-radius: var(--UI-RADIUS-CONTROL) !important;
     right: auto !important;
     /* Let it sit naturally or reset */
     position: static !important;
@@ -652,7 +921,7 @@ select.error, textarea.error, input.error {
     background-color: var(--BGCOLOR1);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     padding: 16px;
-    border-radius: 16px;
+    border-radius: var(--UI-RADIUS-PANEL);
     border: 1px solid rgba(0, 0, 0, 0.1);
     white-space: normal;
     text-align: left;
@@ -669,7 +938,7 @@ select.error, textarea.error, input.error {
     padding: 10px;
     margin-bottom: 8px;
     background-color: var(--BGCOLOR2);
-    border-radius: 12px;
+    border-radius: var(--UI-RADIUS-CONTROL);
     border: 1px solid rgba(128, 128, 128, 0.2);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
@@ -709,7 +978,7 @@ select.error, textarea.error, input.error {
     font-size: 1.1em;
     border-bottom: 1px solid var(--ACCENT);
     background-color: rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+    border-radius: var(--UI-RADIUS-CONTROL);
 }
 
 .layer-switcher.shown li input {
@@ -832,7 +1101,7 @@ select.error, textarea.error, input.error {
     background-position: center;
     margin: calc( 2px * var(--SCALE));
     display: inline-block;
-    border-radius: 8px;
+    border-radius: var(--UI-RADIUS-CONTROL);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.1s;
     vertical-align: top;
@@ -865,7 +1134,7 @@ select.error, textarea.error, input.error {
 
     /* Modern Look matching .button */
     border-bottom: none;
-    border-radius: 8px;
+    border-radius: var(--UI-RADIUS-CONTROL);
     background-color: var(--ACCENT);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
@@ -921,7 +1190,7 @@ select.error, textarea.error, input.error {
     background-color: var(--ACCENT);
     width: calc(28px * var(--SCALE));
     height: calc(28px * var(--SCALE));
-    border-radius: 8px;
+    border-radius: var(--UI-RADIUS-CONTROL);
     margin: calc(2px * var(--SCALE));
     display: inline-block;
     cursor: pointer;
@@ -1042,7 +1311,7 @@ table.infoSectionTable tr td {
 /* Compact filter blocks: title + actions on one line, controls on next */
 .filterBlock {
     background-color: var(--BGCOLOR2);
-    border-radius: 8px;
+    border-radius: var(--UI-RADIUS-CONTROL);
     border: 1px solid rgba(128, 128, 128, 0.2);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 6px 8px !important;
@@ -1061,7 +1330,12 @@ table.infoSectionTable tr td {
 }
 #tab-filters .filterFormHeader .infoBlockTitleText {
     margin: 0;
-    font-size: 12px;
+    font-size: calc(11px * var(--SCALE));
+    line-height: 1.2;
+    min-width: 0;
+    flex: 1 1 auto;
+    padding-right: calc(4px * var(--SCALE));
+    overflow-wrap: break-word;
 }
 #tab-filters .filterFormActions {
     display: flex;
@@ -1082,17 +1356,186 @@ table.infoSectionTable tr td {
 #tab-filters .filterFormBody .buttonFilter {
     margin-bottom: 0;
 }
-#tab-filters .filterBlocksWrap {
+
+#tab-filters .filterFormHeader--toolbar {
+    justify-content: flex-end;
+    margin-bottom: calc(2px * var(--SCALE));
+}
+
+#tab-filters .filter-field-item {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+#tab-filters .filterFormBody--field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-top: 6px;
+    align-items: stretch;
+    gap: calc(3px * var(--SCALE));
 }
-#tab-filters #filterTable {
+
+#tab-filters .filter-field-label {
+    font-size: calc(10px * var(--SCALE));
+    font-weight: 600;
+    color: var(--TXTCOLOR2);
+    margin: 0;
+    line-height: 1.2;
+}
+
+#tab-filters .filter-field-input {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Dark mode: accordion body and inputs both use BGCOLOR1 — lift fields with BGCOLOR2 + light edge */
+html.dark #tab-filters .searchInput,
+html.dark #tab-filters .altitudeFilterInput {
+    background-color: var(--BGCOLOR2);
+    color: var(--TXTCOLOR1);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+html.dark #tab-filters .searchInput::placeholder,
+html.dark #tab-filters .altitudeFilterInput::placeholder {
+    color: var(--TXTCOLOR3);
+    opacity: 1;
+}
+
+html.dark #tab-filters .searchInput:focus,
+html.dark #tab-filters .altitudeFilterInput:focus {
+    border-color: rgba(255, 255, 255, 0.42);
+    outline: none;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--ACCENT);
+}
+
+html.dark #tab-filters .filter-field-label {
+    color: var(--TXTCOLOR1);
+}
+
+html.dark .filters-panel-sheet .filters-active-bar {
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+html.dark .filters-panel-sheet .filter-accordion {
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+html.dark .filters-panel-sheet .filter-accordion-body {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .filters-panel-sheet .filter-accordion[open] > .filter-accordion-summary {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+html.dark #tab-filters .filterFormBtn {
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: var(--TXTCOLOR1);
+}
+
+html.dark #tab-filters .filterFormBtn:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+html.dark .filters-panel-sheet .filters-clear-all-btn {
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: var(--TXTCOLOR1);
+}
+
+html.dark .filters-panel-sheet .filters-clear-all-btn:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+html.dark .mobile_table_toggle.formButton {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: var(--TXTCOLOR1);
+}
+
+html.dark .mobile_table_toggle.formButton:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+#tab-filters #filterTable_squawk,
+#tab-filters #filterTable_reg,
+#tab-filters #filterTable_callsign,
+#tab-filters #filterTable_type,
+#tab-filters #filterTable_icao,
+#tab-filters #filterTable_route,
+#tab-filters #filterTable_emitter {
+    display: block;
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+}
+
+/* Filter field rows tile in two columns (single-column tables still layout fine) */
+#tab-filters #filterTable_squawk tbody,
+#tab-filters #filterTable_reg tbody,
+#tab-filters #filterTable_callsign tbody,
+#tab-filters #filterTable_type tbody,
+#tab-filters #filterTable_icao tbody,
+#tab-filters #filterTable_route tbody,
+#tab-filters #filterTable_emitter tbody {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(6px * var(--SCALE));
+    width: 100%;
+}
+
+#tab-filters #filterTable_squawk tr,
+#tab-filters #filterTable_reg tr,
+#tab-filters #filterTable_callsign tr,
+#tab-filters #filterTable_type tr,
+#tab-filters #filterTable_icao tr,
+#tab-filters #filterTable_route tr,
+#tab-filters #filterTable_emitter tr {
+    display: contents;
+}
+
+#tab-filters #filterTable_squawk td,
+#tab-filters #filterTable_reg td,
+#tab-filters #filterTable_callsign td,
+#tab-filters #filterTable_type td,
+#tab-filters #filterTable_icao td,
+#tab-filters #filterTable_route td,
+#tab-filters #filterTable_emitter td {
+    display: block;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+#tab-filters #filterTable_squawk .filter-field-item,
+#tab-filters #filterTable_reg .filter-field-item,
+#tab-filters #filterTable_callsign .filter-field-item,
+#tab-filters #filterTable_type .filter-field-item,
+#tab-filters #filterTable_icao .filter-field-item,
+#tab-filters #filterTable_route .filter-field-item,
+#tab-filters #filterTable_emitter .filter-field-item {
     margin-bottom: 0;
 }
-#tab-filters #filterTable .filterBlock {
-    margin-bottom: 6px;
+
+@media screen and (max-width: 400px) {
+    #tab-filters #filterTable_squawk tbody,
+    #tab-filters #filterTable_reg tbody,
+    #tab-filters #filterTable_callsign tbody,
+    #tab-filters #filterTable_type tbody,
+    #tab-filters #filterTable_icao tbody,
+    #tab-filters #filterTable_route tbody,
+    #tab-filters #filterTable_emitter tbody {
+        grid-template-columns: 1fr;
+    }
 }
 
 .largeText a {
@@ -1136,7 +1579,7 @@ table.infoSectionTable tr td {
     z-index: 9999;
     display: none;
     background-color: var(--BGCOLOR2);
-    border-radius: 10px;
+    border-radius: var(--UI-RADIUS-PANEL);
     border: 1px solid rgba(128, 128, 128, 0.3);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--TXTCOLOR2);
@@ -1166,7 +1609,7 @@ table.infoSectionTable tr td {
     margin-bottom: calc(16px * var(--SCALE));
     background: linear-gradient(180deg, rgba(128, 128, 128, 0.08) 0%, transparent 100%);
     border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-    border-radius: 10px 10px 0 0;
+    border-radius: var(--UI-RADIUS-PANEL) var(--UI-RADIUS-PANEL) 0 0;
     min-height: calc(44px * var(--SCALE));
     box-sizing: border-box;
 }
@@ -1194,7 +1637,7 @@ table.infoSectionTable tr td {
     z-index: 9999;
     display: none;
     background-color: var(--BGCOLOR2);
-    border-radius: 10px;
+    border-radius: var(--UI-RADIUS-PANEL);
     border: 1px solid rgba(128, 128, 128, 0.3);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--TXTCOLOR2);
@@ -1311,7 +1754,7 @@ table.infoSectionTable tr td {
 
 .settingsSection {
     border: 1px solid rgba(128, 128, 128, 0.2);
-    border-radius: 6px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     margin-bottom: 6px;
     overflow: hidden;
 }
@@ -1499,19 +1942,32 @@ table.infoSectionTable tr td {
     float: right;
     width: calc(100% - calc( 5px * var(--SCALE)));
     max-width:  calc(520px * var(--SCALE));
-    right: calc( 85px * var(--SCALE));
-    bottom: calc( 35px * var(--SCALE));
+    right: calc( 92px * var(--SCALE));
+    bottom: calc( 42px * var(--SCALE));
     background-color: transparent !important;
+    overflow: visible;
 }
 
 #altitude_chart_button {
-    background: none;
+    background: transparent;
     border: none;
     padding: 0;
     width: 100%;
     display: block;
     color: var(--TXTCOLOR2);
     cursor: default;
+    border-radius: 0;
+    overflow: visible;
+}
+
+/* OpenLayers adds outline on .ol-control button:hover — disable for this static legend */
+#altitude_chart_button:hover,
+#altitude_chart_button:focus,
+#altitude_chart_button:focus-visible,
+#altitude_chart_button:active {
+    outline: none;
+    box-shadow: none;
+    color: var(--TXTCOLOR2);
 }
 
 
@@ -1521,7 +1977,7 @@ table.infoSectionTable tr td {
     text-decoration: none;
     padding: calc( 4px * var(--SCALE));
     line-height: calc( 22px * var(--SCALE));
-    border-radius: calc( 4px * var(--SCALE));
+    border-radius: var(--UI-RADIUS-TIGHT);
 }
 .bottom-info-container {
     padding-top: calc( 10px * var(--SCALE));
@@ -1547,6 +2003,182 @@ table.infoSectionTable tr td {
 .ui-tabs-panel {
     background-color: var(--BGCOLOR1);
 }
+
+/* Search / Filters: one “page” card — segmented control fused to the panel below */
+#tabs.ui-sidebar-tabs {
+    margin-top: calc(8px * var(--SCALE));
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: var(--UI-RADIUS-PANEL);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    background-color: var(--BGCOLOR2);
+}
+
+html.dark #tabs.ui-sidebar-tabs {
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    box-sizing: border-box;
+    list-style: none;
+    margin: 0;
+    padding: calc(6px * var(--SCALE));
+    gap: calc(6px * var(--SCALE));
+    background-color: var(--BGCOLOR1);
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0;
+}
+
+html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* jQuery UI themes paint <li> (ui-state-active / hover) — strip so only our <a> buttons show color */
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-tab,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-default,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-hover,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-focus {
+    flex: 1 1 0;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    top: auto;
+    position: relative;
+    border: none !important;
+    border-bottom-width: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+/* Inactive = .formButton-like; active = .search-submit-btn — !important beats jQuery UI link states */
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li > a.ui-tabs-anchor {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+    float: none !important;
+    padding: calc(7px * var(--SCALE)) calc(12px * var(--SCALE)) !important;
+    margin: 0 !important;
+    border-radius: var(--UI-RADIUS-CONTROL) !important;
+    font-size: calc(12px * var(--SCALE)) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    color: var(--TXTCOLOR2) !important;
+    background-color: rgba(128, 128, 128, 0.35) !important;
+    background-image: none !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    box-shadow: none !important;
+    transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* jQuery UI sets aria-selected on <li>, not on <a> — scope inactive dark styles so they never override accent */
+html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li[aria-selected="false"] > a.ui-tabs-anchor {
+    color: var(--TXTCOLOR1) !important;
+    background-color: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+}
+
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li[aria-selected="true"] > a.ui-tabs-anchor {
+    color: #ffffff !important;
+    background-color: var(--ACCENT) !important;
+    border: 1px solid rgba(0, 0, 0, 0.16) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor,
+html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor,
+html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li[aria-selected="true"] > a.ui-tabs-anchor {
+    color: #ffffff !important;
+    background-color: var(--ACCENT) !important;
+    border-color: rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:not(.ui-tabs-active) > a.ui-tabs-anchor:hover {
+    color: var(--TXTCOLOR1) !important;
+    background-color: rgba(128, 128, 128, 0.5) !important;
+    border-color: rgba(0, 0, 0, 0.28) !important;
+}
+
+html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:not(.ui-tabs-active) > a.ui-tabs-anchor:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.22) !important;
+    border-color: rgba(255, 255, 255, 0.38) !important;
+}
+
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:hover,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:hover {
+    color: #ffffff !important;
+    background-color: var(--ACCENT) !important;
+    filter: brightness(1.06);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14) !important;
+}
+
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li > a.ui-tabs-anchor:active {
+    transform: translateY(1px);
+}
+
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:active,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:active {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Keep accent fill when the active tab has focus (keyboard / click); jQuery/browser can restyle anchors */
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus-visible,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus-visible {
+    color: #ffffff !important;
+    background-color: var(--ACCENT) !important;
+    border: 1px solid rgba(0, 0, 0, 0.16) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    outline: none;
+}
+
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus-visible,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus-visible {
+    outline: 2px solid var(--ACCENT-LIGHT);
+    outline-offset: 2px;
+}
+
+html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus,
+html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus {
+    border-color: rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+#tabs.ui-sidebar-tabs .ui-tabs-panel {
+    padding: 0;
+    margin: 0;
+    background-color: var(--BGCOLOR2);
+    border: none;
+    border-radius: 0;
+}
+
+#tabs.ui-sidebar-tabs .sidebar-panel-sheet {
+    margin-top: 0;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    background-color: transparent;
+}
 .greyButton {
     background-color: var(--BGCOLOR2);
     cursor: pointer;
@@ -1558,7 +2190,7 @@ table.infoSectionTable tr td {
     font-size: calc(15px * var(--SCALE));
     font-weight: bold;
     color: var(--TXTCOLOR1);
-    border-radius: 6px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     margin-bottom: 4px;
     transition: background-color 0.2s;
 }
@@ -1591,16 +2223,89 @@ table.infoSectionTable tr td {
 .ui-tabs .ui-tabs-nav li.ui-tabs-active {
     padding-bottom: 0px;
 }
+
+#tabs.ui-sidebar-tabs.ui-tabs .ui-tabs-panel {
+    padding: 0;
+}
+
+#tabs.ui-sidebar-tabs.ui-tabs .ui-tabs-nav {
+    padding: calc(6px * var(--SCALE));
+    margin: 0;
+    margin-bottom: 0;
+}
+
+#tabs.ui-sidebar-tabs.ui-tabs .ui-tabs-nav li.ui-tabs-active {
+    padding-bottom: 0;
+}
+
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav.ui-widget-header {
+    background: var(--BGCOLOR1);
+    border: none;
+}
 .ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
-    border-radius: 3px;
+    border-radius: var(--UI-RADIUS-TIGHT);
 }
 
 .buttonFilter {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    width: calc( 240px * var(--SCALE));
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     cursor: pointer;
+}
+
+/* Tighter chip grid — no fixed 240px rail; chips shrink to the column */
+#tab-filters .buttonFilter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(3px * var(--SCALE));
+}
+
+#tab-filters .buttonFilter li {
+    float: none;
+    width: auto;
+    flex: 1 1 calc(52px * var(--SCALE));
+    min-width: calc(48px * var(--SCALE));
+    max-width: calc(88px * var(--SCALE));
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: calc(2px * var(--SCALE)) calc(4px * var(--SCALE));
+    font-size: calc(11px * var(--SCALE));
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+/* SOURCE: two columns; chip density matches #tab-filters .buttonFilter (Database flags), not extra vertical padding */
+#tab-filters #sourceFilter {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(3px * var(--SCALE));
+    justify-items: stretch;
+    align-items: stretch;
+}
+
+#tab-filters #sourceFilter li {
+    float: none;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+    padding: calc(2px * var(--SCALE)) calc(4px * var(--SCALE));
+    font-size: calc(11px * var(--SCALE));
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+#tab-filters #sourceFilter li#source-filter-uat {
+    line-height: 1.15;
 }
 
 .ui-widget-content .ui-selectable .ui-selected {
@@ -1612,7 +2317,7 @@ table.infoSectionTable tr td {
 .buttonFilter li {
     border-width: 1px;
     border-color: var(--BGCOLOR2);
-    border-radius: 4px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     margin-right: 4px;
     margin-bottom: 4px;
     padding: 3px 4px;
@@ -1644,7 +2349,7 @@ table.infoSectionTable tr td {
     padding: 6px 4px;
     /* Very compact padding */
     border: 1px solid var(--ACCENT);
-    border-radius: 6px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     /* Rounded corners */
     background-color: var(--BGCOLOR2);
     text-align: center;
@@ -1759,7 +2464,7 @@ a.ui-button:active,
 
 .ui-slider {
     background-color: rgba(128, 128, 128, 0.25);
-    border-radius: 4px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     height: 6px;
     border: none;
     margin: 8px 4px 14px;
@@ -1779,16 +2484,19 @@ a.ui-button:active,
     transform: scale(1.15);
 }
 
-/* Settings select dropdown */
+/* Settings select: override global select { height: 22px } (clips text) — compact single-line height */
 #settings_infoblock select {
     max-width: 100%;
+    height: calc(28px * var(--SCALE));
+    min-height: calc(28px * var(--SCALE));
+    box-sizing: border-box;
     background-color: rgba(128, 128, 128, 0.15);
     color: var(--TXTCOLOR2);
     border: 1px solid rgba(128, 128, 128, 0.3);
-    border-radius: 6px;
-    padding: 6px 12px;
+    border-radius: var(--UI-RADIUS-TIGHT);
+    padding: 0 10px;
     font-size: 13px;
-    line-height: 1.6;
+    line-height: calc(26px * var(--SCALE));
     font-family: inherit;
     cursor: pointer;
     outline: none;
@@ -1799,13 +2507,17 @@ a.ui-button:active,
 
 /* jQuery UI selectmenu used for settings dropdowns */
 #settings_infoblock .ui-selectmenu-button.ui-button {
-    padding-top: 6px;
-    padding-bottom: 6px;
+    min-height: calc(28px * var(--SCALE));
+    height: calc(28px * var(--SCALE));
+    box-sizing: border-box;
+    padding: 0 10px;
     font-size: 13px;
-    line-height: 1.6;
+    line-height: calc(26px * var(--SCALE));
 }
 #settings_infoblock .ui-selectmenu-text {
-    line-height: 1.6;
+    line-height: calc(26px * var(--SCALE));
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Globe table limit selector in sidebar */
@@ -1836,7 +2548,7 @@ a.ui-button:active,
     background-color: rgba(128, 128, 128, 0.4);
     color: var(--TXTCOLOR2);
     border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 6px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     padding: 6px 14px;
     font-size: 13px;
     font-family: inherit;
@@ -1941,7 +2653,7 @@ input{
     height: auto;
     width: auto;
     background: white;
-    border-radius: 6px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     padding: 3px;
     /* Total height: 26px + 6px = 32px */
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
@@ -2007,7 +2719,7 @@ input{
     font-size: calc(14px * var(--SCALE));
     font-weight: 500;
     color: var(--TXTCOLOR1);
-    border-radius: 6px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     transition: all 0.2s ease;
     box-sizing: border-box;
     /* ensure padding doesn't overflow */
@@ -2110,7 +2822,7 @@ input{
     margin-right: auto;
     max-width: 70%;
     background: white;
-    border-radius: 4px;
+    border-radius: var(--UI-RADIUS-TIGHT);
     padding: 1px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
@@ -2162,27 +2874,23 @@ input{
     }
 }
 
-/* Mobile Table Toggle */
+/* Mobile aircraft list toggle — same chrome as .formButton, compact and centered */
 .mobile_table_toggle {
     display: none;
-    width: 96%;
-    margin: 5px 2%;
-    padding: 10px;
-    font-size: var(--FS2); /* Use var(--FS2) instead of calc if possible, or just standard size */
-    font-weight: bold;
-    color: var(--TXTCOLOR1);
-    background-color: var(--BGCOLOR2);
-    border: 1px solid rgba(0,0,0,0.1);
-    border-radius: 6px;
-    cursor: pointer;
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: calc(100% - 16px);
+    margin: 4px auto 6px;
+    padding: 3px 10px;
+    font-size: var(--FS1);
+    font-weight: 500;
+    line-height: 1.25;
     text-align: center;
 }
 
 @media screen and (max-width: 768px) {
     /* Mobile Table Toggle: Hide contents of sidebar-table by default, except the toggle button and tabs */
-    #sidebar-table:not(.mobile_visible) > #planesTable,
-    #sidebar-table:not(.mobile_visible) > #legend,
-    #sidebar-table:not(.mobile_visible) > .settingsOptionContainer {
+    #sidebar-table:not(.mobile_visible) > .sidebar-table-sheet {
         display: none !important;
     }
 
@@ -2196,7 +2904,7 @@ input{
         display: none;
     }
     /* But show it if parent has mobile_visible (overriding the line above) */
-    #sidebar-table.mobile_visible > #planesTable {
+    #sidebar-table.mobile_visible #planesTable {
         display: table;
     }
     
@@ -2204,14 +2912,28 @@ input{
     #legend {
         display: none;
     }
-    #sidebar-table.mobile_visible > #legend {
-        display: block;
+    #sidebar-table.mobile_visible #legend {
+        display: flex;
+    }
+
+    /* Altitude legend: centered, compact; JS adds .altitude_chart_mobile_hidden when overlays open.
+       Sit above .ol-scale-line (~8px + ~28px) and #credits (~10px + text) with clear gap. */
+    #altitude_chart {
+        float: none;
+        left: 50%;
+        right: auto;
+        width: min(92vw, 340px);
+        max-width: min(92vw, 340px);
+        bottom: calc(58px * var(--SCALE) + env(safe-area-inset-bottom, 0px));
+        transform: translateX(-50%) scale(0.82);
+        transform-origin: center bottom;
+    }
+
+    #altitude_chart.altitude_chart_mobile_hidden {
+        display: none !important;
     }
     
-    /* settingsOptionContainer (More Table Lines etc) default hidden by the :not rule above, 
-       so just need to ensure they show when parent is visible? 
-       They are divs, so display: block is default. 
-       The :not rule handles the hiding. The absence of that rule handles the showing. */
+    /* Globe “table rows” row lives inside .sidebar-table-sheet; hidden/shown with the sheet on mobile. */
 }
 @media screen and (max-width: 768px) {
     /* Hide the extra table controls layout container on mobile by default */
@@ -2229,7 +2951,7 @@ body.mobile_sidebar_open .layer-switcher {
 /* Custom Layer Switcher Button Style */
 .layer-switcher button {
     background-color: var(--ACCENT) !important; /* Use red accent color */
-    border-radius: 6px !important;
+    border-radius: var(--UI-RADIUS-CONTROL) !important;
     border: none !important;
     /* Use a white SVG icon for the layers */
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 11l-2.5-1.25L12 11zm0 2.5l-5-2.5-2.5 1.25L12 16l7.5-3.75-2.5-1.25L12 13.5zm0 2.5l-5-2.5-2.5 1.25L12 18.5l7.5-3.75-2.5-1.25L12 16z"/><path d="M22 13.5l-10 5-10-5L2 15l10 5 10-5zM22 17.5l-10 5-10-5L2 19l10 5 10-5z" opacity="0.5"/></svg>');
@@ -2300,7 +3022,7 @@ body.mobile_sidebar_open .layer-switcher {
     box-sizing: border-box;
     background-color: var(--BGCOLOR2);
     border: 1px solid rgba(128, 128, 128, 0.3);
-    border-radius: 10px;
+    border-radius: var(--UI-RADIUS-PANEL);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--TXTCOLOR2);

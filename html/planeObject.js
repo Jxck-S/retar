@@ -277,6 +277,8 @@ PlaneObject.prototype.isFiltered = function() {
     }
 
     for (const filter of filters_active) {
+        if (filter.key === 'route' && !useRouteAPI)
+            continue;
         if (!this[filter.field] || !this[filter.field].toUpperCase().match(filter.PATTERN)) {
             //this[filter.field] && console.log(this[filter.field].toUpperCase() + ' ' + filter.PATTERN);
             return true;
