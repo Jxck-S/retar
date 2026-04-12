@@ -1813,7 +1813,9 @@ jQuery('#selected_altitude_geom1')
             if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
                 TAR.altitudeChart.syncMobileCollapse();
 
-            if (loadFinished) {
+            /* Desktop: sidebar width changes the map box — OL must resize. Mobile overlay
+             * (position:absolute) does not; skip updateSize to avoid a full map repaint. */
+            if (loadFinished && (!onMobile || !mapIsVisible)) {
                 updateMapSize();
             }
         },
@@ -3234,6 +3236,7 @@ function initMap() {
 
     // Insert at start so they appear at bottom of layer picker (switcher renders in reverse order)
     layers.insertAt(0, positionsRangesGroup);
+    invalidateLayersPanel();
 
     ol_map_init();
 
@@ -10296,10 +10299,49 @@ function fetchCustomLogoIndex() {
 parseURLIcaos();
 initialize();
 
+// Layers picker: built once; invalidated when the layer tree is recreated (e.g. map init).
+function invalidateLayersPanel() {
+    const c = document.getElementById('layers_picker_content');
+    if (!c)
+        return;
+    c.innerHTML = '';
+    delete c.dataset.layersPanelBuilt;
+}
+
+// Sync radio/checkbox visuals from OpenLayers (e.g. base map changed elsewhere).
+function refreshLayersPanelControls() {
+    const container = document.getElementById('layers_picker_content');
+    if (!container || !layers_group || container.dataset.layersPanelBuilt !== '1')
+        return;
+    const byName = {};
+    ol.control.LayerSwitcher.forEachRecursive(layers_group, function (lyr) {
+        const n = lyr.get('name');
+        if (n)
+            byName[n] = lyr;
+    });
+    container.querySelectorAll('.settingsOptionContainer[data-layer-name]').forEach(function (row) {
+        const name = row.getAttribute('data-layer-name');
+        const layer = byName[name];
+        if (!layer)
+            return;
+        const radio = row.querySelector('.settingsRadio');
+        const cb = row.querySelector('.settingsCheckbox');
+        if (radio) {
+            const sel = !!layer.getVisible();
+            radio.classList.toggle('settingsRadioSelected', sel);
+            radio.setAttribute('aria-checked', sel);
+        } else if (cb) {
+            cb.classList.toggle('settingsCheckboxChecked', layer.getVisible());
+        }
+    });
+}
+
 // Build the custom layers panel (same structure as settings: details/summary + settingsCheckbox/settingsText)
 function buildLayersPanel() {
     const container = document.getElementById('layers_picker_content');
     if (!container || !layers_group)
+        return;
+    if (container.dataset.layersPanelBuilt === '1')
         return;
     container.innerHTML = '';
 
@@ -10410,6 +10452,8 @@ function buildLayersPanel() {
         details.appendChild(content);
         container.appendChild(details);
     }
+
+    container.dataset.layersPanelBuilt = '1';
 }
 
 function appendOverlayLayers(container, group) {
@@ -10466,6 +10510,7 @@ function showCustomLayersPanel() {
     jQuery('#settings_infoblock').hide();
     closeLabelMenu();
     buildLayersPanel();
+    refreshLayersPanelControls();
     jQuery('#layers_infoblock').show();
     if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
         TAR.altitudeChart.syncMobileCollapse();
