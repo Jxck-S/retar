@@ -2446,28 +2446,44 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
     cursor: grabbing;
 }
 
+.aircraft_media_panel {
+    text-align: center;
+    width: 100%;
+}
+#photo_container td {
+    text-align: center;
+}
+
 #copyrightInfo {
     position: Relative;
     font-size: var(--FS1);
     text-align: center;
 }
-#selected_photo{
+/* Center photos and silhouettes; sil alone gets the white card frame */
+#selected_photo,
+#selected_photo.aircraft_media_frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    display: block;
     width: 100%;
-    margin: 0;
+    margin: 0 auto;
 }
 #airplanePhoto {
-    display: inline-block;
+    display: block;
     max-width: 100%;
     height: auto;
+    margin: 0 auto;
+}
+a.aircraft_photo_link {
+    display: inline-block;
+    max-width: 100%;
+    line-height: 0;
 }
 
-/* Aircraft type silhouette: smaller footprint + same white “card” treatment as airline banners */
-#photo_container.photo_row_sil #selected_photo {
-    text-align: center;
-}
-.silhouette_wrap {
+/* Type silhouette: bordered card only (not used for API photos) */
+.aircraft_media_sil {
     display: inline-block;
     max-width: 72%;
     margin: 2px auto 0 auto;
@@ -2479,13 +2495,23 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
     box-sizing: border-box;
     vertical-align: middle;
 }
-.silhouette_wrap img {
+.aircraft_media_sil img {
     display: block;
     margin: 0 auto;
     max-width: 100%;
     width: auto;
     height: auto;
     max-height: 132px;
+}
+
+/* Silent placeholder while photo JSON is loading */
+.aircraft_media_pending {
+    display: block;
+    min-height: 1px;
+}
+
+#photo_container.photo_row_sil #selected_photo {
+    text-align: center;
 }
 .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
     background: var(--BGCOLOR1);

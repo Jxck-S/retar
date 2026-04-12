@@ -3637,6 +3637,9 @@ function planePhotoFetchPending(plane) {
         (Date.now() - plane.psAPIresponseTS < 120000);
 }
 
+/** Non-empty placeholder while photo APIs are in flight (no visible text; reserves layout in adjustInfoBlock). */
+const AIRCRAFT_MEDIA_PENDING_HTML = '<div class="aircraft_media_pending" aria-hidden="true"></div>';
+
 function displaySil() {
     jQuery('#copyrightInfo').html("");
     if (!showSil) {
@@ -3645,7 +3648,7 @@ function displaySil() {
     }
     // Don't show a silhouette while we're still waiting on a photo API response.
     if (planePhotoFetchPending(SelectedPlane)) {
-        setPhotoHtml("<p>Loading image...</p>");
+        setPhotoHtml(AIRCRAFT_MEDIA_PENDING_HTML);
         return;
     }
     // Don't replace a loaded aircraft photo with a silhouette (displaySil is called from many paths).
@@ -3669,9 +3672,9 @@ function displaySil() {
         return;
     }
     // If the loaded URL ends up as ZZZZ.png (e.g. redirect / try_files), hide after load.
-    const silOnLoad = "if((this.src&&this.src.indexOf('ZZZZ.png')!==-1)||(this.currentSrc&&this.currentSrc.indexOf('ZZZZ.png')!==-1)){if(typeof setPhotoHtml==='function'){setPhotoHtml('');}else{var w=this.closest('.silhouette_wrap');if(w){w.style.display='none';}}if(window.adjustInfoBlock){adjustInfoBlock();}}";
-    // Wrapped for banner-like styling; size controlled in CSS (smaller than full aircraft photos).
-    new_html = "<div class=\"silhouette_wrap\" title=\"Aircraft type silhouette\"><img id=\"silhouette\" class=\"silhouette_img\" src=\"aircraft_sil/" + type + ".png\" alt=\"\" onload=\"" + silOnLoad + "\" onerror=\"this.style.display='none';if(window.adjustInfoBlock){adjustInfoBlock();}\" /></div>";
+    const silOnLoad = "if((this.src&&this.src.indexOf('ZZZZ.png')!==-1)||(this.currentSrc&&this.currentSrc.indexOf('ZZZZ.png')!==-1)){if(typeof setPhotoHtml==='function'){setPhotoHtml('');}else{var w=this.closest('.aircraft_media_sil');if(w){w.style.display='none';}}if(window.adjustInfoBlock){adjustInfoBlock();}}";
+    // Bordered “card” only for silhouettes; photos are unboxed (see CSS).
+    new_html = "<div class=\"aircraft_media_sil\" title=\"Aircraft type silhouette\"><img id=\"silhouette\" class=\"silhouette_img\" src=\"aircraft_sil/" + type + ".png\" alt=\"\" onload=\"" + silOnLoad + "\" onerror=\"this.style.display='none';if(window.adjustInfoBlock){adjustInfoBlock();}\" /></div>";
     setPhotoHtml(new_html);
 }
 
@@ -3684,7 +3687,7 @@ function displayPhoto() {
     }
     if (!SelectedPlane.psAPIresponse) {
         if (planespottersAPI || planespottingAPI || customPhotosApi) {
-            setPhotoHtml("<p>Loading image...</p>");
+            setPhotoHtml(AIRCRAFT_MEDIA_PENDING_HTML);
         } else {
             displaySil();
         }
@@ -3692,11 +3695,6 @@ function displayPhoto() {
     }
     let photos = SelectedPlane.psAPIresponse["photos"] || SelectedPlane.psAPIresponse["images"];
     if (!photos || photos.length == 0) {
-        if (typeof customPhotosApi !== 'undefined' && customPhotosApi) {
-            setPhotoHtml("");
-            adjustInfoBlock();
-            return;
-        }
         displaySil();
         adjustInfoBlock();
         return;
@@ -3714,7 +3712,7 @@ function displayPhoto() {
     if (typeof customPhotosApi !== 'undefined' && customPhotosApi && typeof customPhotosClickable !== 'undefined' && !customPhotosClickable) {
         new_html = '<img id="airplanePhoto" src="' + photoToPull + '" onerror="this.style.display=\'none\';if(window.adjustInfoBlock){adjustInfoBlock();}">';
     } else {
-        new_html = '<a class="link" href="'+ linkToPicture +'" target="_blank" rel="noopener noreferrer"><img id="airplanePhoto" src="' + photoToPull + '" onerror="this.style.display=\'none\';if(window.adjustInfoBlock){adjustInfoBlock();}"></a>';
+        new_html = '<a class="link aircraft_photo_link" href="'+ linkToPicture +'" target="_blank" rel="noopener noreferrer"><img id="airplanePhoto" src="' + photoToPull + '" onerror="this.style.display=\'none\';if(window.adjustInfoBlock){adjustInfoBlock();}"></a>';
     }
     let copyright = photos[0]["photographer"] || photos[0]["user"];
     jQuery('#copyrightInfo').html("<span>Image © " + copyright +"</span>");
@@ -3739,7 +3737,7 @@ function refreshPhoto(selected) {
     if (!selected.dbinfoLoaded) {
         // Don't paint a silhouette while DB is loading — it can stick until the next refresh and look like sil "wins" over photos.
         if (planespottersAPI || planespottingAPI || customPhotosApi) {
-            setPhotoHtml("<p>Loading image...</p>");
+            setPhotoHtml(AIRCRAFT_MEDIA_PENDING_HTML);
         } else {
             displaySil();
         }
@@ -3774,7 +3772,7 @@ function refreshPhoto(selected) {
     selected.psAPIparam = param;
     selected.psAPIresponse = null;
 
-    setPhotoHtml("<p>Loading image...</p>");
+    setPhotoHtml(AIRCRAFT_MEDIA_PENDING_HTML);
     jQuery('#copyrightInfo').html("<span></span>");
     //console.log(ts/1000 + 'sending psAPI request');
     selected.psAPIresponseTS = ts;
@@ -5518,7 +5516,7 @@ function adjustInfoBlock() {
 
     const hasAirplanePhoto = jQuery('#airplanePhoto').length > 0;
     const hasSilhouette = jQuery('#silhouette').length > 0;
-    const loadingPhoto = !hasAirplanePhoto && !hasSilhouette && jQuery('#selected_photo').find('p').length > 0;
+    const loadingPhoto = !hasAirplanePhoto && !hasSilhouette && jQuery('#selected_photo .aircraft_media_pending').length > 0;
 
     if (hasAirplanePhoto) {
         jQuery('#photo_container').removeClass('photo_row_sil').addClass('photo_row_photo');
