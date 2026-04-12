@@ -2853,6 +2853,28 @@ input{
         display: block !important;
         z-index: 1001; /* Ensure it is above the sidebar if it is outside, or inside */
     }
+
+    /*
+     * Full-screen mobile sidebar used to sit above the map and eat every touch.
+     * Pass events through the shell; only #sidebar-table (card + margins in its box)
+     * re-enables hits. Scroll moves to #sidebar-table while open so the list/tabs still scroll.
+     */
+    body.mobile_sidebar_open #sidebar_container {
+        pointer-events: none;
+    }
+    body.mobile_sidebar_open #sidebar_canvas {
+        pointer-events: none;
+        overflow: visible;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+    body.mobile_sidebar_open #sidebar-table {
+        pointer-events: auto;
+        max-height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
 }
 
 /* Mobile sidebar close button (now inside #sidebar-table) */
