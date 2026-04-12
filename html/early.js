@@ -11,6 +11,59 @@ function hideErrorBox(sel) {
     jQuery(sel).addClass('hidden');
 }
 
+/**
+ * Airline media URLs: config may set either a service root (…/logba/) or an asset folder (…/logba/logos).
+ * Callers used to always append "logos/", which breaks when the base already ends with /logos.
+ */
+function normalizeAirlineMediaBase(url) {
+    if (typeof url !== 'string') return '';
+    return url.trim().replace(/\/+$/, '');
+}
+
+/** Parent path for /custom/logos, /custom/banners, and the custom-logo JSON index. */
+function airlineLogosServiceRoot() {
+    const b = normalizeAirlineMediaBase(airlineLogosApiUrl);
+    if (!b) return '';
+    return b.replace(/\/(logos|banners)$/i, '');
+}
+
+function airlineOperatorLogoUrl(icao) {
+    const b = normalizeAirlineMediaBase(airlineLogosApiUrl);
+    if (!b || !icao) return '';
+    if (/\/logos$/i.test(b)) return b + '/' + icao;
+    return b + '/logos/' + icao;
+}
+
+function airlineCustomLogoUrl(customKey) {
+    const root = airlineLogosServiceRoot();
+    if (!root || !customKey) return '';
+    return root + '/custom/logos/' + customKey;
+}
+
+/** Base path for operator banner images (uses airlineBannersApiUrl when set). */
+function airlineBannersEndpointBase() {
+    const bb = normalizeAirlineMediaBase(airlineBannersApiUrl);
+    if (bb) return bb;
+    const lb = normalizeAirlineMediaBase(airlineLogosApiUrl);
+    if (!lb) return '';
+    if (/\/logos$/i.test(lb)) return lb.replace(/\/logos$/i, '') + '/banners';
+    if (/\/banners$/i.test(lb)) return lb;
+    return lb + '/banners';
+}
+
+function airlineOperatorBannerUrl(icao) {
+    const b = airlineBannersEndpointBase();
+    if (!b || !icao) return '';
+    if (/\/banners$/i.test(b)) return b + '/' + icao;
+    return b + '/banners/' + icao;
+}
+
+function airlineCustomBannerUrl(customKey) {
+    const root = airlineLogosServiceRoot();
+    if (!root || !customKey) return '';
+    return root + '/custom/banners/' + customKey;
+}
+
 // TAR1090 application object
 let TAR;
 TAR = (function (global, jQuery, TAR) {
