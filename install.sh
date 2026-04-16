@@ -122,9 +122,9 @@
         cd "$gpath/git"
         TAR_VERSION="$(cat version)_dirty"
     else
-        VERSION_NEW=$(curl --silent --show-error "https://raw.githubusercontent.com/Jxck-S/tar1090/master/version")
+        VERSION_NEW=$(curl --silent --show-error "https://raw.githubusercontent.com/Jxck-S/retar/main/version")
         if [[ "$1" == "force" ]] || [[ "$(cat "$gpath/git/version" 2>/dev/null)" != "$VERSION_NEW" ]]; then
-            if ! getGIT "$repo" "master" "$gpath/git"; then
+            if ! getGIT "$repo" "main" "$gpath/git"; then
                 echo "Unable to download files, exiting! (Maybe try again?)"
                 exit 1
             fi
@@ -549,4 +549,3 @@
     else
         echo "All done! You'll need to configure your webserver yourself, see ${ipath}/nginx-tar1090.conf for a reference nginx configuration"
     fi
-

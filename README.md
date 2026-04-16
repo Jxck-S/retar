@@ -22,7 +22,7 @@ No hardware required. The demo loads static sample data so you can explore the m
 ## Installation
 
 ```
-sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/master/install.sh)"
+sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/main/install.sh)"
 ```
 
 ## View the added webinterface
@@ -38,7 +38,7 @@ http://[IP_ADDRESS]/?pTracks
 ## Update (same command as installation)
 
 ```
-sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/master/install.sh)"
+sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/main/install.sh)"
 ```
 
 Configuration should be preserved.
@@ -46,5 +46,5 @@ Configuration should be preserved.
 ## Remove / Uninstall
 
 ```
-sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/master/uninstall.sh)"
+sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/main/uninstall.sh)"
 ```
