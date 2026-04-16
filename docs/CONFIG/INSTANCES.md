@@ -22,7 +22,7 @@ The automated script can manage multiple instances by reading from the `/etc/def
     *   *Note:* If you want the instance at `http://pi/`, use `webroot` as the name.
 3.  **Deploy:** After saving the file, run the main install script:
     ```bash
-    sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/master/install.sh)"
+    sudo bash -c "$(wget -nv -O - https://github.com/Jxck-S/retar/raw/main/install.sh)"
     ```
 
 ---
