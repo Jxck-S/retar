@@ -1195,6 +1195,10 @@ select.error, textarea.error, input.error {
     /* Removing custom hover bg to match standard button behavior */
 }
 
+.replayButton {
+    background-image: url('images/replay-white.svg');
+}
+
 
 .button {
     background-color: var(--ACCENT);

@@ -3125,6 +3125,7 @@ function initMap() {
 
     if ((globeIndex && aggregator) || filterUuid) {
         jQuery('#dump1090_message_rate_td').hide();
+        jQuery('#RP').show();
     }
 
     locationDotLayer = new ol.layer.Vector({
@@ -3455,6 +3456,9 @@ function initMap() {
             case "T":
                 filterTISB = !filterTISB;
                 refreshFilter();
+                break;
+            case "Y":
+                showReplayBar();
                 break;
             case "u":
                 toggleMilitary();
