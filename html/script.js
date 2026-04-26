@@ -9428,10 +9428,12 @@ function showReplayBar(){
     showingReplayBar = !showingReplayBar;
     if (!showingReplayBar){
         jQuery("#replayBar").hide();
+        clearTimeout(refreshId);
         replay = null;
         jQuery('#map_canvas').height('100%');
         jQuery('#sidebar_canvas').height('100%');
         jQuery("#selected_showTrace_hide").show();
+        fetchData({force: true});
     } else {
         jQuery("#replayBar").show();
         jQuery("#replayBar").css('display', 'grid');
