@@ -1196,7 +1196,17 @@ select.error, textarea.error, input.error {
 }
 
 .replayButton {
-    background-image: url('images/replay-white.svg');
+    /* icon drawn via masked ::before so it follows text color
+       (white when inActiveButton, black when activeButton) */
+}
+.replayButton::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: currentColor;
+    -webkit-mask: url('images/replay-white.svg') center / 20px no-repeat;
+    mask: url('images/replay-white.svg') center / 20px no-repeat;
 }
 
 

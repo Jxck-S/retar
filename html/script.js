@@ -9428,6 +9428,7 @@ function showReplayBar(){
     console.log('showReplayBar()');
     showingReplayBar = !showingReplayBar;
     if (!showingReplayBar){
+        jQuery('#RP').removeClass('activeButton').addClass('inActiveButton');
         jQuery("#replayBar").hide();
         clearTimeout(refreshId);
         replay = null;
@@ -9436,6 +9437,7 @@ function showReplayBar(){
         jQuery("#selected_showTrace_hide").show();
         fetchData({force: true});
     } else {
+        jQuery('#RP').removeClass('inActiveButton').addClass('activeButton');
         jQuery("#replayBar").show();
         jQuery("#replayBar").css('display', 'grid');
         jQuery('#replayBar').height('100px');
