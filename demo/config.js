@@ -32,6 +32,9 @@
 //SiteLon     = 9.0;
 //SiteName = "My Radar Site"; // tooltip of the marker (override defaults.js)
 
+// Update GPS location (keep map centered on GPS location)
+//updateLocation = false;
+
 // Color controls for the heywhatsthat upintheair range outline
 //range_outline_color = '#0000DD';
 //range_outline_alpha = 1.0;
@@ -300,6 +303,9 @@ PageDescription = "ADS-B plane tracking interface";
 // show links to various registration websites (not all countries)
 // registrationLinks = true;
 
+// enable callsign-based airline lookup from the operators database
+// airlineLookup = true;
+
 // Filter implausible positions (required speed > Mach 3.5)
 // valid values: true, false, "onlyMLAT" ("" required)
 // positionFilter = true;
@@ -324,13 +330,14 @@ PageDescription = "ADS-B plane tracking interface";
 //squareMania = false;
 
 // Columns that have a // in front of them are shown.
-/* // remove this line to mofify columns (and the one at the end)
+/* // remove this line to modify columns (and the one at the end)
 HideCols = [
 	"#icao",
 //	"#country",
 //	"#flight",
 //	"#route",
 	"#registration",
+	"#airline",
 //	"#type",
 	"#operator",
 //	"#squawk",

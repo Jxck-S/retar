@@ -1209,6 +1209,10 @@ select.error, textarea.error, input.error {
     mask: url('images/replay-white.svg') center / 20px no-repeat;
 }
 
+.replayButton {
+    background-image: url('images/replay-white.svg');
+}
+
 
 .button {
     background-color: var(--ACCENT);
