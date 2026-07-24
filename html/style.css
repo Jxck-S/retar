@@ -2535,6 +2535,13 @@ a.ui-button:active,
 .ui-button:active,
 .ui-button.ui-state-active:hover {
     background: var(--ACCENT);
+    /* base theme also sets border: 1px solid #003eff — strip the stock blue */
+    border-color: var(--ACCENT);
+}
+
+/* base theme focus ring is a hardcoded blue glow; follow the accent instead */
+.ui-visual-focus {
+    box-shadow: 0 0 3px 1px var(--ACCENT);
 }
 .ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited, a.ui-button, a:link.ui-button, a:visited.ui-button, .ui-button {
   color:var(--TXTCOLOR2);
