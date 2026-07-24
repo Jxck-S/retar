@@ -2681,6 +2681,7 @@ input{
     position: absolute;
     height: 10px;
     bottom: 0%;
+    z-index: 5;
     grid-template-columns: 1fr 1.5fr 5fr 2fr;
     grid-template-rows: 20px 40px 20px 20px;
     justify-items: center;
