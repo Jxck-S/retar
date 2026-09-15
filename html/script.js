@@ -137,7 +137,7 @@ let lastRequestBox = '';
 let nextQuerySelected = 0;
 let enableDynamicCachebusting = false;
 g.lastRefreshInt = 1000;
-let reapTimeout = globeIndex ? 240 : 480;
+let reapTimeout = globeIndex ? 4 * 60 : 15 * 60;
 
 
 let baroCorrectQNH = 1013.25;
@@ -218,6 +218,25 @@ function processAircraft(ac, init, uat) {
     // Do we already have this plane object in g.planes?
     // If not make it.
     let plane = g.planes[hex]
+
+    if (!noVanish && plane && g.historyKeep && g.historyKeep[hex] && type != 'adsc') {
+        if (now - plane.last_info_server > reapTimeout) {
+
+            //console.log(`deleting ${hex} at ${now}`);
+
+            delete g.planes[plane.icao];
+            for (let i = 0; i < g.planesOrdered.length; ++i) {
+                if (g.planesOrdered[i].icao == hex) {
+                    g.planesOrdered.splice(i, 1);
+                    break;
+                }
+            }
+
+            plane.destroy();
+            plane = null;
+        }
+    }
+
 
     if (!plane) {
         plane = new PlaneObject(hex);
@@ -2592,8 +2611,10 @@ function processBoat(feature, now, last) {
 
     ac.type = 'ais';
     ac.gs = pr.speed;
-    ac.flight = pr.callsign;
-    ac.r = pr.shipname;
+    // Maritime callsign is the ITU ship-station license - a registration-
+    // role identifier, not an operational one. A vessel is hailed by NAME.
+    ac.flight = pr.shipname || pr.callsign || String(pr.mmsi);
+    ac.r = pr.callsign;
     ac.seen = now - pr.last_signal;
 
     ac.messages  = pr.count;
@@ -9840,7 +9861,7 @@ function setAutoselect() {
 function registrationLink(plane) {
     
     const countryLinks = {
-        Brazil: (reg) => `https://sistemas.anac.gov.br/aeronaves/cons_rab_resposta_en.asp?textMarca=${reg}`,
+        Brazil: (reg) => `https://aeronaves.anac.gov.br/aeronaves/cons_rab_resposta_en.asp?textMarca=${reg}`,
         Australia: (reg) => `https://www.casa.gov.au/search-centre/aircraft-register?reg=${reg.replace(/^VH-/, '')}`,
         Jamaica: (reg) => `https://www.jcaa.gov.jm/aircraft-registry/${reg}`,
         Montenegro: (reg) => `https://www.caa.me/en/registri?field_registarska_oznaka1_value=${reg}`,

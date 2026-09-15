@@ -259,6 +259,9 @@ PageDescription = "ADS-B plane tracking interface";
 //   MapboxAPIKey = "your key here";
 //
 //MapboxAPIKey = null;
+//
+// Carto api key
+//carto_api_key = "";
 
 // This determines what is up, default is north (0 degrees)
 //mapOrientation = 0;
@@ -271,7 +274,8 @@ PageDescription = "ADS-B plane tracking interface";
 
 // Only display labels when zoomed in this far:
 //labelZoom = 8;
-//labelZoomGround = 12.5;
+//labelZoomGround = 14.8;
+//labelZoomAIS = 11.8;
 
 // font family for labels, default bold, could be empty or italic as well
 // labelStyle = 'bold';
