@@ -291,6 +291,8 @@ let BingMapsAPIKey = null;
 //
 let MapboxAPIKey = null;
 
+let carto_api_key = null;
+
 let pf_data = ["chunks/pf.json"]
 
 let mapOrientation = 0; // This determines what is up, normally north (0 degrees)
@@ -307,6 +309,7 @@ let utcTimesHistoric = true;
 // Only display labels when zoomed in this far:
 let labelZoom = 0;
 let labelZoomGround = 14.8;
+let labelZoomAIS = 11.8;
 
 // font family for labels, default bold, could be empty or italic as well
 let labelStyle = 'bold';
