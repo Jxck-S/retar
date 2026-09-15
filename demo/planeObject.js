@@ -878,8 +878,9 @@ PlaneObject.prototype.updateIcon = function() {
     let opIconLineAdded = false;
 
     if ( g.enableLabels && (!multiSelect || (multiSelect && this.selected)) &&
+        (this.dataSource != "ais" || g.zoomLvl >= labelZoomAIS) &&
         (
-            (g.zoomLvl >= labelZoom && this.altitude != "ground" && this.dataSource != "ais")
+            (g.zoomLvl >= labelZoom && this.altitude != "ground")
             || (g.zoomLvl >= labelZoomGround - 2 && this.speed > 5 && !this.fakeHex)
             || (g.zoomLvl >= labelZoomGround + 0 && !this.fakeHex)
             || (g.zoomLvl >= labelZoomGround + 1)
@@ -3061,8 +3062,12 @@ PlaneObject.prototype.routeCheck = function() {
         // we have all the pieces that allow us to lookup a route
         let route_check = { 'callsign': currentName, icao: this.icao};
         if (!this.position) {
-            // no lookup (for now)
-            return;
+            if (routeApiUrl.includes("adsb.im") && this.messages > 100) {
+                // check without plausibility check if we have received enough messages
+            } else {
+                // no lookup (for now)
+                return;
+            }
         } else if (showTrace || replay) {
             if (!routeApiUrl.includes("adsb.im")) {
                 route_check['lat'] = this.position[1];
