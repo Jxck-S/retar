@@ -62,6 +62,13 @@ let MessageRateInTitle = false;
 // plane table and in the detailed plane info. Valid values are
 // "nautical", "metric", or "imperial".
 let DisplayUnits = "nautical";
+// Override DisplayUnits for a single quantity, for example altitude in feet
+// while everything else is metric. Same values as DisplayUnits, null follows
+// DisplayUnits. The Units dropdown in the settings doesn't affect overridden quantities.
+let altitudeUnits = null;
+let verticalRateUnits = null;
+let speedUnits = null;
+let distanceUnits = null;
 
 // -- Map settings ----------------------------------------
 // These settings are overridden by any position information
@@ -166,6 +173,10 @@ let outlineWidth = 0.90;
 // constant html color for markers / tracks
 let monochromeMarkers = null;
 let monochromeTracks = null;
+
+// draw a dashed line from the selected aircraft in its direction of travel
+// covering this many minutes at the current ground speed, 0 disables
+let headingLineMinutes = 0;
 
 let altitudeChartDefaultState = true;
 
@@ -320,6 +331,18 @@ let labelScale = 1;
 // have ANY effect
 let labelFont;
 
+// show the current map zoom level above the scale line
+let showZoomLevel = false;
+
+// Default state of the U / T / L / O / K buttons on page load.
+// L / O / K are remembered by the browser once clicked, the default only applies before that.
+// O has no visible effect unless labels (L) are on.
+let defaultMilitaryOnly = false;    // U: only show military aircraft
+let defaultAllTracks = false;       // T: show all tracks
+let defaultLabels = false;          // L: aircraft labels
+let defaultExtendedLabels = 0;      // O: label extension, 0 - 3
+let defaultTrackLabels = false;     // K: track labels
+
 // some scaling for fonts and things
 let globalScale = 1;
 let userScale = 1;
@@ -341,6 +364,9 @@ let planespottersLinks = false;
 
 // show links to various registration websites (not all countries)
 let registrationLinks = true;
+// custom link for the registration, overrides the per country links (requires registrationLinks)
+// placeholders: REGISTRATION, ICAO, TYPE (type code, may be empty), values are URL-encoded
+let registrationLinkTemplate = null;
 
 // enable callsign-based airline lookup from the operators database
 let airlineLookup = true;
