@@ -982,6 +982,8 @@
         <div id="sidebar_canvas">
 
           <div id="sidebar-table">
+            <!-- mobile: floating top panel (close, banner, counts) -->
+            <div class="sidebar-top-block">
             <div class="sidebar-table-top-chrome">
               <button type="button" id="sidebar_close_mobile" class="sidebar_close_mobile" title="Close Sidebar" aria-label="Close sidebar"></button>
             </div>
@@ -1041,7 +1043,10 @@
             </table>
 
             <!-- ABOVE_TABS_ANCHOR -->
+            </div>
 
+            <!-- mobile: panel docked to the bottom (Search / Filters, aircraft list) -->
+            <div class="sidebar-bottom-block">
             <div id="tabs" class="ui-sidebar-tabs" style="min-height: 10px; overflow: auto">
               <ul class="ui-sidebar-tabs-nav" role="tablist">
                 <li role="presentation" aria-selected="true"><a href="#tab-search" role="tab">Search</a></li>
@@ -1156,6 +1161,7 @@
               </div>
 
               <!-- BELOW_LEGEND_ANCHOR -->
+            </div>
             </div>
           </div>
 

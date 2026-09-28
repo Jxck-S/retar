@@ -1916,6 +1916,16 @@ jQuery('#selected_altitude_geom1')
             TAR.altitudeChart.syncMobileCollapse();
     });
 
+    // Mobile: with the sidebar panels open, the map shows between them; tapping it
+    // returns to map mode (capture phase, so the tap doesn't also select a plane)
+    document.getElementById('map_container').addEventListener('pointerdown', function (e) {
+        if (!onMobile || !document.body.classList.contains('mobile_sidebar_open'))
+            return;
+        e.stopPropagation();
+        e.preventDefault();
+        jQuery("#sidebar_close_mobile").click();
+    }, true);
+
     jQuery("#mobile_table_toggle").click(function() {
         let container = jQuery("#sidebar-table");
         let btn = jQuery(this);

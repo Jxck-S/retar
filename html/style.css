@@ -3094,22 +3094,72 @@ input{
         flex: 1 1 auto;
         min-height: 0;
     }
-    /* floating over the map: this is where the card look belongs */
+    /* Two floating panels instead of one big card: banner + counts on top,
+       Search / Filters (and the aircraft list) docked to the bottom. The map
+       stays visible between them; tapping it closes the sidebar (script.js). */
     #sidebar-table {
-        border-radius: var(--UI-RADIUS-PANEL);
-        margin: calc(10px * var(--SCALE)) calc(5px * var(--SCALE));
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        border: 1px solid rgba(0, 0, 0, 0.12);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        padding: calc(10px * var(--SCALE)) calc(8px * var(--SCALE)) 0;
+        background: transparent;
+        pointer-events: none;
     }
-    html.dark #sidebar-table {
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-    body.mobile_sidebar_open #sidebar-table {
+    .sidebar-top-block,
+    .sidebar-bottom-block {
         pointer-events: auto;
-        max-height: 100%;
+        background-color: var(--BGCOLOR1);
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+    }
+    .sidebar-top-block {
+        position: relative;
+        flex: 0 0 auto;
+        border-radius: var(--UI-RADIUS-PANEL);
+        padding: calc(8px * var(--SCALE)) calc(12px * var(--SCALE));
+    }
+    /* flush with the bottom and sides of the screen; selector at the very bottom */
+    .sidebar-bottom-block {
+        display: flex;
+        flex-direction: column-reverse;
+        flex: 0 1 auto;
+        min-height: 0;
+        max-height: 72%;
+        margin: auto calc(-8px * var(--SCALE)) 0;
+        padding: calc(12px * var(--SCALE)) calc(14px * var(--SCALE)) calc(12px * var(--SCALE) + env(safe-area-inset-bottom, 0px));
+        border-radius: var(--UI-RADIUS-PANEL) var(--UI-RADIUS-PANEL) 0 0;
+    }
+    /* tabs: panel content above the segmented control */
+    .sidebar-bottom-block #tabs.ui-sidebar-tabs {
+        display: flex;
+        flex-direction: column-reverse;
+        flex: 0 1 auto;
+        min-height: 0;
+        margin-top: 0;
+        overflow: visible !important;
+    }
+    .sidebar-bottom-block #tabs .ui-tabs-panel {
+        min-height: 0;
+        max-height: 45vh;
         overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
+    }
+    .sidebar-bottom-block #tabs .sidebar-panel-sheet {
+        margin-top: 0;
+        padding: 0 0 calc(10px * var(--SCALE));
+    }
+    .sidebar-bottom-block .sidebar-table-sheet {
+        min-height: 0;
+        max-height: 38vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        margin: 0 0 calc(8px * var(--SCALE));
+        padding-top: 0;
+        border-top: none;
+    }
+    .sidebar-bottom-block .mobile_table_toggle {
+        margin: 0 auto calc(8px * var(--SCALE));
     }
 }
 
@@ -3117,12 +3167,10 @@ input{
 @media screen and (max-width: 768px) {
     .sidebar-table-top-chrome {
         display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        min-height: calc(42px * var(--SCALE));
-        padding: calc(4px * var(--SCALE)) calc(8px * var(--SCALE)) calc(4px * var(--SCALE));
-        flex-shrink: 0;
-        box-sizing: border-box;
+        position: absolute;
+        top: calc(6px * var(--SCALE));
+        right: calc(6px * var(--SCALE));
+        z-index: 2;
     }
 
     .sidebar_close_mobile {
@@ -3158,7 +3206,7 @@ input{
 
 @media screen and (max-width: 768px) {
     /* Mobile Table Toggle: Hide contents of sidebar-table by default, except the toggle button and tabs */
-    #sidebar-table:not(.mobile_visible) > .sidebar-table-sheet {
+    #sidebar-table:not(.mobile_visible) .sidebar-table-sheet {
         display: none !important;
     }
 
