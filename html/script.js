@@ -10298,39 +10298,52 @@ function printTrace() {
     _printTrace(SelectedPlane.recentTrace.trace);
 }
 
+// The share button is built once per selected aircraft. Copy feedback toggles a
+// class on the existing row instead of rebuilding it, so the element under the
+// cursor isn't replaced on every refresh (which replayed the hover animation).
+let copyLinkTimer = null;
+
 function copyShareLink() {
-    navigator.clipboard.writeText(shareLink);
-
-    copyLinkTime = new Date().getTime();
-    copiedIcao = SelectedPlane.icao;
-    setSelectedIcao();
+    const row = jQuery('#selected_icao');
+    const link = row.find('.share-link-icon');
+    navigator.clipboard.writeText(shareLink).then(function() {
+        row.addClass('linkCopied');
+        link.attr('title', 'Link copied');
+        clearTimeout(copyLinkTimer);
+        copyLinkTimer = setTimeout(function() {
+            row.removeClass('linkCopied');
+            link.attr('title', 'Copy shareable link');
+        }, 2000);
+    }).catch(function() {
+        link.attr('title', 'Copy failed - right click to copy link');
+    });
 }
-
-let copyLinkTime = 0;
-let copiedIcao = null;
 
 function setSelectedIcao() {
     const selected = SelectedPlane;
-    if (selected.icao == selIcao && copiedIcao == null) {
+    if (selected.icao == selIcao) {
+        // keep the link target current (shareLink follows the map view)
+        jQuery('#selected_icao .share-link-icon').prop('href', shareLink);
         return;
     }
     selIcao = selected.icao;
+    clearTimeout(copyLinkTimer);
     let hex_html = "<span style='font-family: monospace;' class=identSmall>Hex:" + NBSP + selected.icao.toUpperCase() + "</span>";
     if (globeIndex || shareBaseUrl) {
-        if (copiedIcao && (copiedIcao != selected.icao || new Date().getTime() - copyLinkTime > 2000)) {
-            copiedIcao = null;
-        }
-        
-        const shareIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-top: -1px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`;
-        
-        let copy_link_content = (copiedIcao != null) ? "<span style='color: #4CAF50; font-weight: bold;'>Copied!</span>" : `<span class="share-link-icon-wrap">${shareIcon}</span>`;
+        const svgAttrs = 'xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-top: -1px;"';
+        const shareIcon = `<svg ${svgAttrs}><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`;
+        const checkIcon = `<svg ${svgAttrs}><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
         let icao_link = "<span class=identSmall><a class='link share-link-icon' title='Copy shareable link' target=\"_blank\" href=\"" + shareLink +
-            "\" onclick=\"copyShareLink(); return false;\">" + copy_link_content + "</a></span>";
+            "\" onclick=\"copyShareLink(); return false;\">" +
+            `<span class="share-link-icon-wrap share-icon-idle">${shareIcon}</span>` +
+            `<span class="share-link-icon-wrap share-icon-done">${checkIcon}</span>` +
+            "</a><span class='share-copied-label'>Copied!</span></span>";
         hex_html = hex_html + icao_link;
     }
-    jQuery('#selected_icao').html(hex_html);
-
-    jQuery('a.identSmall').prop('href',shareLink);
+    const row = jQuery('#selected_icao');
+    row.removeClass('linkCopied');
+    row.html(hex_html);
 }
 
 function mapTypeSettings() {
