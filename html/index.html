@@ -1058,22 +1058,17 @@
               </ul>
               <div id="tab-search">
                 <div class="sidebar-panel-sheet">
-                  <table id="tab-search-table" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td>
-                        <form id="search_form">
-                          <div class="infoBlockTitleText">Search:</div>
-                          <div class="search-input-wrapper">
-                            <input id="search_input" name="searchBox" type="text" class="searchInput textInputWithClear"
-                              maxlength="128" title="Tail number, callsign, ICAO hex, aircraft type; airport code (e.g. KATL); lat/lon e.g. 33.64,-84.42 or 33.64 -84.42">
-                            <div id="search_clear_button" class="search-clear-btn" title="Clear Search">×</div>
-                          </div>
-                          <button class="formButton search-submit-btn" type="submit">Search</button>
-                          <p class="search-form-hint">Tail number, callsign, ICAO hex, airport code, latitude and longitude</p>
-                        </form>
-                      </td>
-                    </tr>
-                  </table>
+                  <form id="search_form" role="search">
+                    <label for="search_input" class="sr-only">Search aircraft</label>
+                    <div class="search-input-wrapper">
+                      <input id="search_input" name="searchBox" type="text" class="searchInput textInputWithClear"
+                        maxlength="128" autocomplete="off" spellcheck="false"
+                        placeholder="Tail, callsign, hex, type, airport, lat,lon"
+                        title="Tail number, callsign, ICAO hex, aircraft type; airport code (e.g. KATL); lat/lon e.g. 33.64,-84.42 or 33.64 -84.42">
+                      <div id="search_clear_button" class="search-clear-btn" title="Clear Search">×</div>
+                    </div>
+                    <button class="formButton search-submit-btn" type="submit">Search</button>
+                  </form>
                   <div class="search-warning sidebar-notice-amber" id="search_warning" style="display:none" role="status" aria-live="polite"></div>
                 </div>
               </div>
