@@ -2117,20 +2117,23 @@ jQuery('#selected_altitude_geom1')
     }
 }
 
-function initLegend(colors) {
+function initLegend() {
+    // same dots as the rows' source stripe and the Filters tab
+    const palette = tableColorsLight || tableColors;
+    const colors = Object.assign({}, palette.unselected, palette.selected);
+    const item = (key, label) => '<span class="legendTitle"><span class="filter-chip-dot" style="background-color:' + colors[key] + ';"></span>' + label + '</span>';
     let html = '';
-    html += '<div class="legendTitle" style="background-color:' + colors['adsb'] + ';">ADS-B</div>';
-    html += '<div class="legendTitle" style="background-color:' + colors['uat'] + ';">UAT / ADS-R</div>';
-    html += '<div class="legendTitle" style="background-color:' + colors['mlat'] + ';">MLAT</div>';
-    html += '<br>';
-    html += '<div class="legendTitle" style="background-color:' + colors['tisb'] + ';">TIS-B</div>';
+    html += item('adsb', 'ADS-B');
+    html += item('uat', 'UAT / ADS-R');
+    html += item('mlat', 'MLAT');
+    html += item('tisb', 'TIS-B');
     if (!globeIndex)
-        html += '<div class="legendTitle" style="background-color:' + colors['modeS'] + ';">Mode-S</div>';
+        html += item('modeS', 'Mode-S');
     if (globeIndex)
-        html += '<div class="legendTitle" style="background-color:' + colors['other'] + ';">Other</div>';
+        html += item('other', 'Other');
     if (aiscatcher_server)
-        html += '<div class="legendTitle" style="background-color:' + colors['ais'] + ';">AIS</div>';
-    html += '<div class="legendTitle" style="background-color:' + colors['adsc'] + `;">${jaeroLabel}</div>`;
+        html += item('ais', 'AIS');
+    html += item('adsc', jaeroLabel);
 
     document.getElementById('legend').innerHTML = html;
 }
@@ -3552,7 +3555,7 @@ function initMap() {
             if (loadFinished) {
                 TAR.planeMan.redraw();
                 refreshFilter();
-                initLegend(tableColors.unselected);
+                initLegend();
                 initSourceFilter();
                 initFlagFilter();
                 syncFilterControls();
@@ -3560,7 +3563,7 @@ function initMap() {
         }
     });
 
-    initLegend(tableColors.unselected);
+    initLegend();
 
     initFilters();
 
@@ -5214,24 +5217,23 @@ function refreshFeatures() {
 
             if (now - plane.refreshTR > 5 || plane.selected != plane.selectCache) {
                 plane.refreshTR = now;
-                let colors = tableColors.unselected;
-                let bgColor = "#F8F8F8"
-
                 plane.selectCache = plane.selected;
-                if (plane.selected)
-                    colors = tableColors.selected;
 
-                if (plane.dataSource && plane.dataSource in colors)
-                    bgColor = colors[plane.dataSource];
-
+                // Source is a coloured stripe at the start of the row (configured table colours,
+                // readable in both themes); emergency squawks keep a full-row highlight.
+                let rowStyle;
                 if (plane.squawk in tableColors.special) {
-                    bgColor = tableColors.special[plane.squawk];
-                    plane.bgColorCache = bgColor;
-                    plane.tr.style = "background-color: " + bgColor + "; color: black;";
-                } else if (plane.bgColorCache != bgColor) {
-                    plane.bgColorCache = bgColor;
-                    plane.tr.style = "background-color: " + bgColor + ";";
+                    rowStyle = "background-color: " + tableColors.special[plane.squawk] + "; color: black;";
+                } else {
+                    const palette = tableColorsLight || tableColors;
+                    const src = palette.selected[plane.dataSource] || palette.unselected[plane.dataSource] || palette.selected.unknown;
+                    rowStyle = "--row-src: " + src + ";";
                 }
+                if (plane.bgColorCache != rowStyle) {
+                    plane.bgColorCache = rowStyle;
+                    plane.tr.style = rowStyle;
+                }
+                plane.tr.classList.toggle('planeRowSelected', !!plane.selected);
 
                 for (let cell in activeCols) {
                     let col = activeCols[cell];

@@ -43,18 +43,27 @@ select {
     font-size: var(--FS2);
     white-space: nowrap;
     cursor: default;
-    /* no gaps between cells: header and each row read as one bar with rounded ends */
-    border-spacing: 0 calc(2px * var(--SCALE));
+    border-spacing: 0;
 }
 
-#planesTable tr > td:first-child {
-    border-top-left-radius: var(--UI-RADIUS-SMALL);
-    border-bottom-left-radius: var(--UI-RADIUS-SMALL);
+/* Rows sit on the panel with a hairline between them; the data source is a
+   stripe at the row start (--row-src, set per row in script.js). Emergency
+   squawks keep their inline full-row colour. */
+#planesTable tbody tr td {
+    border-bottom: 1px solid color-mix(in srgb, var(--TXTCOLOR1) 8%, transparent);
 }
 
-#planesTable tr > td:last-child {
-    border-top-right-radius: var(--UI-RADIUS-SMALL);
-    border-bottom-right-radius: var(--UI-RADIUS-SMALL);
+#planesTable tbody tr > td:first-child {
+    box-shadow: inset calc(3px * var(--SCALE)) 0 0 var(--row-src, transparent);
+    padding-left: calc(7px * var(--SCALE));
+}
+
+#planesTable tbody tr:hover {
+    background-color: color-mix(in srgb, var(--TXTCOLOR1) 6%, transparent);
+}
+
+#planesTable tbody tr.planeRowSelected {
+    background-color: color-mix(in srgb, var(--ACCENT) 22%, transparent);
 }
 
 #layout_container {
@@ -962,16 +971,18 @@ html.dark .sidebar-notice-amber {
 }
 
 
-/* colour lives on the cells so the header bar gets the rounded row ends */
+/* plain header: muted labels over a divider (opaque so it covers rows when sticky) */
 .aircraft_table_header {
-    color: #FFFFFF;
+    color: var(--TXTCOLOR2);
     cursor: pointer;
     position: sticky;
     top: 0;
     z-index: 10;
 }
 .aircraft_table_header td {
-    background-color: var(--ACCENT);
+    background-color: var(--BGCOLOR1);
+    border-bottom: 1px solid color-mix(in srgb, var(--TXTCOLOR1) 20%, transparent);
+    font-weight: 600;
     font-size: smaller;
     padding: calc( 5px * var(--SCALE));
     text-align: center;
@@ -1717,12 +1728,14 @@ html.dark .mobile_table_toggle.formButton:hover {
 
 
 
+/* legend under the table: dot + label, like the Filters source chips */
 .legendTitle {
-    border-radius: var(--UI-RADIUS-SMALL);
-    line-height: calc( 19px * var(--SCALE));
-    padding-right: calc( 3px * var(--SCALE));
-    padding-left: calc( 3px * var(--SCALE));
-    margin: calc( 2px * var(--SCALE));
+    display: inline-flex;
+    align-items: center;
+    gap: calc(5px * var(--SCALE));
+    font-size: calc(12px * var(--SCALE));
+    line-height: 1.6;
+    margin-right: calc(12px * var(--SCALE));
 }
 
 #settings_infoblock {
