@@ -1906,15 +1906,21 @@ jQuery('#selected_altitude_geom1')
         },
     });
 
-    jQuery("#sidebar_close_mobile").click(function() {
+    // Mobile: with the sidebar panels open, the map shows between them; tapping it
+    // returns to map mode (capture phase, so the tap doesn't also select a plane)
+    document.getElementById('map_container').addEventListener('pointerdown', function (e) {
+        if (!onMobile || !document.body.classList.contains('mobile_sidebar_open'))
+            return;
+        e.stopPropagation();
+        e.preventDefault();
         if (toggles.sidebar_visible) {
-             toggles.sidebar_visible.toggle(false);
+            toggles.sidebar_visible.toggle(false);
         } else {
-             jQuery("#sidebar_container").hide();
+            jQuery("#sidebar_container").hide();
         }
         if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
             TAR.altitudeChart.syncMobileCollapse();
-    });
+    }, true);
 
     jQuery("#mobile_table_toggle").click(function() {
         let container = jQuery("#sidebar-table");
@@ -2117,20 +2123,41 @@ jQuery('#selected_altitude_geom1')
     }
 }
 
-function initLegend(colors) {
+// The table can be wider than the sidebar (many columns, narrow sidebar, phones).
+// Scroll it sideways inside its own box only when it overflows: a horizontal
+// scroll container would also stop the sticky header from pinning while the
+// sidebar scrolls, so keep that working whenever the table fits.
+function initTableScroll() {
+    const wrap = document.getElementById('planes_table_scroll');
+    const table = document.getElementById('planesTable');
+    if (!wrap || !table || typeof ResizeObserver === 'undefined')
+        return;
+    const sync = () => {
+        wrap.classList.toggle('is-scrollable', table.offsetWidth > wrap.clientWidth + 1);
+    };
+    const observer = new ResizeObserver(sync);
+    observer.observe(wrap);
+    observer.observe(table);
+    sync();
+}
+
+function initLegend() {
+    // same dots as the rows' source stripe and the Filters tab
+    const palette = tableColorsLight || tableColors;
+    const colors = Object.assign({}, palette.unselected, palette.selected);
+    const item = (key, label) => '<span class="legendTitle"><span class="filter-chip-dot" style="background-color:' + colors[key] + ';"></span>' + label + '</span>';
     let html = '';
-    html += '<div class="legendTitle" style="background-color:' + colors['adsb'] + ';">ADS-B</div>';
-    html += '<div class="legendTitle" style="background-color:' + colors['uat'] + ';">UAT / ADS-R</div>';
-    html += '<div class="legendTitle" style="background-color:' + colors['mlat'] + ';">MLAT</div>';
-    html += '<br>';
-    html += '<div class="legendTitle" style="background-color:' + colors['tisb'] + ';">TIS-B</div>';
+    html += item('adsb', 'ADS-B');
+    html += item('uat', 'UAT / ADS-R');
+    html += item('mlat', 'MLAT');
+    html += item('tisb', 'TIS-B');
     if (!globeIndex)
-        html += '<div class="legendTitle" style="background-color:' + colors['modeS'] + ';">Mode-S</div>';
+        html += item('modeS', 'Mode-S');
     if (globeIndex)
-        html += '<div class="legendTitle" style="background-color:' + colors['other'] + ';">Other</div>';
+        html += item('other', 'Other');
     if (aiscatcher_server)
-        html += '<div class="legendTitle" style="background-color:' + colors['ais'] + ';">AIS</div>';
-    html += '<div class="legendTitle" style="background-color:' + colors['adsc'] + `;">${jaeroLabel}</div>`;
+        html += item('ais', 'AIS');
+    html += item('adsc', jaeroLabel);
 
     document.getElementById('legend').innerHTML = html;
 }
@@ -3552,7 +3579,7 @@ function initMap() {
             if (loadFinished) {
                 TAR.planeMan.redraw();
                 refreshFilter();
-                initLegend(tableColors.unselected);
+                initLegend();
                 initSourceFilter();
                 initFlagFilter();
                 syncFilterControls();
@@ -3560,7 +3587,8 @@ function initMap() {
         }
     });
 
-    initLegend(tableColors.unselected);
+    initLegend();
+    initTableScroll();
 
     initFilters();
 
@@ -5214,24 +5242,23 @@ function refreshFeatures() {
 
             if (now - plane.refreshTR > 5 || plane.selected != plane.selectCache) {
                 plane.refreshTR = now;
-                let colors = tableColors.unselected;
-                let bgColor = "#F8F8F8"
-
                 plane.selectCache = plane.selected;
-                if (plane.selected)
-                    colors = tableColors.selected;
 
-                if (plane.dataSource && plane.dataSource in colors)
-                    bgColor = colors[plane.dataSource];
-
+                // Source is a coloured stripe at the start of the row (configured table colours,
+                // readable in both themes); emergency squawks keep a full-row highlight.
+                let rowStyle;
                 if (plane.squawk in tableColors.special) {
-                    bgColor = tableColors.special[plane.squawk];
-                    plane.bgColorCache = bgColor;
-                    plane.tr.style = "background-color: " + bgColor + "; color: black;";
-                } else if (plane.bgColorCache != bgColor) {
-                    plane.bgColorCache = bgColor;
-                    plane.tr.style = "background-color: " + bgColor + ";";
+                    rowStyle = "background-color: " + tableColors.special[plane.squawk] + "; color: black;";
+                } else {
+                    const palette = tableColorsLight || tableColors;
+                    const src = palette.selected[plane.dataSource] || palette.unselected[plane.dataSource] || palette.selected.unknown;
+                    rowStyle = "--row-src: " + src + ";";
                 }
+                if (plane.bgColorCache != rowStyle) {
+                    plane.bgColorCache = rowStyle;
+                    plane.tr.style = rowStyle;
+                }
+                plane.tr.classList.toggle('planeRowSelected', !!plane.selected);
 
                 for (let cell in activeCols) {
                     let col = activeCols[cell];
@@ -5252,10 +5279,12 @@ function refreshFeatures() {
         ctime && console.timeEnd("modTRs");
 
         global.refreshPageTitle();
-        jQuery('#dump1090_total_history').updateText(TrackedHistorySize);
+        // counts with thousands separators; server fields can be missing
+        const fmtCount = (v) => (v == null || isNaN(v)) ? 'n/a' : Number(v).toLocaleString();
+        jQuery('#dump1090_total_history').updateText(fmtCount(TrackedHistorySize));
         jQuery('#dump1090_message_rate').updateText(MessageRate === null ? 'n/a' : MessageRate.toFixed(1));
-        jQuery('#dump1090_total_ac').updateText(globeIndex ? globeTrackedAircraft : TrackedAircraft);
-        jQuery('#dump1090_total_ac_positions').updateText(TrackedAircraftPositions);
+        jQuery('#dump1090_total_ac').updateText(fmtCount(globeIndex ? globeTrackedAircraft : TrackedAircraft));
+        jQuery('#dump1090_total_ac_positions').updateText(fmtCount(TrackedAircraftPositions));
 
 
 
@@ -6210,7 +6239,7 @@ function toggleTableInView(arg) {
         loStore['tableInView'] = tableInView;
     }
 
-    jQuery('#with_positions').text(tableInView ? "On Screen:" : "With Position:");
+    jQuery('#with_positions').text(tableInView ? "on screen" : "with position");
 
     buttonActive('#V', tableInView);
 }

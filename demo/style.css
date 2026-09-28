@@ -4,14 +4,20 @@
     --FS1: calc(10px * var(--SCALE));
     --FS2: calc(13px * var(--SCALE));
     --FS3: calc(17px * var(--SCALE));
-    /* Settings/Layers modals used literal 10px — only for large surfaces */
-    --UI-RADIUS-PANEL: 10px;
-    /* Map/header buttons: keep visibly squarer than the 10px panels (was 8px) */
-    --UI-RADIUS-CONTROL: calc(5px * var(--SCALE));
-    /* Search, filters, column chips, tabs — tighter than panel corners */
-    --UI-RADIUS-TIGHT: calc(4px * var(--SCALE));
-    /* Tab pills: outer top corners nest inside #tabs panel radius minus nav padding (~6px*SCALE) */
-    --UI-RADIUS-TABS-OUTER: max(3px, calc(var(--UI-RADIUS-PANEL) - 6px * var(--SCALE) - 1px));
+    /* Corner radius: one value per role, used everywhere (no pills, no squares
+       except flush edges; circles only for dots, thumbs and round icon buttons) */
+    /* Panels, cards, popovers, floating boxes */
+    --UI-RADIUS-PANEL: 12px;
+    /* Anything you click or type in: buttons, map buttons, tabs, inputs, chips, images */
+    --UI-RADIUS-CONTROL: calc(8px * var(--SCALE));
+    /* Tiny marks: checkboxes, badges, slider tracks, map scale / zoom labels */
+    --UI-RADIUS-SMALL: calc(4px * var(--SCALE));
+    /* Map buttons: neutral surface, text-coloured icons; accent only when switched on */
+    --MAPBTN-BG: var(--BGCOLOR1);
+    --MAPBTN-FG: var(--TXTCOLOR1);
+    --MAPBTN-HOVER: color-mix(in srgb, var(--TXTCOLOR1) 10%, var(--BGCOLOR1));
+    --MAPBTN-BORDER: color-mix(in srgb, var(--TXTCOLOR1) 16%, transparent);
+    --MAPBTN-SHADOW: 0 1px 3px rgba(0, 0, 0, 0.18);
 }
 
 html,
@@ -37,6 +43,39 @@ select {
     font-size: var(--FS2);
     white-space: nowrap;
     cursor: default;
+    border-spacing: 0;
+}
+
+/* Table box: stays inside the sidebar section; scrolls sideways only when the
+   table is wider than it (class toggled by initTableScroll in script.js) */
+.planes-table-scroll {
+    max-width: 100%;
+}
+
+.planes-table-scroll.is-scrollable {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+
+/* Rows sit on the panel with a hairline between them; the data source is a
+   stripe at the row start (--row-src, set per row in script.js). Emergency
+   squawks keep their inline full-row colour. */
+#planesTable tbody tr td {
+    border-bottom: 1px solid color-mix(in srgb, var(--TXTCOLOR1) 8%, transparent);
+}
+
+#planesTable tbody tr > td:first-child {
+    box-shadow: inset calc(3px * var(--SCALE)) 0 0 var(--row-src, transparent);
+    padding-left: calc(7px * var(--SCALE));
+}
+
+#planesTable tbody tr:hover {
+    background-color: color-mix(in srgb, var(--TXTCOLOR1) 6%, transparent);
+}
+
+#planesTable tbody tr.planeRowSelected {
+    background-color: color-mix(in srgb, var(--ACCENT) 22%, transparent);
 }
 
 #layout_container {
@@ -55,26 +94,61 @@ select {
     background-color: var(--BGCOLOR1);
 }
 
-/* Outer shell uses the same border, radius, and shadow as inner sidebar cards */
+/* Desktop: the sidebar is docked, so its content is flat (no card inside it).
+   Mobile turns this into a floating card over the map (see max-width: 768px). */
 #sidebar-table {
     position: relative; /* Anchor for the mobile close button */
     background-color: var(--BGCOLOR1);
-    border-radius: var(--UI-RADIUS-PANEL);
-    padding: calc(10px * var(--SCALE)) calc(8px * var(--SCALE));
-    margin: calc(10px * var(--SCALE)) calc(5px * var(--SCALE));
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    padding: calc(12px * var(--SCALE)) calc(16px * var(--SCALE));
 }
 
-/* Table block, Search tab, Filters tab — identical chrome */
+/* Table block, Search tab, Filters tab: flat sections inside the #sidebar-table
+   card (no nested cards). Only controls and floating panels get rounded boxes;
+   sections are separated by spacing and a divider. */
+/* Aircraft counts: one compact row, number first, label muted */
+.sidebar-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: calc(4px * var(--SCALE)) calc(14px * var(--SCALE));
+    padding: calc(2px * var(--SCALE)) 0;
+}
+
+.sidebar-stat {
+    white-space: nowrap;
+}
+
+.sidebar-stat-value {
+    font-size: calc(15px * var(--SCALE));
+    font-weight: 600;
+    color: var(--TXTCOLOR1);
+    font-variant-numeric: tabular-nums;
+}
+
+.sidebar-stat-label {
+    font-size: calc(12px * var(--SCALE));
+    color: var(--TXTCOLOR2);
+    opacity: 0.8;
+}
+
 .sidebar-table-sheet,
 .sidebar-panel-sheet {
     margin-top: calc(8px * var(--SCALE));
-    padding: calc(10px * var(--SCALE)) calc(8px * var(--SCALE)) calc(8px * var(--SCALE));
-    background-color: var(--BGCOLOR2);
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: var(--UI-RADIUS-PANEL);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: calc(10px * var(--SCALE)) 0 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.sidebar-table-sheet {
+    margin-top: calc(12px * var(--SCALE));
+    padding-top: calc(12px * var(--SCALE));
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+html.dark .sidebar-table-sheet {
+    border-top-color: rgba(255, 255, 255, 0.1);
 }
 
 .filters-panel-sheet .filters-active-bar {
@@ -170,7 +244,7 @@ select {
     color: var(--TXTCOLOR1);
     background-color: var(--BGCOLOR1);
     border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 999px;
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: calc(4px * var(--SCALE)) calc(10px * var(--SCALE));
     cursor: pointer;
     transition: background-color 0.12s, border-color 0.12s;
@@ -219,7 +293,7 @@ select {
     top: 50%;
     height: 4px;
     margin-top: -2px;
-    border-radius: 2px;
+    border-radius: var(--UI-RADIUS-SMALL);
 }
 
 .filter-range-track {
@@ -326,7 +400,7 @@ select {
     color: var(--TXTCOLOR2);
     background-color: var(--BGCOLOR1);
     border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     cursor: pointer;
     padding: 0;
 }
@@ -454,43 +528,61 @@ html.dark .filter-tips td {
     opacity: 0.85;
 }
 
-#tab-search .search-form-hint {
-    margin: calc(8px * var(--SCALE)) 0 0;
+/* visible to screen readers only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
     padding: 0;
-    font-size: calc(11px * var(--SCALE));
-    line-height: 1.4;
-    color: var(--TXTCOLOR2);
-    opacity: 0.85;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Search: one row, input (with icon) + compact button */
+#tab-search #search_form {
+    display: flex;
+    align-items: stretch;
+    gap: calc(6px * var(--SCALE));
 }
 
 #tab-search #search_form .search-input-wrapper {
     display: block;
-    width: 100%;
-    max-width: 100%;
-    margin-top: calc(4px * var(--SCALE));
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 #tab-search #search_form .searchInput {
     width: 100%;
     max-width: 100%;
-    height: calc(26px * var(--SCALE));
+    height: calc(32px * var(--SCALE));
     box-sizing: border-box;
+    padding-left: calc(30px * var(--SCALE));
+    font-size: calc(13px * var(--SCALE));
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(9px * var(--SCALE)) center;
+    background-size: calc(14px * var(--SCALE));
+}
+
+/* the clear button only when there is something to clear */
+#tab-search #search_input:placeholder-shown ~ .search-clear-btn {
+    display: none;
 }
 
 #tab-search #search_form .search-submit-btn {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: calc(7px * var(--SCALE));
-    padding: calc(7px * var(--SCALE)) calc(12px * var(--SCALE));
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0 calc(14px * var(--SCALE));
     font-size: calc(12px * var(--SCALE));
     font-weight: 600;
     letter-spacing: 0.02em;
     color: #fff;
     background-color: var(--ACCENT);
-    border: 1px solid rgba(0, 0, 0, 0.16);
+    border: 1px solid transparent;
     border-radius: var(--UI-RADIUS-CONTROL);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
@@ -563,13 +655,16 @@ html.dark .filter-tips td {
     border-radius: var(--UI-RADIUS-CONTROL);
     
     /* Using shorthand to enforce all background properties at once and prevent overrides */
-    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>') no-repeat center !important;
+    background: var(--MAPBTN-BG) !important;
+    --icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>');
+    color: var(--MAPBTN-FG);
+    padding: 0;
     
     /* Smaller icon (20px) creates more "spacing" inside the 28px button */
     background-size: 20px !important;
 
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    border: none;
+    box-shadow: var(--MAPBTN-SHADOW);
+    border: 1px solid var(--MAPBTN-BORDER);
     cursor: pointer;
     transition: all 0.2s ease;
     
@@ -578,17 +673,7 @@ html.dark .filter-tips td {
 }
 
 .sidebar_button:hover {
-    background-color: var(--ACCENT-LIGHT) !important;
-}
-
-/* Dark mode adjustment if needed - assuming html.dark sets filters or we just let it be dark on dark? 
-   Ideally we want contrasting icon. 
-*/
-html.dark .sidebar_button {
-    /* Dark mode background logic - keep standard accent for consistency if it works, or slightly dimmer */
-    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>') no-repeat center !important;
-    background-size: 20px !important;
-    border-color: rgba(255,255,255,0.3);
+    background-color: var(--MAPBTN-HOVER) !important;
 }
 
 #toggle_sidebar_button.show_sidebar {
@@ -614,7 +699,8 @@ html.dark .sidebar_button {
     /* Shrink -> Restore / Minimize Sidebar. 
        Icon: Restore/Arrows In style.
     */
-    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>') no-repeat center !important;
+    background: var(--MAPBTN-BG) !important;
+    --icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>');
     background-size: 20px !important;
     transform: none;
     /* Default is hidden (since we start in normal map mode usually). 
@@ -636,7 +722,8 @@ html.dark .sidebar_button {
     /* Expand -> Full Screen / Maximize Sidebar. 
        Icon: Maximize/Arrows Out style to indicate full screen mode.
     */
-    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>') no-repeat center !important;
+    background: var(--MAPBTN-BG) !important;
+    --icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>');
     background-size: 20px !important;
     transform: none;
     /* Default visible (normal state) */
@@ -658,7 +745,7 @@ html.dark .sidebar_button {
     bottom: 30px;
     left: 8px;
     padding: 2px 4px;
-    border-radius: 4px;
+    border-radius: var(--UI-RADIUS-SMALL);
     font-size: 10px;
     background: var(--ol-partial-background-color);
     color: var(--ol-foreground-color);
@@ -735,12 +822,26 @@ html.dark .sidebar_button {
 .ol-control button {
     outline: none;
     z-index: 999;
+    border-radius: var(--UI-RADIUS-CONTROL);
+}
+
+/* OpenLayers ships 2px / 4px corners; use ours */
+.ol-control {
+    border-radius: var(--UI-RADIUS-CONTROL);
+}
+
+.ol-scale-line {
+    border-radius: var(--UI-RADIUS-SMALL);
+}
+
+.ol-attribution.ol-uncollapsible {
+    border-radius: var(--UI-RADIUS-CONTROL) 0 0 0;
 }
 
 .ol-zoom-in, .ol-zoom-out {
     background-image: none !important;
-    background-color: var(--ACCENT) !important;
-    color: white !important;
+    background-color: var(--MAPBTN-BG) !important;
+    color: var(--MAPBTN-FG) !important;
     width: calc(28px * var(--SCALE)) !important;
     height: calc(28px * var(--SCALE)) !important;
     border-radius: var(--UI-RADIUS-CONTROL) !important;
@@ -749,15 +850,14 @@ html.dark .sidebar_button {
     line-height: calc(28px * var(--SCALE)) !important; /* Center vertically */
     text-align: center !important;
     cursor: pointer !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--MAPBTN-SHADOW);
     transition: all 0.2s ease;
-    border: none !important;
+    border: 1px solid var(--MAPBTN-BORDER) !important;
     margin: calc(2px * var(--SCALE)) !important;
 }
 
 .ol-zoom-in:hover, .ol-zoom-out:hover {
-    background-color: var(--ACCENT-LIGHT) !important;
-    transform: translateY(-1px);
+    background-color: var(--MAPBTN-HOVER) !important;
 }
 
 .ol-zoom-in {
@@ -839,6 +939,7 @@ html.dark .sidebar-notice-amber {
     width: 50%;
     background-color: var(--BGCOLOR1);
     padding: calc( 5px * var(--SCALE));
+    border-radius: var(--UI-RADIUS-CONTROL);
 }
 
 #js_error {
@@ -848,7 +949,7 @@ html.dark .sidebar-notice-amber {
     background-color: rgba(33, 33, 33, 0.95);
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
@@ -882,20 +983,22 @@ html.dark .sidebar-notice-amber {
 }
 
 
+/* plain header: muted labels over a divider (opaque so it covers rows when sticky) */
 .aircraft_table_header {
-    background-color: var(--ACCENT);
-    color: #FFFFFF;
+    color: var(--TXTCOLOR2);
     cursor: pointer;
     position: sticky;
     top: 0;
     z-index: 10;
-    box-shadow:
-        0 -2px 2px -1px rgba(0, 0, 0, 0.5),
-        0 2px 2px -1px rgba(0, 0, 0, 0.7);
 }
 .aircraft_table_header td {
+    background-color: var(--BGCOLOR1);
+    border-bottom: 1px solid color-mix(in srgb, var(--TXTCOLOR1) 20%, transparent);
+    font-weight: 600;
     font-size: smaller;
-    padding: calc( 5px * var(--SCALE));
+    /* header labels set the column widths: keep side padding tight so the
+       default sidebar fits every column without sideways scrolling */
+    padding: calc( 5px * var(--SCALE)) calc( 3px * var(--SCALE));
     text-align: center;
 }
 
@@ -925,22 +1028,6 @@ html.dark .sidebar-notice-amber {
     opacity: 0.3;
     filter: alpha(opacity=30);
     /* For IE8 and earlier */
-}
-
-/* Spacing for Search and Filter Sections */
-#tab-search-table td,
-#filterTable2 td {
-    padding: 0px;
-    padding-bottom: 8px;
-    margin: 0px;
-    border-top-width: 0px;
-}
-
-/* Remove border/padding from the very last row's cell in each table to clean up bottom edge */
-#tab-search-table tr:last-child td,
-#filterTable2 tr:last-child td {
-    border-bottom: none;
-    padding-bottom: 0px;
 }
 
 .infoBlockTitleText {
@@ -1010,18 +1097,18 @@ html.dark .infoBlockTitleText {
     width: calc(70px * var(--SCALE));
     height: calc(24px * var(--SCALE));
     color:var(--TXTCOLOR2);
-    background-color: var(--BGCOLOR1);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 0 4px;
 }
 .searchInput {
     width: calc(100px * var(--SCALE));
     height: calc(24px * var(--SCALE));
     color: var(--TXTCOLOR2);
-    background-color: var(--BGCOLOR1);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 0 4px;
     box-sizing: border-box;
 }
@@ -1031,7 +1118,7 @@ html.dark .infoBlockTitleText {
     color: var(--TXTCOLOR2);
     background-color: rgba(128, 128, 128, 0.35);
     border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 4px 10px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1335,7 +1422,10 @@ select.error, textarea.error, input.error {
 }
 
 .svgButton {
-    background-color: var(--ACCENT);
+    background-color: var(--MAPBTN-BG);
+    color: var(--MAPBTN-FG);
+    border: 1px solid var(--MAPBTN-BORDER);
+    box-sizing: border-box;
     width: calc( 28px * var(--SCALE));
     height: calc( 28px * var(--SCALE));
     cursor: pointer;
@@ -1343,18 +1433,18 @@ select.error, textarea.error, input.error {
     margin: calc( 2px * var(--SCALE));
     display: inline-block;
     border-radius: var(--UI-RADIUS-CONTROL);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.1s;
+    box-shadow: var(--MAPBTN-SHADOW);
+    transition: background-color 0.15s ease;
     vertical-align: top;
 }
 
-.svgButton:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.1);
+.svgButton:hover,
+.button:hover {
+    background-color: var(--MAPBTN-HOVER);
 }
 
 .fullscreenButton {
-    background-image: url('images/fullscreen.svg');
+    --icon: url('images/fullscreen.svg');
     background-size: 20px;
     background-repeat: no-repeat;
 }
@@ -1363,7 +1453,7 @@ select.error, textarea.error, input.error {
     width: calc(28px * var(--SCALE));
     height: calc(28px * var(--SCALE));
     cursor: pointer;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>');
+    --icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>');
 
     /* Center the image */
     background-size: 20px;
@@ -1374,34 +1464,22 @@ select.error, textarea.error, input.error {
     margin: calc(2px * var(--SCALE));
 
     /* Modern Look matching .button */
-    border-bottom: none;
     border-radius: var(--UI-RADIUS-CONTROL);
-    background-color: var(--ACCENT);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
     align-self: center;
-}
-
-.settingsCog:hover {
-    background-color: var(--ACCENT-LIGHT);
-    /* transform rule removed */
 }
 
 .layersButton {
     /* Layers icon: stroked stacked layers SVG provided by user */
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'></polygon><polyline points='2 17 12 22 22 17'></polyline><polyline points='2 12 12 17 22 12'></polyline></svg>");
+    --icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'></polygon><polyline points='2 17 12 22 22 17'></polyline><polyline points='2 12 12 17 22 12'></polyline></svg>");
     background-size: 20px;
     background-position: center;
     background-repeat: no-repeat;
-}
-.layersButton:hover {
-    background-color: var(--ACCENT-LIGHT);
 }
 
 .locationButton {
     /* Target style: Filled center, Ring, 4 Ticks */
     /* Adjusted spacing: Inner radius 3 (was 4) to increase gap to ring (r=7) */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3' fill='white'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='white' stroke-width='2'/%3E%3Cline x1='12' y1='3' x2='12' y2='5' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='12' y1='19' x2='12' y2='21' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='3' y1='12' x2='5' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='19' y1='12' x2='21' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3' fill='white'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='white' stroke-width='2'/%3E%3Cline x1='12' y1='3' x2='12' y2='5' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='12' y1='19' x2='12' y2='21' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='3' y1='12' x2='5' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='19' y1='12' x2='21' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
     background-size: 20px;
     background-repeat: no-repeat;
     background-position: center;
@@ -1410,35 +1488,25 @@ select.error, textarea.error, input.error {
 .militaryButton {
     /* Military Rank style: Star + Chevrons (User Reference) */
     /* Hollow Star (stroke) to match image, Thick Chevrons for visibility */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Star (Top) --%3E%3Cpolygon points='12 1 14.5 6 20 6 16 9.5 17.5 14.5 12 12 6.5 14.5 8 9.5 4 6 9.5 6' /%3E%3C!-- Chevrons (Bottom) --%3E%3Cpolyline points='4 15 12 19 20 15' /%3E%3Cpolyline points='4 19 12 23 20 19' /%3E%3C/svg%3E");
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Star (Top) --%3E%3Cpolygon points='12 1 14.5 6 20 6 16 9.5 17.5 14.5 12 12 6.5 14.5 8 9.5 4 6 9.5 6' /%3E%3C!-- Chevrons (Bottom) --%3E%3Cpolyline points='4 15 12 19 20 15' /%3E%3Cpolyline points='4 19 12 23 20 19' /%3E%3C/svg%3E");
     background-size: 20px;
     background-repeat: no-repeat;
     background-position: center;
-}
-
-/* Active state for Military button (when ON) */
-#U.activeButton {
-    /* Keep Red Background (var(--ACCENT)) to match other buttons */
-    /* Switch to Black Icon to indicate active state */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Star (Top) --%3E%3Cpolygon points='12 1 14.5 6 20 6 16 9.5 17.5 14.5 12 12 6.5 14.5 8 9.5 4 6 9.5 6' /%3E%3C!-- Chevrons (Bottom) --%3E%3Cpolyline points='4 15 12 19 20 15' /%3E%3Cpolyline points='4 19 12 23 20 19' /%3E%3C/svg%3E");
-}
-#U.activeButton:hover {
-    /* Removing custom hover bg to match standard button behavior */
 }
 
 .replayButton {
-    background-image: url('images/replay-white.svg');
+    --icon: url('images/replay-white.svg');
     background-size: 20px;
     background-repeat: no-repeat;
     background-position: center;
-}
-#RP.activeButton {
-    filter: invert(1);
 }
 
 
 .button {
-    background-color: var(--ACCENT);
+    background-color: var(--MAPBTN-BG);
+    color: var(--MAPBTN-FG);
+    border: 1px solid var(--MAPBTN-BORDER);
+    box-sizing: border-box;
     width: calc(28px * var(--SCALE));
     height: calc(28px * var(--SCALE));
     border-radius: var(--UI-RADIUS-CONTROL);
@@ -1447,7 +1515,8 @@ select.error, textarea.error, input.error {
     cursor: pointer;
     text-align: center;
     background-clip: padding-box;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--MAPBTN-SHADOW);
+    transition: background-color 0.15s ease;
     vertical-align: top;
 }
 
@@ -1465,16 +1534,53 @@ select.error, textarea.error, input.error {
 {
     font-weight: bold;
     font-size: calc( 15px * var(--SCALE));
-    line-height:  calc( 27px * var(--SCALE));
+    line-height:  calc( 26px * var(--SCALE));
     text-align: center;
     margin: calc( 5px * var(--SCALE));
 }
 
-.activeButton {
- color:#000
+/* toggled on: the only place map buttons use the accent colour */
+.button.activeButton,
+.svgButton.activeButton,
+.button.activeButton:hover,
+.svgButton.activeButton:hover {
+    background-color: var(--ACCENT);
+    border-color: transparent;
+    color: #fff;
 }
-.inActiveButton {
- color:#fff
+
+/* Icons are masks filled with the text colour, so one icon works on the
+   light / dark surface and turns white on the accent when switched on */
+.militaryButton,
+.locationButton,
+.layersButton,
+.settingsCog,
+.fullscreenButton,
+.replayButton,
+.sidebar_button {
+    background-image: none;
+}
+
+.militaryButton::before,
+.locationButton::before,
+.layersButton::before,
+.settingsCog::before,
+.fullscreenButton::before,
+.replayButton::before,
+.sidebar_button::before {
+    content: '';
+    display: block;
+    width: calc(20px * var(--SCALE));
+    height: calc(20px * var(--SCALE));
+    margin: calc(3px * var(--SCALE)) auto 0;
+    background-color: currentColor;
+    -webkit-mask: var(--icon) center / contain no-repeat;
+    mask: var(--icon) center / contain no-repeat;
+    pointer-events: none;
+}
+
+.sidebar_button::before {
+    margin: 0 auto;
 }
 
 #highlighted_infoblock {
@@ -1484,7 +1590,8 @@ select.error, textarea.error, input.error {
     top: calc( 60px * var(--SCALE));
     min-width:  calc(132px * var(--SCALE));
     padding-right: calc( 5px * var(--SCALE));
-    box-shadow: calc( 4px * var(--SCALE)) calc( 4px * var(--SCALE)) calc( 10px * var(--SCALE)) #444444;
+    border-radius: var(--UI-RADIUS-PANEL);
+    box-shadow: 0 calc( 4px * var(--SCALE)) calc( 16px * var(--SCALE)) rgba(0, 0, 0, 0.3);
     cursor: pointer;
     z-index: 9999;
     display: none;
@@ -1568,23 +1675,23 @@ table.infoSectionTable tr td {
     padding: 6px 8px !important;
 }
 
-/* Dark mode: lift filter inputs off the panel with BGCOLOR2 + light edge */
-html.dark #tab-filters .searchInput,
-html.dark #tab-filters .altitudeFilterInput {
+/* Dark mode: lift inputs off the flat sidebar with BGCOLOR2 + light edge */
+html.dark .searchInput,
+html.dark .altitudeFilterInput {
     background-color: var(--BGCOLOR2);
     color: var(--TXTCOLOR1);
     border: 1px solid rgba(255, 255, 255, 0.22);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-html.dark #tab-filters .searchInput::placeholder,
-html.dark #tab-filters .altitudeFilterInput::placeholder {
+html.dark .searchInput::placeholder,
+html.dark .altitudeFilterInput::placeholder {
     color: var(--TXTCOLOR3);
     opacity: 1;
 }
 
-html.dark #tab-filters .searchInput:focus,
-html.dark #tab-filters .altitudeFilterInput:focus {
+html.dark .searchInput:focus,
+html.dark .altitudeFilterInput:focus {
     border-color: rgba(255, 255, 255, 0.42);
     outline: none;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--ACCENT);
@@ -1635,11 +1742,14 @@ html.dark .mobile_table_toggle.formButton:hover {
 
 
 
+/* legend under the table: dot + label, like the Filters source chips */
 .legendTitle {
-    line-height: calc( 19px * var(--SCALE));
-    padding-right: calc( 3px * var(--SCALE));
-    padding-left: calc( 3px * var(--SCALE));
-    margin: calc( 2px * var(--SCALE));
+    display: inline-flex;
+    align-items: center;
+    gap: calc(5px * var(--SCALE));
+    font-size: calc(12px * var(--SCALE));
+    line-height: 1.6;
+    margin-right: calc(12px * var(--SCALE));
 }
 
 #settings_infoblock {
@@ -1747,7 +1857,7 @@ html.dark .mobile_table_toggle.formButton:hover {
     cursor: pointer;
     background-color: transparent;
     border: 2px solid rgba(128, 128, 128, 0.5);
-    border-radius: 3px;
+    border-radius: var(--UI-RADIUS-SMALL);
     position: relative;
     transition: all 0.2s ease;
     background-image: none;
@@ -1832,7 +1942,7 @@ html.dark .mobile_table_toggle.formButton:hover {
 
 .settingsSection {
     border: 1px solid rgba(128, 128, 128, 0.2);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     margin-bottom: 6px;
     overflow: hidden;
 }
@@ -1907,7 +2017,7 @@ html.dark .mobile_table_toggle.formButton:hover {
     cursor: pointer;
     background-color: transparent;
     border: 2px solid rgba(128, 128, 128, 0.5);
-    border-radius: 3px;
+    border-radius: var(--UI-RADIUS-SMALL);
     position: relative;
     transition: all 0.2s ease;
     background-image: none;
@@ -1962,24 +2072,6 @@ html.dark .mobile_table_toggle.formButton:hover {
     z-index: 100;
 }
 
-/* Mobile sidebar only: X in a flow row above the table so it never covers the injected banner */
-.sidebar_close_mobile {
-    position: static;
-    right: auto;
-    top: auto;
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(128, 128, 128, 0.1);
-    border: none;
-    border-radius: 50%;
-    transition: background-color 0.2s, transform 0.2s;
-    z-index: auto;
-}
-
 .settingsCloseBox:hover,
 .infoblockCloseBox:hover,
 .layer-switcher-close-x:hover {
@@ -1987,14 +2079,8 @@ html.dark .mobile_table_toggle.formButton:hover {
     transform: scale(1.05);
 }
 
-.sidebar_close_mobile:hover {
-    background-color: rgba(128, 128, 128, 0.2);
-    transform: scale(1.05);
-}
-
 .settingsCloseBox::after,
 .infoblockCloseBox::after,
-.sidebar_close_mobile::after,
 .layer-switcher-close-x::after {
     content: '\2715'; /* Clean bold X */
     font-size: 18px;
@@ -2026,11 +2112,6 @@ html.dark .mobile_table_toggle.formButton:hover {
 .infoblockCloseBox::after {
     font-size: 16px;
     opacity: 0.7;
-}
-
-/* Mobile sidebar: full-width row above table (banner, stats, tabs sit below the X) */
-.sidebar-table-top-chrome {
-    display: none;
 }
 
 
@@ -2086,7 +2167,7 @@ body.map-credits-visible #altitude_chart {
     text-decoration: none;
     padding: calc( 4px * var(--SCALE));
     line-height: calc( 22px * var(--SCALE));
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
 }
 .bottom-info-container {
     padding-top: calc( 10px * var(--SCALE));
@@ -2113,19 +2194,14 @@ body.map-credits-visible #altitude_chart {
     background-color: var(--BGCOLOR1);
 }
 
-/* Search / Filters: one “page” card — segmented control fused to the panel below */
+/* Search / Filters: flat section with a segmented control on top (no nested card) */
 #tabs.ui-sidebar-tabs {
     margin-top: calc(8px * var(--SCALE));
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: var(--UI-RADIUS-PANEL);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-    background-color: var(--BGCOLOR2);
-}
-
-html.dark #tabs.ui-sidebar-tabs {
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    padding: 0; /* jQuery UI .ui-tabs adds .2em, which insets the tab buttons from the content */
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background-color: transparent;
 }
 
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
@@ -2135,16 +2211,17 @@ html.dark #tabs.ui-sidebar-tabs {
     box-sizing: border-box;
     list-style: none;
     margin: 0;
-    padding: calc(6px * var(--SCALE));
+    padding: 0;
     gap: calc(6px * var(--SCALE));
-    background-color: var(--BGCOLOR1);
+    background-color: transparent;
     border: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: calc(var(--UI-RADIUS-PANEL) - 1px) calc(var(--UI-RADIUS-PANEL) - 1px) 0 0;
+    border-radius: 0;
 }
 
-html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+/* jQuery UI's clearfix ::before/::after become flex items and add a gap at each end */
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav::before,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav::after {
+    display: none;
 }
 
 /* jQuery UI themes paint <li> (ui-state-active / hover) — strip so only our <a> buttons show color */
@@ -2172,6 +2249,17 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
 }
 
 /* Inactive = .formButton-like; active = .search-submit-btn — !important beats jQuery UI link states */
+/* Search / Filters: segmented control. One rounded track; the active view is a
+   raised neutral segment (no accent fill: accent is kept for actions). */
+#tabs.ui-sidebar-tabs.ui-tabs > ul.ui-tabs-nav.ui-widget-header {
+    padding: calc(3px * var(--SCALE));
+    gap: calc(3px * var(--SCALE));
+    /* derived from the theme so it reads on any panel colour (e.g. grey #313131 installs):
+       a step from the panel towards the text colour */
+    background: color-mix(in srgb, var(--TXTCOLOR1) 10%, var(--BGCOLOR1));
+    border-radius: var(--UI-RADIUS-CONTROL);
+}
+
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li > a.ui-tabs-anchor {
     display: flex !important;
     align-items: center;
@@ -2179,117 +2267,53 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
     width: 100%;
     box-sizing: border-box;
     float: none !important;
-    padding: calc(7px * var(--SCALE)) calc(12px * var(--SCALE)) !important;
+    padding: calc(6px * var(--SCALE)) calc(12px * var(--SCALE)) !important;
     margin: 0 !important;
-    border-radius: var(--UI-RADIUS-CONTROL) !important;
+    /* nested inside the track: track radius minus its padding */
+    border-radius: calc(var(--UI-RADIUS-CONTROL) - 3px * var(--SCALE)) !important;
     font-size: calc(12px * var(--SCALE)) !important;
     font-weight: 600 !important;
     letter-spacing: 0.02em;
     text-decoration: none !important;
     cursor: pointer !important;
     color: var(--TXTCOLOR2) !important;
-    background-color: rgba(128, 128, 128, 0.35) !important;
-    background-image: none !important;
-    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    background: transparent !important;
+    border: none !important;
     box-shadow: none !important;
-    transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease, background-color 0.2s ease, border-color 0.2s ease;
+    outline: none;
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Outer tab corners follow the panel radius; inner meeting edge stays CONTROL (must come after rule above) */
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:first-child > a.ui-tabs-anchor {
-    border-radius: var(--UI-RADIUS-TABS-OUTER) var(--UI-RADIUS-CONTROL) var(--UI-RADIUS-CONTROL) var(--UI-RADIUS-TABS-OUTER) !important;
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:last-child > a.ui-tabs-anchor {
-    border-radius: var(--UI-RADIUS-CONTROL) var(--UI-RADIUS-TABS-OUTER) var(--UI-RADIUS-TABS-OUTER) var(--UI-RADIUS-CONTROL) !important;
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:only-child > a.ui-tabs-anchor {
-    border-radius: var(--UI-RADIUS-TABS-OUTER) !important;
-}
-
-/* jQuery UI sets aria-selected on <li>, not on <a> — scope inactive dark styles so they never override accent */
-html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li[aria-selected="false"] > a.ui-tabs-anchor {
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:not(.ui-tabs-active) > a.ui-tabs-anchor:hover {
     color: var(--TXTCOLOR1) !important;
-    background-color: rgba(255, 255, 255, 0.14) !important;
-    border-color: rgba(255, 255, 255, 0.28) !important;
+    background: color-mix(in srgb, var(--TXTCOLOR1) 7%, transparent) !important;
 }
 
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor,
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor,
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li[aria-selected="true"] > a.ui-tabs-anchor {
-    color: #ffffff !important;
-    background-color: var(--ACCENT) !important;
-    border: 1px solid rgba(0, 0, 0, 0.16) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    color: var(--TXTCOLOR1) !important;
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
 }
 
+/* dark themes: raised = lighter than the track, again derived from the theme */
 html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor,
 html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor,
 html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li[aria-selected="true"] > a.ui-tabs-anchor {
-    color: #ffffff !important;
-    background-color: var(--ACCENT) !important;
-    border-color: rgba(0, 0, 0, 0.25) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+    background: color-mix(in srgb, var(--TXTCOLOR1) 24%, var(--BGCOLOR1)) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
 }
 
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:not(.ui-tabs-active) > a.ui-tabs-anchor:hover {
-    color: var(--TXTCOLOR1) !important;
-    background-color: rgba(128, 128, 128, 0.5) !important;
-    border-color: rgba(0, 0, 0, 0.28) !important;
-}
-
-html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:not(.ui-tabs-active) > a.ui-tabs-anchor:hover {
-    color: #ffffff !important;
-    background-color: rgba(255, 255, 255, 0.22) !important;
-    border-color: rgba(255, 255, 255, 0.38) !important;
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:hover,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:hover {
-    color: #ffffff !important;
-    background-color: var(--ACCENT) !important;
-    filter: brightness(1.06);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14) !important;
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li > a.ui-tabs-anchor:active {
-    transform: translateY(1px);
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:active,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:active {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Keep accent fill when the active tab has focus (keyboard / click); jQuery/browser can restyle anchors */
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus-visible,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus-visible {
-    color: #ffffff !important;
-    background-color: var(--ACCENT) !important;
-    border: 1px solid rgba(0, 0, 0, 0.16) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
-    outline: none;
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus-visible,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus-visible {
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li > a.ui-tabs-anchor:focus-visible {
     outline: 2px solid var(--ACCENT-LIGHT);
-    outline-offset: 2px;
-}
-
-html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus,
-html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus {
-    border-color: rgba(0, 0, 0, 0.25) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+    outline-offset: 1px;
 }
 
 #tabs.ui-sidebar-tabs .ui-tabs-panel {
     padding: 0;
     margin: 0;
-    background-color: var(--BGCOLOR2);
+    background-color: transparent;
     border: none;
     border-radius: 0;
 }
@@ -2312,7 +2336,7 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
     font-size: calc(15px * var(--SCALE));
     font-weight: bold;
     color: var(--TXTCOLOR1);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     margin-bottom: 4px;
     transition: background-color 0.2s;
 }
@@ -2351,7 +2375,7 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
 }
 
 #tabs.ui-sidebar-tabs.ui-tabs .ui-tabs-nav {
-    padding: calc(6px * var(--SCALE));
+    padding: 0;
     margin: 0;
     margin-bottom: 0;
 }
@@ -2361,11 +2385,11 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
 }
 
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav.ui-widget-header {
-    background: var(--BGCOLOR1);
+    background: transparent;
     border: none;
 }
 .ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
 }
 
 .ui-widget-content .ui-selectable .ui-selected {
@@ -2393,7 +2417,7 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
     padding: 6px 4px;
     /* Very compact padding */
     border: 1px solid var(--ACCENT);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     /* Rounded corners */
     background-color: var(--BGCOLOR2);
     text-align: center;
@@ -2478,7 +2502,7 @@ a.aircraft_photo_link {
     max-width: 72%;
     margin: 2px auto 0 auto;
     background: #fff;
-    border-radius: 4px;
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 6px 10px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -2541,7 +2565,7 @@ a.ui-button:active,
 
 .ui-slider {
     background-color: rgba(128, 128, 128, 0.25);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     height: 6px;
     border: none;
     margin: 8px 4px 14px;
@@ -2570,7 +2594,7 @@ a.ui-button:active,
     background-color: rgba(128, 128, 128, 0.15);
     color: var(--TXTCOLOR2);
     border: 1px solid rgba(128, 128, 128, 0.3);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 0 10px;
     font-size: 13px;
     line-height: calc(26px * var(--SCALE));
@@ -2625,7 +2649,7 @@ a.ui-button:active,
     background-color: rgba(128, 128, 128, 0.4);
     color: var(--TXTCOLOR2);
     border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 6px 14px;
     font-size: 13px;
     font-family: inherit;
@@ -2731,7 +2755,7 @@ input{
     height: auto;
     width: auto;
     background: white;
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 3px;
     /* Total height: 26px + 6px = 32px */
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
@@ -2905,7 +2929,7 @@ input{
     font-size: calc(14px * var(--SCALE));
     font-weight: 500;
     color: var(--TXTCOLOR1);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     transition: all 0.2s ease;
     box-sizing: border-box;
     /* ensure padding doesn't overflow */
@@ -2957,7 +2981,7 @@ input{
 .dbFlagBadge {
     display: inline-block;
     padding: 2px 6px;
-    border-radius: 2px;
+    border-radius: var(--UI-RADIUS-SMALL);
 }
 
 .dbFlagBadge,
@@ -2995,7 +3019,7 @@ input{
     margin-right: auto;
     max-width: 70%;
     background: white;
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 1px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
@@ -3037,34 +3061,83 @@ input{
     }
     body.mobile_sidebar_open #sidebar_canvas {
         pointer-events: none;
+        padding: 0; /* panels dock to the screen edges */
         overflow: visible;
         flex: 1 1 auto;
         min-height: 0;
     }
-    body.mobile_sidebar_open #sidebar-table {
+    /* Two floating panels instead of one big card: banner + counts on top,
+       Search / Filters (and the aircraft list) docked to the bottom. The map
+       stays visible between them; tapping it closes the sidebar (script.js). */
+    #sidebar-table {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        pointer-events: none;
+    }
+    /* Docked to the screen edges, mirror images of each other: the top one
+       rounds its bottom corners, the bottom one its top corners */
+    .sidebar-top-block,
+    .sidebar-bottom-block {
         pointer-events: auto;
-        max-height: 100%;
+        background-color: var(--BGCOLOR1);
+        box-shadow: 0 0 18px rgba(0, 0, 0, 0.28);
+        padding-left: calc(14px * var(--SCALE));
+        padding-right: calc(14px * var(--SCALE));
+    }
+    .sidebar-top-block {
+        position: relative;
+        flex: 0 0 auto;
+        padding-top: calc(12px * var(--SCALE) + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(12px * var(--SCALE));
+        border-radius: 0 0 var(--UI-RADIUS-PANEL) var(--UI-RADIUS-PANEL);
+    }
+    /* selector at the very bottom */
+    .sidebar-bottom-block {
+        display: flex;
+        flex-direction: column-reverse;
+        flex: 0 1 auto;
+        min-height: 0;
+        max-height: 72%;
+        margin-top: auto;
+        padding-top: calc(12px * var(--SCALE));
+        padding-bottom: calc(12px * var(--SCALE) + env(safe-area-inset-bottom, 0px));
+        border-radius: var(--UI-RADIUS-PANEL) var(--UI-RADIUS-PANEL) 0 0;
+    }
+    /* tabs: panel content above the segmented control */
+    .sidebar-bottom-block #tabs.ui-sidebar-tabs {
+        display: flex;
+        flex-direction: column-reverse;
+        flex: 0 1 auto;
+        min-height: 0;
+        margin-top: 0;
+        overflow: visible !important;
+    }
+    .sidebar-bottom-block #tabs .ui-tabs-panel {
+        min-height: 0;
+        max-height: 45vh;
         overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
     }
-}
-
-/* Mobile sidebar close button — row above injected banner / table */
-@media screen and (max-width: 768px) {
-    .sidebar-table-top-chrome {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        min-height: calc(42px * var(--SCALE));
-        padding: calc(4px * var(--SCALE)) calc(8px * var(--SCALE)) calc(4px * var(--SCALE));
-        flex-shrink: 0;
-        box-sizing: border-box;
+    .sidebar-bottom-block #tabs .sidebar-panel-sheet {
+        margin-top: 0;
+        padding: 0 0 calc(10px * var(--SCALE));
     }
-
-    .sidebar_close_mobile {
-        display: flex !important;
-        background: rgba(128, 128, 128, 0.15); /* Slightly darker on mobile for visibility */
+    .sidebar-bottom-block .sidebar-table-sheet {
+        min-height: 0;
+        max-height: 38vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        margin: 0 0 calc(8px * var(--SCALE));
+        padding-top: 0;
+        border-top: none;
+    }
+    .sidebar-bottom-block .mobile_table_toggle {
+        margin: 0 auto calc(8px * var(--SCALE));
     }
 }
 
@@ -3072,7 +3145,7 @@ input{
     /* Hide map buttons when mobile sidebar is open */
     body.mobile_sidebar_open #header_top,
     body.mobile_sidebar_open #header_side .button,
-    body.mobile_sidebar_open #header_side .svgButton:not(.sidebar_close_mobile),
+    body.mobile_sidebar_open #header_side .svgButton,
     body.mobile_sidebar_open .buttonContainer,
     .fullscreenButton { /* Hide fullscreen button on mobile entirely */
         display: none !important;
@@ -3095,7 +3168,7 @@ input{
 
 @media screen and (max-width: 768px) {
     /* Mobile Table Toggle: Hide contents of sidebar-table by default, except the toggle button and tabs */
-    #sidebar-table:not(.mobile_visible) > .sidebar-table-sheet {
+    #sidebar-table:not(.mobile_visible) .sidebar-table-sheet {
         display: none !important;
     }
 
@@ -3264,7 +3337,7 @@ body.mobile_sidebar_open .layer-switcher {
     cursor: pointer;
     background-color: transparent;
     border: 2px solid rgba(128, 128, 128, 0.5);
-    border-radius: 3px;
+    border-radius: var(--UI-RADIUS-SMALL);
     position: relative;
     transition: all 0.2s ease;
 }
