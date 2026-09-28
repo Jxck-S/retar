@@ -78,6 +78,32 @@ select {
 /* Table block, Search tab, Filters tab: flat sections inside the #sidebar-table
    card (no nested cards). Only controls and floating panels get rounded boxes;
    sections are separated by spacing and a divider. */
+/* Aircraft counts: one compact row, number first, label muted */
+.sidebar-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: calc(4px * var(--SCALE)) calc(14px * var(--SCALE));
+    padding: calc(2px * var(--SCALE)) 0;
+}
+
+.sidebar-stat {
+    white-space: nowrap;
+}
+
+.sidebar-stat-value {
+    font-size: calc(15px * var(--SCALE));
+    font-weight: 600;
+    color: var(--TXTCOLOR1);
+    font-variant-numeric: tabular-nums;
+}
+
+.sidebar-stat-label {
+    font-size: calc(12px * var(--SCALE));
+    color: var(--TXTCOLOR2);
+    opacity: 0.8;
+}
+
 .sidebar-table-sheet,
 .sidebar-panel-sheet {
     margin-top: calc(8px * var(--SCALE));
@@ -2206,6 +2232,19 @@ body.map-credits-visible #altitude_chart {
 }
 
 /* Inactive = .formButton-like; active = .search-submit-btn — !important beats jQuery UI link states */
+/* Search / Filters: segmented control. One rounded track; the active view is a
+   raised neutral segment (no accent fill: accent is kept for actions). */
+#tabs.ui-sidebar-tabs.ui-tabs > ul.ui-tabs-nav.ui-widget-header {
+    padding: calc(3px * var(--SCALE));
+    gap: calc(3px * var(--SCALE));
+    background: rgba(128, 128, 128, 0.16);
+    border-radius: var(--UI-RADIUS-CONTROL);
+}
+
+html.dark #tabs.ui-sidebar-tabs.ui-tabs > ul.ui-tabs-nav.ui-widget-header {
+    background: rgba(255, 255, 255, 0.07);
+}
+
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li > a.ui-tabs-anchor {
     display: flex !important;
     align-items: center;
@@ -2213,98 +2252,46 @@ body.map-credits-visible #altitude_chart {
     width: 100%;
     box-sizing: border-box;
     float: none !important;
-    padding: calc(7px * var(--SCALE)) calc(12px * var(--SCALE)) !important;
+    padding: calc(6px * var(--SCALE)) calc(12px * var(--SCALE)) !important;
     margin: 0 !important;
-    border-radius: var(--UI-RADIUS-CONTROL) !important;
+    /* nested inside the track: track radius minus its padding */
+    border-radius: calc(var(--UI-RADIUS-CONTROL) - 3px * var(--SCALE)) !important;
     font-size: calc(12px * var(--SCALE)) !important;
     font-weight: 600 !important;
     letter-spacing: 0.02em;
     text-decoration: none !important;
     cursor: pointer !important;
     color: var(--TXTCOLOR2) !important;
-    background-color: rgba(128, 128, 128, 0.35) !important;
-    background-image: none !important;
-    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    background: transparent !important;
+    border: none !important;
     box-shadow: none !important;
-    transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease, background-color 0.2s ease, border-color 0.2s ease;
+    outline: none;
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* jQuery UI sets aria-selected on <li>, not on <a> — scope inactive dark styles so they never override accent */
-html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li[aria-selected="false"] > a.ui-tabs-anchor {
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:not(.ui-tabs-active) > a.ui-tabs-anchor:hover {
     color: var(--TXTCOLOR1) !important;
-    background-color: rgba(255, 255, 255, 0.14) !important;
-    border-color: rgba(255, 255, 255, 0.28) !important;
+    background: rgba(128, 128, 128, 0.14) !important;
 }
 
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor,
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor,
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li[aria-selected="true"] > a.ui-tabs-anchor {
-    color: #ffffff !important;
-    background-color: var(--ACCENT) !important;
-    border: 1px solid rgba(0, 0, 0, 0.16) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    color: var(--TXTCOLOR1) !important;
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
 }
 
 html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor,
 html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor,
 html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li[aria-selected="true"] > a.ui-tabs-anchor {
-    color: #ffffff !important;
-    background-color: var(--ACCENT) !important;
-    border-color: rgba(0, 0, 0, 0.25) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
 }
 
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:not(.ui-tabs-active) > a.ui-tabs-anchor:hover {
-    color: var(--TXTCOLOR1) !important;
-    background-color: rgba(128, 128, 128, 0.5) !important;
-    border-color: rgba(0, 0, 0, 0.28) !important;
-}
-
-html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:not(.ui-tabs-active) > a.ui-tabs-anchor:hover {
-    color: #ffffff !important;
-    background-color: rgba(255, 255, 255, 0.22) !important;
-    border-color: rgba(255, 255, 255, 0.38) !important;
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:hover,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:hover {
-    color: #ffffff !important;
-    background-color: var(--ACCENT) !important;
-    filter: brightness(1.06);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14) !important;
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li > a.ui-tabs-anchor:active {
-    transform: translateY(1px);
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:active,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:active {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Keep accent fill when the active tab has focus (keyboard / click); jQuery/browser can restyle anchors */
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus-visible,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus-visible {
-    color: #ffffff !important;
-    background-color: var(--ACCENT) !important;
-    border: 1px solid rgba(0, 0, 0, 0.16) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
-    outline: none;
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus-visible,
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus-visible {
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li > a.ui-tabs-anchor:focus-visible {
     outline: 2px solid var(--ACCENT-LIGHT);
-    outline-offset: 2px;
-}
-
-html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-tabs-active > a.ui-tabs-anchor:focus,
-html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tabs-anchor:focus {
-    border-color: rgba(0, 0, 0, 0.25) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+    outline-offset: 1px;
 }
 
 #tabs.ui-sidebar-tabs .ui-tabs-panel {

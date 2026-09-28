@@ -1017,21 +1017,12 @@
             </tr>
               <tr>
                 <td>
-                  <table style="width: 100%">
-                    <tr class="infoblock_heading">
-                    <td style="width: 50%"><span class="infoBlockTitleText">Total Aircraft:</span> <span
-                        id="dump1090_total_ac">n/a</span></td>
-                    <td id="dump1090_message_rate_td" style="display: none;"><span class="infoBlockTitleText">Messages:</span> <span
-                        id="dump1090_message_rate">n/a</span>/sec</td>
-                    </tr>
-                    <tr class="infoblock_body">
-                    <td style="width: 50%"><span id="with_positions" class="infoBlockTitleText">With Position:</span>
-                      <span id="dump1090_total_ac_positions">n/a</span>
-                    </td>
-                    <td id="dump1090_total_history_td"><span class="infoBlockTitleText">History:</span> <span
-                        id="dump1090_total_history">n/a</span> positions</td>
-                    </tr>
-                  </table>
+                  <div class="sidebar-stats">
+                    <span class="sidebar-stat"><span class="sidebar-stat-value" id="dump1090_total_ac">n/a</span> <span class="sidebar-stat-label">total</span></span>
+                    <span class="sidebar-stat"><span class="sidebar-stat-value" id="dump1090_total_ac_positions">n/a</span> <span class="sidebar-stat-label" id="with_positions">with position</span></span>
+                    <span class="sidebar-stat" id="dump1090_message_rate_td" style="display: none;"><span class="sidebar-stat-value" id="dump1090_message_rate">n/a</span> <span class="sidebar-stat-label">msgs/sec</span></span>
+                    <span class="sidebar-stat" id="dump1090_total_history_td"><span class="sidebar-stat-value" id="dump1090_total_history">n/a</span> <span class="sidebar-stat-label">history positions</span></span>
+                  </div>
                   <table style="width: 100%" id="infoblock_altimeter" class="hidden">
                     <tr>
                       <td>

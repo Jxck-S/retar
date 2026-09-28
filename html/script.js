@@ -5252,10 +5252,12 @@ function refreshFeatures() {
         ctime && console.timeEnd("modTRs");
 
         global.refreshPageTitle();
-        jQuery('#dump1090_total_history').updateText(TrackedHistorySize);
+        // counts with thousands separators; server fields can be missing
+        const fmtCount = (v) => (v == null || isNaN(v)) ? 'n/a' : Number(v).toLocaleString();
+        jQuery('#dump1090_total_history').updateText(fmtCount(TrackedHistorySize));
         jQuery('#dump1090_message_rate').updateText(MessageRate === null ? 'n/a' : MessageRate.toFixed(1));
-        jQuery('#dump1090_total_ac').updateText(globeIndex ? globeTrackedAircraft : TrackedAircraft);
-        jQuery('#dump1090_total_ac_positions').updateText(TrackedAircraftPositions);
+        jQuery('#dump1090_total_ac').updateText(fmtCount(globeIndex ? globeTrackedAircraft : TrackedAircraft));
+        jQuery('#dump1090_total_ac_positions').updateText(fmtCount(TrackedAircraftPositions));
 
 
 
@@ -6210,7 +6212,7 @@ function toggleTableInView(arg) {
         loStore['tableInView'] = tableInView;
     }
 
-    jQuery('#with_positions').text(tableInView ? "On Screen:" : "With Position:");
+    jQuery('#with_positions').text(tableInView ? "on screen" : "with position");
 
     buttonActive('#V', tableInView);
 }
