@@ -1097,6 +1097,29 @@ select.error, textarea.error, input.error {
     justify-content: center;
 }
 
+/* Copy feedback: swap share icon for a check in the same slot (no size change
+   under the cursor) and show the label beside the button, not inside it. */
+.share-icon-done,
+.share-copied-label {
+    display: none;
+}
+
+.linkCopied .share-icon-idle {
+    display: none;
+}
+
+.linkCopied .share-icon-done {
+    display: inline-flex;
+    color: #4CAF50;
+}
+
+.linkCopied .share-copied-label {
+    display: inline;
+    margin-left: calc(4px * var(--SCALE));
+    color: #4CAF50;
+    font-weight: bold;
+}
+
 #header_side {
     position: absolute;
     right: calc( 0px * var(--SCALE));
