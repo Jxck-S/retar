@@ -3090,6 +3090,7 @@ input{
     }
     body.mobile_sidebar_open #sidebar_canvas {
         pointer-events: none;
+        padding: 0; /* panels dock to the screen edges */
         overflow: visible;
         flex: 1 1 auto;
         min-height: 0;
@@ -3103,31 +3104,37 @@ input{
         height: 100%;
         box-sizing: border-box;
         margin: 0;
-        padding: calc(10px * var(--SCALE)) calc(8px * var(--SCALE)) 0;
+        padding: 0;
         background: transparent;
         pointer-events: none;
     }
+    /* Docked to the screen edges, mirror images of each other: the top one
+       rounds its bottom corners, the bottom one its top corners */
     .sidebar-top-block,
     .sidebar-bottom-block {
         pointer-events: auto;
         background-color: var(--BGCOLOR1);
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+        box-shadow: 0 0 18px rgba(0, 0, 0, 0.28);
+        padding-left: calc(14px * var(--SCALE));
+        padding-right: calc(14px * var(--SCALE));
     }
     .sidebar-top-block {
         position: relative;
         flex: 0 0 auto;
-        border-radius: var(--UI-RADIUS-PANEL);
-        padding: calc(8px * var(--SCALE)) calc(12px * var(--SCALE));
+        padding-top: calc(12px * var(--SCALE) + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(12px * var(--SCALE));
+        border-radius: 0 0 var(--UI-RADIUS-PANEL) var(--UI-RADIUS-PANEL);
     }
-    /* flush with the bottom and sides of the screen; selector at the very bottom */
+    /* selector at the very bottom */
     .sidebar-bottom-block {
         display: flex;
         flex-direction: column-reverse;
         flex: 0 1 auto;
         min-height: 0;
         max-height: 72%;
-        margin: auto calc(-8px * var(--SCALE)) 0;
-        padding: calc(12px * var(--SCALE)) calc(14px * var(--SCALE)) calc(12px * var(--SCALE) + env(safe-area-inset-bottom, 0px));
+        margin-top: auto;
+        padding-top: calc(12px * var(--SCALE));
+        padding-bottom: calc(12px * var(--SCALE) + env(safe-area-inset-bottom, 0px));
         border-radius: var(--UI-RADIUS-PANEL) var(--UI-RADIUS-PANEL) 0 0;
     }
     /* tabs: panel content above the segmented control */
@@ -3165,12 +3172,17 @@ input{
 
 /* Mobile sidebar close button — row above injected banner / table */
 @media screen and (max-width: 768px) {
+    /* close button in the free space at the right of the counts row, clear of the banner */
     .sidebar-table-top-chrome {
         display: flex;
         position: absolute;
-        top: calc(6px * var(--SCALE));
-        right: calc(6px * var(--SCALE));
+        bottom: calc(8px * var(--SCALE));
+        right: calc(10px * var(--SCALE));
         z-index: 2;
+    }
+    .sidebar-table-top-chrome .sidebar_close_mobile {
+        width: calc(30px * var(--SCALE));
+        height: calc(30px * var(--SCALE));
     }
 
     .sidebar_close_mobile {
