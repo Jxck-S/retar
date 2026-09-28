@@ -289,13 +289,16 @@ PlaneObject.prototype.isFiltered = function() {
             continue;
         const value = this[filter.field];
         if (!value) {
+            // nothing to match: kept by a "hide matches" filter, hidden by a "keep matches" one
+            if (filter.neg)
+                continue;
             return true;
         }
         const index = value.toUpperCase().search(filter.PATTERN);
         // placeholder names (no callsign / empty callsign) only match from the start (#419)
         const placeholder = filter.field == 'name' && (value == 'no callsign' || value == 'empty callsign');
-        if (placeholder ? index != 0 : index < 0) {
-            //this[filter.field] && console.log(this[filter.field].toUpperCase() + ' ' + filter.PATTERN);
+        const matched = placeholder ? index == 0 : index >= 0;
+        if (matched == !!filter.neg) {
             return true;
         }
     }
