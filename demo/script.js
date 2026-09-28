@@ -1441,14 +1441,9 @@ function earlyInitPage() {
     jQuery("#altimeter_set_standard").click(onAltimeterSetStandard);
     jQuery("#altimeter_set_selected").click(onAltimeterSetSelected);
 
-    // Set up altitude filter button event handlers and validation options
+    // Altitude filter: Enter or leaving a box applies it (the slider applies live)
     jQuery("#altitude_filter_form").submit(onFilterByAltitude);
-    jQuery("#source_filter_form").submit(updateSourceFilter);
-    jQuery("#flag_filter_form").submit(updateFlagFilter);
-
-    jQuery("#altitude_filter_reset_button").click(onResetAltitudeFilter);
-    jQuery("#source_filter_reset_button").click(onResetSourceFilter);
-    jQuery("#flag_filter_reset_button").click(onResetFlagFilter);
+    jQuery("#altitude_filter_min, #altitude_filter_max").on('change', onFilterByAltitude);
 
     jQuery('#filters_clear_all').on('click', function (e) {
         e.preventDefault();
@@ -1530,14 +1525,6 @@ function earlyInitPage() {
     jQuery('#blockedmlat_filter').on('click', function() {
         filterBlockedMLAT(true);
         refresh();
-    });
-
-    jQuery('#nodb_filter_form').submit(function(event) {
-        updateNoDbFilter(event);
-    });
-
-    jQuery('#nodb_filter_reset_button').click(function(event) {
-        onResetNoDbFilter(event);
     });
 
     new Toggle({
@@ -2148,103 +2135,254 @@ function initLegend(colors) {
     document.getElementById('legend').innerHTML = html;
 }
 
-function initSourceFilter(colors) {
-    const createFilter = function (color, text, key) {
-        return '<li class="ui-widget-content" style="background-color:' + color + ';" id="source-filter-' + key + '">' + text + '</li>';
-    };
+// Filters tab: toggle chips instead of jQuery UI selectable lists. State lives in
+// sourcesFilter / flagFilter / nodbFilter / filters.category as before, so the
+// filter engine and URL params are unchanged; syncFilterControls() mirrors it.
+function filterChipHtml(label, attrs, dotColor, title) {
+    const dot = dotColor ? '<span class="filter-chip-dot" style="background-color:' + dotColor + ';"></span>' : '';
+    return '<button type="button" class="filter-chip" aria-pressed="false" ' + attrs + (title ? ' title="' + title + '"' : '') + '>' + dot + label + '</button>';
+}
 
-    let html = '';
-    html += createFilter(colors['adsb'], 'ADS-B', sources[0]);
-
-    html += createFilter(colors['uat'], 'UAT / ADS-R', sources[1][0]);
-    html += createFilter(colors['mlat'], 'MLAT', sources[2]);
-    html += createFilter(colors['tisb'], 'TIS-B', sources[3]);
-    html += createFilter(colors['modeS'], 'Mode-S', sources[4]);
-    html += createFilter(colors['other'], 'Other', sources[5]);
-    html += createFilter(colors['adsc'], jaeroLabel, sources[6]);
-
-    if (aiscatcher_server) {
-        html += createFilter(colors['ais'], 'AIS', sources[7]);
+// toggle every member of `values` in list; returns null when empty (= no filter)
+function toggleFilterValues(list, values) {
+    list = list ? list.slice() : [];
+    values = Array.isArray(values) ? values : [values];
+    const on = values.every(v => list.includes(v));
+    for (const v of values) {
+        const i = list.indexOf(v);
+        if (on && i >= 0)
+            list.splice(i, 1);
+        else if (!on && i < 0)
+            list.push(v);
     }
+    return list.length ? list : null;
+}
 
-    document.getElementById('sourceFilter').innerHTML = html;
+const sourceFilterLabels = ['ADS-B', 'UAT / ADS-R', 'MLAT', 'TIS-B', 'Mode-S', 'Other', null, 'AIS'];
+const sourceFilterColorKeys = ['adsb', 'uat', 'mlat', 'tisb', 'modeS', 'other', 'adsc', 'ais'];
 
-    jQuery("#sourceFilter").selectable({
-        stop: function () {
-            sourcesFilter = [];
-            jQuery(".ui-selected", this).each(function () {
-                const index = jQuery("#sourceFilter li").index(this);
-                if (Array.isArray(sources[index]))
-                    sources[index].forEach(member => { sourcesFilter.push(member); });
-                else
-                    sourcesFilter.push(sources[index]);
-            });
-        }
+function initSourceFilter() {
+    // dots use the configured (light) "selected" table colours in both themes:
+    // the dark-mode table colours are dimmed row backgrounds and vanish as dots
+    const palette = tableColorsLight || tableColors;
+    const colors = Object.assign({}, palette.unselected, palette.selected);
+    let html = '';
+    for (let i = 0; i < sources.length; i++) {
+        if (sources[i] == 'ais' && !aiscatcher_server)
+            continue;
+        const label = sourceFilterLabels[i] || jaeroLabel;
+        html += filterChipHtml(label, 'data-src-index="' + i + '"', colors[sourceFilterColorKeys[i]]);
+    }
+    const el = document.getElementById('sourceFilter');
+    el.innerHTML = html;
+    // re-rendered on theme change: bind the click handler only once
+    if (el.dataset.bound)
+        return;
+    el.dataset.bound = '1';
+    el.addEventListener('click', function (e) {
+        const chip = e.target.closest('[data-src-index]');
+        if (!chip)
+            return;
+        sourcesFilter = toggleFilterValues(sourcesFilter, sources[chip.dataset.srcIndex]);
+        PlaneFilter.sources = sourcesFilter;
+        refreshFilter();
     });
+}
 
-    jQuery("#sourceFilter").on("selectablestart", function (event, ui) {
-        event.originalEvent.ctrlKey = true;
-    });
+const flagFilterLabels = { military: 'Military', pia: 'PIA', ladd: 'LADD' };
+const flagFilterColors = { military: 'green', pia: 'red', ladd: 'orange' };
+
+function toggleFlagFilter(flag) {
+    flagFilter = toggleFilterValues(flagFilter, flag);
+    PlaneFilter.flagFilter = flagFilter;
+    refreshFilter();
 }
 
 function initFlagFilter() {
-    const createFilter = function (text, key) {
-        // Use existing CSS classes .Military, .PIA, .LADD for styling
-        return '<li class="ui-widget-content ' + text + '" id="flag-filter-' + key + '">' + text + '</li>';
-    };
-
     let html = '';
-    html += createFilter('Military', flagFilterValues[0]);
-    html += createFilter('PIA', flagFilterValues[1]);
-    html += createFilter('LADD', flagFilterValues[2]);
-
-    document.getElementById('flagFilter').innerHTML = html;
-
-    jQuery("#flagFilter").selectable({
-        stop: function () {
-            flagFilter = [];
-            jQuery(".ui-selected", this).each(function () {
-                const index = jQuery("#flagFilter li").index(this);
-                if (Array.isArray(flagFilterValues[index]))
-                    flagFilterValues[index].forEach(member => { flagFilter.push(member); });
-                else
-                    flagFilter.push(flagFilterValues[index]);
-            });
-        }
-    });
-
-    jQuery("#flagFilter").on("selectablestart", function (event, ui) {
-        event.originalEvent.ctrlKey = true;
+    for (const f of flagFilterValues)
+        html += filterChipHtml(flagFilterLabels[f], 'data-flag="' + f + '"', flagFilterColors[f]);
+    const el = document.getElementById('flagFilter');
+    el.innerHTML = html;
+    // re-rendered on theme change: bind the click handler only once
+    if (el.dataset.bound)
+        return;
+    el.dataset.bound = '1';
+    el.addEventListener('click', function (e) {
+        const chip = e.target.closest('[data-flag]');
+        if (chip)
+            toggleFlagFilter(chip.dataset.flag);
     });
 }
 
+const nodbFilterLabels = { noreg: 'No registration', notype: 'No type' };
+
 function initNoDbFilter() {
-    const createFilter = function (text, key) {
-        return '<li class="ui-widget-content" id="nodb-filter-' + key + '">' + text + '</li>';
-    };
-
     let html = '';
-    html += createFilter('No registration', nodbFilterValues[0]);
-    html += createFilter('No type', nodbFilterValues[1]);
+    for (const f of nodbFilterValues)
+        html += filterChipHtml(nodbFilterLabels[f], 'data-nodb="' + f + '"');
+    const el = document.getElementById('nodbFilter');
+    el.innerHTML = html;
+    // re-rendered on theme change: bind the click handler only once
+    if (el.dataset.bound)
+        return;
+    el.dataset.bound = '1';
+    el.addEventListener('click', function (e) {
+        const chip = e.target.closest('[data-nodb]');
+        if (!chip)
+            return;
+        nodbFilter = toggleFilterValues(nodbFilter, chip.dataset.nodb);
+        PlaneFilter.nodbFilter = nodbFilter;
+        refreshFilter();
+    });
+}
 
-    document.getElementById('nodbFilter').innerHTML = html;
+// Emitter category chips drive the 'category' text filter as ^(A5|A7)$
+const categoryFilterChips = [
+    ['A1', 'Light'], ['A2', 'Small'], ['A3', 'Large'], ['A4', 'B757'], ['A5', 'Heavy'], ['A6', 'High performance'],
+    ['A7', 'Rotorcraft'], ['B1', 'Glider'], ['B2', 'Balloon'], ['B4', 'Ultralight'], ['B6', 'Drone'], ['C1|C2|C3', 'Ground vehicle'],
+];
 
-    jQuery("#nodbFilter").selectable({
-        stop: function () {
-            nodbFilter = [];
-            jQuery(".ui-selected", this).each(function () {
-                const index = jQuery("#nodbFilter li").index(this);
-                if (Array.isArray(nodbFilterValues[index]))
-                    nodbFilterValues[index].forEach(member => { nodbFilter.push(member); });
-                else
-                    nodbFilter.push(nodbFilterValues[index]);
-            });
+function getCategoryFilterCodes() {
+    const f = filters.category;
+    if (!f || !f.pattern)
+        return [];
+    const m = /^\^\(([A-D0-9|]+)\)\$$/.exec(f.pattern.toUpperCase());
+    return m ? m[1].split('|') : null; // null: custom pattern (e.g. from URL), chips can't show it
+}
+
+function toggleCategoryFilter(codes) {
+    const current = getCategoryFilterCodes() || [];
+    const next = toggleFilterValues(current, codes.split('|')) || [];
+    filters.category.set(next.length ? '^(' + next.join('|') + ')$' : '');
+}
+
+function initCategoryFilter() {
+    let html = '';
+    for (const [codes, label] of categoryFilterChips)
+        html += filterChipHtml(label, 'data-cat="' + codes + '"', null, 'Emitter category ' + codes.replace(/\|/g, ', '));
+    const el = document.getElementById('categoryFilter');
+    el.innerHTML = html;
+    // re-rendered on theme change: bind the click handler only once
+    if (el.dataset.bound)
+        return;
+    el.dataset.bound = '1';
+    el.addEventListener('click', function (e) {
+        const chip = e.target.closest('[data-cat]');
+        if (chip)
+            toggleCategoryFilter(chip.dataset.cat);
+    });
+}
+
+// Quick filters are shortcuts onto the filters below; their pressed state is derived from them
+const EMERGENCY_SQUAWKS = '^(7500|7600|7700)$';
+function lowAltitudeLimit() {
+    return units_for('altitude', DisplayUnits) == 'metric' ? 1000 : 3000;
+}
+
+const quickFilters = {
+    military: {
+        active: () => !!(flagFilter && flagFilter.includes('military')),
+        toggle: () => toggleFlagFilter('military'),
+    },
+    emergency: {
+        active: () => filters.squawk && filters.squawk.pattern == EMERGENCY_SQUAWKS && !filters.squawk.neg,
+        toggle: () => filters.squawk.set(quickFilters.emergency.active() ? '' : EMERGENCY_SQUAWKS),
+    },
+    heli: {
+        active: () => (getCategoryFilterCodes() || []).includes('A7'),
+        toggle: () => toggleCategoryFilter('A7'),
+    },
+    heavy: {
+        active: () => (getCategoryFilterCodes() || []).includes('A5'),
+        toggle: () => toggleCategoryFilter('A5'),
+    },
+    low: {
+        active: () => jQuery('#altitude_filter_min').val().trim() == '' && jQuery('#altitude_filter_max').val().trim() == String(lowAltitudeLimit()),
+        toggle: () => {
+            const on = quickFilters.low.active();
+            jQuery('#altitude_filter_min').val('');
+            jQuery('#altitude_filter_max').val(on ? '' : lowAltitudeLimit());
+            onFilterByAltitude();
+        },
+    },
+};
+
+function initQuickFilters() {
+    document.getElementById('quickFilter').addEventListener('click', function (e) {
+        const chip = e.target.closest('[data-quick]');
+        if (chip)
+            quickFilters[chip.dataset.quick].toggle();
+    });
+}
+
+// Altitude range slider mirrors the min / max boxes (empty box = open end)
+function altitudeSliderConfig() {
+    return units_for('altitude', DisplayUnits) == 'metric' ? { max: 15000, step: 100 } : { max: 50000, step: 500 };
+}
+
+let altitudeSliderTimer = null;
+function initAltitudeSlider() {
+    const lo = document.getElementById('altitude_filter_slider_min');
+    const hi = document.getElementById('altitude_filter_slider_max');
+    const onInput = function (e) {
+        const cfg = altitudeSliderConfig();
+        let a = +lo.value, b = +hi.value;
+        if (a > b) {
+            if (e.target === lo) lo.value = a = b;
+            else hi.value = b = a;
         }
-    });
+        jQuery('#altitude_filter_min').val(a > 0 ? a : '');
+        jQuery('#altitude_filter_max').val(b < cfg.max ? b : '');
+        syncAltitudeSlider();
+        clearTimeout(altitudeSliderTimer);
+        altitudeSliderTimer = setTimeout(onFilterByAltitude, 150);
+    };
+    lo.addEventListener('input', onInput);
+    hi.addEventListener('input', onInput);
+}
 
-    jQuery("#nodbFilter").on("selectablestart", function (event, ui) {
-        event.originalEvent.ctrlKey = true;
+function syncAltitudeSlider() {
+    const lo = document.getElementById('altitude_filter_slider_min');
+    const hi = document.getElementById('altitude_filter_slider_max');
+    if (!lo || !hi)
+        return;
+    const cfg = altitudeSliderConfig();
+    for (const el of [lo, hi]) {
+        el.min = 0;
+        el.max = cfg.max;
+        el.step = cfg.step;
+    }
+    const amin = parseFloat(jQuery('#altitude_filter_min').val());
+    const amax = parseFloat(jQuery('#altitude_filter_max').val());
+    lo.value = isNaN(amin) ? 0 : Math.max(0, Math.min(amin, cfg.max));
+    hi.value = isNaN(amax) ? cfg.max : Math.max(0, Math.min(amax, cfg.max));
+    const fill = document.querySelector('#altitude_filter_range .filter-range-fill');
+    fill.style.left = (lo.value / cfg.max * 100) + '%';
+    fill.style.right = (100 - hi.value / cfg.max * 100) + '%';
+}
+
+// Reflect current filter state on every chip / slider (after URL load, clear all, unit change)
+function syncFilterControls() {
+    jQuery('#sourceFilter [data-src-index]').each(function () {
+        const members = [].concat(sources[this.dataset.srcIndex]);
+        this.setAttribute('aria-pressed', !!(sourcesFilter && members.every(m => sourcesFilter.includes(m))));
     });
+    jQuery('#flagFilter [data-flag]').each(function () {
+        this.setAttribute('aria-pressed', !!(flagFilter && flagFilter.includes(this.dataset.flag)));
+    });
+    jQuery('#nodbFilter [data-nodb]').each(function () {
+        this.setAttribute('aria-pressed', !!(nodbFilter && nodbFilter.includes(this.dataset.nodb)));
+    });
+    const cats = getCategoryFilterCodes() || [];
+    jQuery('#categoryFilter [data-cat]').each(function () {
+        this.setAttribute('aria-pressed', this.dataset.cat.split('|').every(c => cats.includes(c)));
+    });
+    jQuery('#quickFilter [data-quick]').each(function () {
+        this.setAttribute('aria-pressed', !!quickFilters[this.dataset.quick].active());
+    });
+    jQuery('.quick-low-label').text(lowAltitudeLimit().toLocaleString() + ' ' + get_unit_label('altitude', DisplayUnits));
+    syncAltitudeSlider();
 }
 
 function push_history() {
@@ -3415,8 +3553,9 @@ function initMap() {
                 TAR.planeMan.redraw();
                 refreshFilter();
                 initLegend(tableColors.unselected);
-                initSourceFilter(tableColors.unselected);
+                initSourceFilter();
                 initFlagFilter();
+                syncFilterControls();
             }
         }
     });
@@ -5763,7 +5902,8 @@ function onDisplayUnitsChanged(e) {
 }
 
 function onFilterByAltitude(e) {
-    e.preventDefault();
+    if (e)
+        e.preventDefault();
     jQuery("#altitude_filter_min").blur();
     jQuery("#altitude_filter_max").blur();
 
@@ -6385,16 +6525,6 @@ function onSearchClear(e) {
     jQuery("#search_input").blur();
 }
 
-function onResetAltitudeFilter(e) {
-    jQuery("#altitude_filter_min").val("");
-    jQuery("#altitude_filter_max").val("");
-    jQuery("#altitude_filter_min").blur();
-    jQuery("#altitude_filter_max").blur();
-
-    updateAltFilter();
-    refreshFilter();
-}
-
 function updateAltFilter() {
     let minAltitude = parseFloat(jQuery("#altitude_filter_min").val().trim());
     let maxAltitude = parseFloat(jQuery("#altitude_filter_max").val().trim());
@@ -6440,57 +6570,6 @@ function getFlightAwareIdentLink(ident, linkText) {
     return "";
 }
 
-function onResetSourceFilter(e) {
-    jQuery('#sourceFilter .ui-selected').removeClass('ui-selected');
-
-    sourcesFilter = null;
-
-    updateSourceFilter();
-}
-
-function updateSourceFilter(e) {
-    if (e)
-        e.preventDefault();
-
-    PlaneFilter.sources = sourcesFilter;
-
-    refreshFilter();
-}
-
-function onResetFlagFilter(e) {
-    jQuery('#flagFilter .ui-selected').removeClass('ui-selected');
-
-    flagFilter = null;
-
-    updateFlagFilter();
-}
-
-function updateFlagFilter(e) {
-    if (e)
-        e.preventDefault();
-
-    PlaneFilter.flagFilter = flagFilter;
-
-    refreshFilter();
-}
-
-function onResetNoDbFilter(e) {
-    jQuery('#nodbFilter .ui-selected').removeClass('ui-selected');
-
-    nodbFilter = null;
-
-    updateNoDbFilter();
-}
-
-function updateNoDbFilter(e) {
-    if (e)
-        e.preventDefault();
-
-    PlaneFilter.nodbFilter = nodbFilter;
-
-    refreshFilter();
-}
-
 const filters = {};
 const filter_list = [];
 const filters_active = [];
@@ -6506,7 +6585,9 @@ function Filter(arg) {
     this.key = arg.key;
     this.field = arg.field;
     this.name = arg.name;
-    this.tbody = document.getElementById(arg.table).getElementsByTagName('tbody')[0];
+    this.placeholder = arg.placeholder || '';
+    this.container = arg.hidden ? null : document.getElementById('filterFields');
+    this.neg = false;
 
     this.id = 'filters_' + this.key;
     this.sid = '#' + this.id;
@@ -6521,43 +6602,51 @@ Filter.prototype.update = function(e) {
     if (e) {
         e.preventDefault();
     }
-
-    this.input.blur();
-    const val = this.input.val().trim();
-
-    this.set(val);
-
+    clearTimeout(this.inputTimer);
+    this.set((this.neg ? '!' : '') + this.input.val().trim());
     return false;
 }
+
+// val: pattern, prefixed with '!' to hide matches instead of keeping them (also in URL params)
 Filter.prototype.set = function(val) {
-
-    this.input.val(val);
-    this.pattern = val;
-    this.PATTERN = this.pattern.toUpperCase();
-
-    const list_index = filters_active.indexOf(this);
-    if (val && list_index < 0) {
-        filters_active.push(this);
-    }
-    if (!val && list_index >= 0) {
-        filters_active.splice(list_index, 1);
-    }
-
+    this.setQuiet(val);
     refreshFilter();
 }
 
 /** Update filter value and filters_active without refresh (for bulk clear). */
 Filter.prototype.setQuiet = function (val) {
-    val = val == null ? '' : String(val);
-    this.input.val(val);
+    val = val == null ? '' : String(val).trim();
+    this.neg = val.startsWith('!');
+    if (this.neg)
+        val = val.slice(1);
+    if (this.input.val().trim() !== val)
+        this.input.val(val);
     this.pattern = val;
     this.PATTERN = val.toUpperCase();
+
+    // a half-typed pattern like "B73(" is not a valid regex: don't apply it
+    let valid = true;
+    try { new RegExp(this.PATTERN); } catch (e) { valid = false; }
+    this.input.toggleClass('filter-field-invalid', !valid);
+    this.input.attr('title', valid ? '' : 'Not a valid pattern yet, so it is not applied');
+    if (this.negButton) {
+        this.negButton.attr('aria-pressed', this.neg);
+        this.negButton.text(this.neg ? '≠' : '=');
+        this.negButton.attr('title', this.neg ? 'Hiding matches: click to keep them instead' : 'Keeping matches: click to hide them instead');
+    }
+
+    const active = !!val && valid;
     const list_index = filters_active.indexOf(this);
-    if (!val && list_index >= 0) {
+    if (!active && list_index >= 0) {
         filters_active.splice(list_index, 1);
-    } else if (val && list_index < 0) {
+    } else if (active && list_index < 0) {
         filters_active.push(this);
     }
+};
+
+/** Pattern as stored in URL params: '!' prefix when hiding matches. */
+Filter.prototype.value = function () {
+    return (this.neg ? '!' : '') + this.pattern;
 };
 
 Filter.prototype.reset = function(e) {
@@ -6569,34 +6658,39 @@ Filter.prototype.reset = function(e) {
 }
 
 Filter.prototype.init = function() {
-    // don't F directly with the innerhtml of the body because it will drop event listeners / recreate dom elements
-    const row = this.tbody.insertRow();
+    if (!this.container) {
+        // driven by other controls (e.g. category chips), no text row of its own
+        this.input = jQuery('<input type="text">');
+        return;
+    }
+    const row = document.createElement('form');
+    row.id = this.id;
+    row.className = 'filter-field';
+    row.setAttribute('aria-label', this.name + ' filter');
     row.innerHTML =
-        `<td>
-            <div class="filter-field-item">
-                <form id="${this.id}" class="filterForm" aria-label="${this.name} filter">
-                    <div class="filterFormHeader filterFormHeader--toolbar">
-                        <span class="filterFormActions">
-                            <button class="formButton filterFormBtn" type="submit" title="Apply ${this.name} filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                            <button class="formButton filterFormBtn" id="${this.id}_reset" title="Reset ${this.name} filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                        </span>
-                    </div>
-                    <div class="filterFormBody filterFormBody--field">
-                        <label class="filter-field-label" for="${this.id}_input">${this.name}</label>
-                        <input id="${this.id}_input" name="${this.id}_name" type="text" class="searchInput filter-field-input" maxlength="1024" placeholder="" autocomplete="off">
-                    </div>
-                </form>
-            </div>
-        </td>`;
+        `<label class="filter-field-label" for="${this.id}_input">${this.name}</label>
+        <button type="button" class="filter-neg-toggle" id="${this.id}_neg" aria-pressed="false">=</button>
+        <input id="${this.id}_input" name="${this.id}_name" type="text" class="searchInput filter-field-input" maxlength="1024" placeholder="${this.placeholder}" autocomplete="off" spellcheck="false">`;
+    this.container.appendChild(row);
+    this.form = row;
     this.input = jQuery(this.sid + '_input');
-    this.form = document.getElementById(this.id)
+    this.negButton = jQuery(this.sid + '_neg');
     this.form.onsubmit = (e) => { return this.update(e); };
-    jQuery(this.sid + '_reset').click((e) => { return this.reset(e); });
+    // apply as you type
+    this.input.on('input', () => {
+        clearTimeout(this.inputTimer);
+        this.inputTimer = setTimeout(() => this.update(), 300);
+    });
+    this.negButton.on('click', () => {
+        this.neg = !this.neg;
+        this.update();
+    });
+    this.setQuiet('');
 }
 
 /** Show route filter accordion only when route API is configured and "Lookup route" (useRouteAPI) is on. */
 function syncRouteFilterAccordionVisibility() {
-    const acc = document.getElementById('filter_acc_route');
+    const acc = document.getElementById('filters_route');
     if (!acc)
         return;
     if (!routeApiUrl) {
@@ -6618,66 +6712,24 @@ function syncRouteFilterAccordionVisibility() {
 }
 
 function initFilters() {
-    initSourceFilter(tableColors.unselected);
+    initSourceFilter();
     initFlagFilter();
     initNoDbFilter();
-    new Filter({
-        key: 'callsign',
-        field: 'name',
-        name: 'Callsign',
-        table: 'filterTable_callsign',
-    });
-    new Filter({
-        key: 'type',
-        field: 'icaoType',
-        name: 'Type code',
-        table: 'filterTable_type',
-    });
-    new Filter({
-        key: 'description',
-        field: 'typeDescription',
-        name: 'Type description',
-        table: 'filterTable_type',
-    });
-    new Filter({
-        key: 'squawk',
-        field: 'squawk',
-        name: 'Squawk',
-        table: 'filterTable_squawk',
-    });
-    new Filter({
-        key: 'icao',
-        field: 'icao',
-        name: 'ICAO hex',
-        table: 'filterTable_icao',
-    });
+    initCategoryFilter();
+    initQuickFilters();
+    initAltitudeSlider();
 
-    new Filter({
-        key: 'registration',
-        field: 'registration',
-        name: 'Registration',
-        table: 'filterTable_reg'
-    });
+    new Filter({ key: 'callsign', field: 'name', name: 'Callsign', placeholder: 'DAL|UAL' });
+    new Filter({ key: 'type', field: 'icaoType', name: 'Type code', placeholder: 'B73.|A32.' });
+    new Filter({ key: 'description', field: 'typeDescription', name: 'Type desc.', placeholder: 'L2J, H..' });
+    new Filter({ key: 'registration', field: 'registration', name: 'Registration', placeholder: '^N' });
+    new Filter({ key: 'country', field: 'country', name: 'Country', placeholder: 'United States' });
+    new Filter({ key: 'squawk', field: 'squawk', name: 'Squawk', placeholder: '7700' });
+    new Filter({ key: 'icao', field: 'icao', name: 'ICAO hex', placeholder: '^AE' });
     if (routeApiUrl) {
-        new Filter({
-            key: 'route',
-            field: 'routeString',
-            name: 'Route',
-            table: 'filterTable_route',
-        });
+        new Filter({ key: 'route', field: 'routeString', name: 'Route', placeholder: 'KJFK' });
     }
-    new Filter({
-        key: 'country',
-        field: 'country',
-        name: 'Country of registration',
-        table: 'filterTable_reg'
-    });
-    new Filter({
-        key: 'category',
-        field: 'category',
-        name: 'Emitter category',
-        table: 'filterTable_emitter'
-    });
+    new Filter({ key: 'category', field: 'category', name: 'Aircraft category', hidden: true });
 
     if (PlaneFilter) {
         if (PlaneFilter.minAltitude && PlaneFilter.minAltitude > -1000000) {
@@ -6693,20 +6745,12 @@ function initFilters() {
             }
         }
 
-        if (PlaneFilter.sources) {
-            sourcesFilter = PlaneFilter.sources
-            sourcesFilter.map((f) => jQuery('#source-filter-' + f).addClass('ui-selected'))
-        }
-
-        if (PlaneFilter.flagFilter) {
-            flagFilter = PlaneFilter.flagFilter
-            flagFilter.map((f) => jQuery('#flag-filter-' + f).addClass('ui-selected'))
-        }
-
-        if (PlaneFilter.nodbFilter) {
-            nodbFilter = PlaneFilter.nodbFilter
-            nodbFilter.map((f) => jQuery('#nodb-filter-' + f).addClass('ui-selected'))
-        }
+        if (PlaneFilter.sources)
+            sourcesFilter = PlaneFilter.sources;
+        if (PlaneFilter.flagFilter)
+            flagFilter = PlaneFilter.flagFilter;
+        if (PlaneFilter.nodbFilter)
+            nodbFilter = PlaneFilter.nodbFilter;
     }
 
     syncRouteFilterAccordionVisibility();
@@ -7061,98 +7105,45 @@ function refresh(redraw) {
     triggerRefresh = 0;
 }
 
-function setFilterAccordionBadge(elId, count) {
-    const el = document.getElementById(elId);
-    if (!el)
-        return;
-    el.textContent = count > 0 ? ' (' + count + ')' : '';
-}
-
 function syncFiltersSummaryUI() {
     const sumEl = document.getElementById('filters_active_summary');
     if (!sumEl)
         return;
 
     const parts = [];
+    const chipLabels = (sel) => jQuery(sel + ' [aria-pressed="true"]').map(function () {
+        return jQuery(this).text().trim();
+    }).get();
 
     const amin = jQuery('#altitude_filter_min').val().trim();
     const amax = jQuery('#altitude_filter_max').val().trim();
     if (amin !== '' || amax !== '') {
-        parts.push('Altitude ' + (amin || '…') + '–' + (amax || '…'));
+        parts.push('Altitude ' + (amin || '…') + '–' + (amax || '…') + ' ' + get_unit_label('altitude', DisplayUnits));
     }
 
-    if (sourcesFilter && sourcesFilter.length > 0) {
-        const labels = jQuery('#sourceFilter .ui-selected').map(function () {
-            return jQuery(this).text().trim().replace(/\s+/g, ' ');
-        }).get().filter(Boolean);
-        parts.push(labels.length ? ('Source: ' + labels.join(', ')) : ('Source: ' + sourcesFilter.length + ' selected'));
-    }
+    syncFilterControls();
 
-    if (flagFilter && flagFilter.length > 0) {
-        const labels = jQuery('#flagFilter .ui-selected').map(function () {
-            return jQuery(this).text().trim();
-        }).get().filter(Boolean);
-        parts.push(labels.length ? ('Database flags: ' + labels.join(', ')) : ('Database flags: ' + flagFilter.length));
-    }
-
-    if (nodbFilter && nodbFilter.length > 0) {
-        const labels = jQuery('#nodbFilter .ui-selected').map(function () {
-            return jQuery(this).text().trim();
-        }).get().filter(Boolean);
-        parts.push(labels.length ? ('Missing database: ' + labels.join(', ')) : ('Missing database: ' + nodbFilter.length));
-    }
+    if (sourcesFilter && sourcesFilter.length > 0)
+        parts.push('Source: ' + chipLabels('#sourceFilter').join(', '));
+    const db = chipLabels('#flagFilter').concat(chipLabels('#nodbFilter'));
+    if (db.length)
+        parts.push(db.join(', '));
 
     for (let i = 0; i < filter_list.length; i++) {
         const f = filter_list[i];
         if (f.key === 'route' && !useRouteAPI)
             continue;
-        if (f.pattern && String(f.pattern).trim() !== '') {
-            parts.push((f.name || f.key) + ': ' + String(f.pattern).trim());
+        if (filters_active.indexOf(f) < 0)
+            continue;
+        if (f.key === 'category' && getCategoryFilterCodes()) {
+            parts.push(chipLabels('#categoryFilter').join(', '));
+            continue;
         }
+        parts.push((f.name || f.key) + (f.neg ? ' ≠ ' : ': ') + f.pattern);
     }
 
     sumEl.textContent = parts.length ? parts.join(' · ') : 'No active filters';
-
-    let nCallsign = 0;
-    let nType = 0;
-    let nSquawk = 0;
-    let nIcao = 0;
-    let nReg = 0;
-    let nRoute = 0;
-    let nEmitter = 0;
-    for (let i = 0; i < filter_list.length; i++) {
-        const f = filter_list[i];
-        if (!f.pattern || !String(f.pattern).trim())
-            continue;
-        if (f.key === 'route' && !useRouteAPI)
-            continue;
-        if (FILTER_FIELD_KEYS_CALLSIGN.has(f.key))
-            nCallsign++;
-        if (FILTER_FIELD_KEYS_TYPE.has(f.key))
-            nType++;
-        if (FILTER_FIELD_KEYS_SQUAWK.has(f.key))
-            nSquawk++;
-        if (FILTER_FIELD_KEYS_ICAO.has(f.key))
-            nIcao++;
-        if (FILTER_FIELD_KEYS_REG.has(f.key))
-            nReg++;
-        if (FILTER_FIELD_KEYS_ROUTE.has(f.key))
-            nRoute++;
-        if (FILTER_FIELD_KEYS_EMITTER.has(f.key))
-            nEmitter++;
-    }
-
-    setFilterAccordionBadge('filter_badge_altitude', (amin !== '' || amax !== '') ? 1 : 0);
-    setFilterAccordionBadge('filter_badge_source', sourcesFilter && sourcesFilter.length > 0 ? sourcesFilter.length : 0);
-    setFilterAccordionBadge('filter_badge_flags', flagFilter && flagFilter.length > 0 ? flagFilter.length : 0);
-    setFilterAccordionBadge('filter_badge_nodb', nodbFilter && nodbFilter.length > 0 ? nodbFilter.length : 0);
-    setFilterAccordionBadge('filter_badge_callsign', nCallsign);
-    setFilterAccordionBadge('filter_badge_type', nType);
-    setFilterAccordionBadge('filter_badge_squawk', nSquawk);
-    setFilterAccordionBadge('filter_badge_icao', nIcao);
-    setFilterAccordionBadge('filter_badge_reg', nReg);
-    setFilterAccordionBadge('filter_badge_route', nRoute);
-    setFilterAccordionBadge('filter_badge_emitter', nEmitter);
+    jQuery('#filters_clear_all').prop('disabled', parts.length == 0);
 }
 
 function clearAllFilters() {
@@ -7160,11 +7151,8 @@ function clearAllFilters() {
     jQuery('#altitude_filter_max').val('');
     updateAltFilter();
 
-    jQuery('#sourceFilter .ui-selected').removeClass('ui-selected');
     sourcesFilter = null;
-    jQuery('#flagFilter .ui-selected').removeClass('ui-selected');
     flagFilter = null;
-    jQuery('#nodbFilter .ui-selected').removeClass('ui-selected');
     nodbFilter = null;
 
     for (let i = 0; i < filter_list.length; i++) {
@@ -7203,6 +7191,7 @@ function updateVisible() {
         plane.updateVisible();
         aircraftShown += (plane.visible && plane.inView);
     }
+    jQuery('#filters_shown_count').updateText(aircraftShown.toLocaleString() + ' aircraft shown in view');
     checkScale();
 }
 
@@ -7787,7 +7776,7 @@ function updateAddressBar() {
         }
 
         for (const filter of filters_active) {
-            filterStrings.push(`filter${filter.key}=${encodeURIComponent(filter.pattern)}`);
+            filterStrings.push(`filter${filter.key}=${encodeURIComponent(filter.value())}`);
         }
 
         if (PlaneFilter.sources) {

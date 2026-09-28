@@ -1081,144 +1081,72 @@
               <div id="tab-filters">
                 <div class="sidebar-panel-sheet filters-panel-sheet">
                 <div id="filters_active_bar" class="filters-active-bar">
-                  <div id="filters_active_summary" class="filters-active-summary">No active filters</div>
+                  <div class="filters-active-text">
+                    <div id="filters_shown_count" class="filters-shown-count"></div>
+                    <div id="filters_active_summary" class="filters-active-summary">No active filters</div>
+                  </div>
                   <button type="button" id="filters_clear_all" class="formButton filters-clear-all-btn" title="Clear all filters">Clear all</button>
                 </div>
 
-                <details class="filter-accordion" id="filter_acc_altitude">
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Altitude</span><span class="filter-accordion-badge" id="filter_badge_altitude" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <form id="altitude_filter_form" class="filterForm" aria-label="Altitude range filter">
-                      <div class="filterFormHeader filterFormHeader--toolbar">
-                        <span class="filterFormActions">
-                          <button class="formButton filterFormBtn" type="submit" title="Apply altitude filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                          <button class="formButton filterFormBtn" id="altitude_filter_reset_button" title="Reset altitude filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                        </span>
-                      </div>
-                      <div class="filterFormBody">
-                        <input id="altitude_filter_min" name="minAltitude" type="text" class="altitudeFilterInput" maxlength="6">
-                        <label for="altitude_filter_min" class="altitudeUnit"></label>
-                        <span> to </span>
-                        <input id="altitude_filter_max" name="maxAltitude" type="text" class="altitudeFilterInput" maxlength="6">
-                        <label for="altitude_filter_max" class="altitudeUnit"></label>
-                      </div>
-                    </form>
+                <section class="filter-sec" aria-labelledby="filter_h_quick">
+                  <div class="filter-sec-h" id="filter_h_quick">Quick filters</div>
+                  <div class="filter-chips" id="quickFilter">
+                    <button type="button" class="filter-chip" data-quick="military">Military</button>
+                    <button type="button" class="filter-chip" data-quick="emergency">Emergencies</button>
+                    <button type="button" class="filter-chip" data-quick="heli">Helicopters</button>
+                    <button type="button" class="filter-chip" data-quick="heavy">Heavies</button>
+                    <button type="button" class="filter-chip" data-quick="low">Below <span class="quick-low-label"></span></button>
                   </div>
-                </details>
+                </section>
 
-                <details class="filter-accordion" id="filter_acc_callsign">
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Callsign</span><span class="filter-accordion-badge" id="filter_badge_callsign" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <table cellpadding="0" cellspacing="0" id="filterTable_callsign">
-                      <tbody></tbody>
+                <section class="filter-sec" aria-labelledby="filter_h_alt">
+                  <div class="filter-sec-h" id="filter_h_alt">Altitude</div>
+                  <div class="filter-range" id="altitude_filter_range">
+                    <div class="filter-range-track"></div>
+                    <div class="filter-range-fill"></div>
+                    <input type="range" id="altitude_filter_slider_min" aria-label="Minimum altitude">
+                    <input type="range" id="altitude_filter_slider_max" aria-label="Maximum altitude">
+                  </div>
+                  <form id="altitude_filter_form" class="filter-alt-inputs" aria-label="Altitude range filter">
+                    <input id="altitude_filter_min" name="minAltitude" type="text" inputmode="numeric" class="altitudeFilterInput" maxlength="6" placeholder="Any" aria-label="Minimum altitude">
+                    <span>to</span>
+                    <input id="altitude_filter_max" name="maxAltitude" type="text" inputmode="numeric" class="altitudeFilterInput" maxlength="6" placeholder="Any" aria-label="Maximum altitude">
+                    <span class="altitudeUnit"></span>
+                  </form>
+                </section>
+
+                <section class="filter-sec" aria-labelledby="filter_h_cat">
+                  <div class="filter-sec-h" id="filter_h_cat">Aircraft category <span class="filter-sec-hint">none selected = all</span></div>
+                  <div class="filter-chips" id="categoryFilter"></div>
+                </section>
+
+                <section class="filter-sec" aria-labelledby="filter_h_src">
+                  <div class="filter-sec-h" id="filter_h_src">Data source</div>
+                  <div class="filter-chips" id="sourceFilter"></div>
+                </section>
+
+                <section class="filter-sec" aria-labelledby="filter_h_db">
+                  <div class="filter-sec-h" id="filter_h_db">Database</div>
+                  <div class="filter-chips">
+                    <span id="flagFilter" class="filter-chips-inline"></span>
+                    <span id="nodbFilter" class="filter-chips-inline"></span>
+                  </div>
+                </section>
+
+                <section class="filter-sec" aria-labelledby="filter_h_id">
+                  <div class="filter-sec-h" id="filter_h_id">Identity</div>
+                  <div class="filter-fields" id="filterFields"></div>
+                  <details class="filter-tips">
+                    <summary>Pattern tips</summary>
+                    <table>
+                      <tr><td><code>B73.</code></td><td><code>.</code> is any one character (B737, B738, B739)</td></tr>
+                      <tr><td><code>B739|B39M</code></td><td><code>|</code> means "or"</td></tr>
+                      <tr><td><code>^N</code></td><td>starts with N</td></tr>
+                      <tr><td><code>L2J</code></td><td>type description: landplane, 2 jets (<code>H..</code> = any helicopter)</td></tr>
+                      <tr><td><span class="filter-neg-sample">≠</span></td><td>hide matches instead of keeping them</td></tr>
                     </table>
-                  </div>
-                </details>
-
-                <details class="filter-accordion" id="filter_acc_squawk">
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Squawk</span><span class="filter-accordion-badge" id="filter_badge_squawk" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <table cellpadding="0" cellspacing="0" id="filterTable_squawk">
-                      <tbody></tbody>
-                    </table>
-                  </div>
-                </details>
-
-                <details class="filter-accordion" id="filter_acc_type">
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Aircraft type</span><span class="filter-accordion-badge" id="filter_badge_type" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <table cellpadding="0" cellspacing="0" id="filterTable_type">
-                      <tbody></tbody>
-                    </table>
-                  </div>
-                </details>
-
-                <details class="filter-accordion" id="filter_acc_icao">
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">ICAO hex</span><span class="filter-accordion-badge" id="filter_badge_icao" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <table cellpadding="0" cellspacing="0" id="filterTable_icao">
-                      <tbody></tbody>
-                    </table>
-                  </div>
-                </details>
-
-                <details class="filter-accordion" id="filter_acc_source">
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Source</span><span class="filter-accordion-badge" id="filter_badge_source" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <form id="source_filter_form" class="filterForm" aria-label="Data source filter">
-                      <div class="filterFormHeader filterFormHeader--toolbar">
-                        <span class="filterFormActions">
-                          <button class="formButton filterFormBtn" type="submit" title="Apply source filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                          <button class="formButton filterFormBtn" id="source_filter_reset_button" title="Reset source filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                        </span>
-                      </div>
-                      <div class="filterFormBody">
-                        <ol id="sourceFilter" class="buttonFilter"></ol>
-                      </div>
-                    </form>
-                  </div>
-                </details>
-
-                <details class="filter-accordion" id="filter_acc_flags">
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Database flags</span><span class="filter-accordion-badge" id="filter_badge_flags" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <form id="flag_filter_form" class="filterForm" aria-label="Database flags filter">
-                      <div class="filterFormHeader filterFormHeader--toolbar">
-                        <span class="filterFormActions">
-                          <button class="formButton filterFormBtn" type="submit" title="Apply database flags filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                          <button class="formButton filterFormBtn" id="flag_filter_reset_button" title="Reset database flags filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                        </span>
-                      </div>
-                      <div class="filterFormBody">
-                        <ol id="flagFilter" class="buttonFilter"></ol>
-                      </div>
-                    </form>
-                  </div>
-                </details>
-
-                <details class="filter-accordion" id="filter_acc_reg">
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Registration</span><span class="filter-accordion-badge" id="filter_badge_reg" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <table cellpadding="0" cellspacing="0" id="filterTable_reg" class="filter-table-reg-below">
-                      <tbody></tbody>
-                    </table>
-                  </div>
-                </details>
-
-                <details class="filter-accordion" id="filter_acc_route" hidden>
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Route</span><span class="filter-accordion-badge" id="filter_badge_route" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <table cellpadding="0" cellspacing="0" id="filterTable_route">
-                      <tbody></tbody>
-                    </table>
-                  </div>
-                </details>
-
-                <details class="filter-accordion" id="filter_acc_emitter">
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Emitter category</span><span class="filter-accordion-badge" id="filter_badge_emitter" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <table cellpadding="0" cellspacing="0" id="filterTable_emitter">
-                      <tbody></tbody>
-                    </table>
-                  </div>
-                </details>
-
-                <details class="filter-accordion" id="filter_acc_nodb">
-                  <summary class="filter-accordion-summary"><span class="filter-accordion-title">Missing database</span><span class="filter-accordion-badge" id="filter_badge_nodb" aria-hidden="true"></span></summary>
-                  <div class="filter-accordion-body">
-                    <form id="nodb_filter_form" class="filterForm" aria-label="Missing database filter">
-                      <div class="filterFormHeader filterFormHeader--toolbar">
-                        <span class="filterFormActions">
-                          <button class="formButton filterFormBtn" type="submit" title="Apply missing database filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></button>
-                          <button class="formButton filterFormBtn" id="nodb_filter_reset_button" title="Reset missing database filter"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                        </span>
-                      </div>
-                      <div class="filterFormBody">
-                        <ol id="nodbFilter" class="buttonFilter"></ol>
-                      </div>
-                    </form>
-                  </div>
-                </details>
+                  </details>
+                </section>
                 </div>
               </div>
             </div>

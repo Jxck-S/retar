@@ -77,10 +77,6 @@ select {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.filters-panel-sheet .filter-table-reg-below {
-    margin-top: 0;
-}
-
 .filters-panel-sheet .filters-active-bar {
     display: flex;
     flex-wrap: wrap;
@@ -105,77 +101,293 @@ select {
     padding: calc(4px * var(--SCALE)) calc(10px * var(--SCALE));
 }
 
-.filters-panel-sheet .filter-accordion {
-    margin-top: calc(6px * var(--SCALE));
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: var(--UI-RADIUS-CONTROL);
+.filters-panel-sheet .filters-clear-all-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.filters-active-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: calc(2px * var(--SCALE));
+}
+
+.filters-shown-count {
+    font-size: calc(12px * var(--SCALE));
+    font-weight: 600;
+    color: var(--TXTCOLOR1);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Filters tab: every filter visible, grouped into sections, applied live */
+.filter-sec {
+    display: flex;
+    flex-direction: column;
+    gap: calc(6px * var(--SCALE));
+    margin-bottom: calc(14px * var(--SCALE));
+}
+
+.filter-sec:last-child {
+    margin-bottom: 0;
+}
+
+.filter-sec-h {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: calc(10.5px * var(--SCALE));
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--TXTCOLOR3);
+}
+
+.filter-sec-hint {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+}
+
+.filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(5px * var(--SCALE));
+}
+
+.filter-chips-inline {
+    display: contents;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(5px * var(--SCALE));
+    font: inherit;
+    font-size: calc(12px * var(--SCALE));
+    line-height: 1.2;
+    color: var(--TXTCOLOR1);
     background-color: var(--BGCOLOR1);
-    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 999px;
+    padding: calc(4px * var(--SCALE)) calc(10px * var(--SCALE));
+    cursor: pointer;
+    transition: background-color 0.12s, border-color 0.12s;
 }
 
-.filters-panel-sheet .filter-accordion:first-of-type {
-    margin-top: calc(2px * var(--SCALE));
+.filter-chip:hover {
+    border-color: var(--ACCENT-LIGHT);
 }
 
-.filters-panel-sheet .filter-accordion-summary {
+.filter-chip[aria-pressed="true"] {
+    background-color: var(--ACCENT);
+    border-color: var(--ACCENT);
+    color: #fff;
+}
+
+.filter-chip:focus-visible,
+.filter-neg-toggle:focus-visible,
+#altitude_filter_range input:focus-visible {
+    outline: 2px solid var(--ACCENT-LIGHT);
+    outline-offset: 2px;
+}
+
+/* Source / database colour as a dot rather than filling the whole chip */
+.filter-chip-dot {
+    width: calc(8px * var(--SCALE));
+    height: calc(8px * var(--SCALE));
+    border-radius: 50%;
+    flex: 0 0 auto;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.filter-chip[aria-pressed="true"] .filter-chip-dot {
+    box-shadow: 0 0 0 1.5px #fff;
+}
+
+/* Altitude: two range inputs stacked on one track */
+.filter-range {
+    position: relative;
+    height: calc(24px * var(--SCALE));
+    margin: 0 calc(4px * var(--SCALE));
+}
+
+.filter-range-track,
+.filter-range-fill {
+    position: absolute;
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    border-radius: 2px;
+}
+
+.filter-range-track {
+    left: 0;
+    right: 0;
+    background-color: rgba(128, 128, 128, 0.35);
+}
+
+.filter-range-fill {
+    background-color: var(--ACCENT);
+}
+
+.filter-range input[type="range"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background: none;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.filter-range input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    pointer-events: auto;
+    width: calc(16px * var(--SCALE));
+    height: calc(16px * var(--SCALE));
+    border-radius: 50%;
+    background-color: var(--BGCOLOR1);
+    border: 2px solid var(--ACCENT);
+    cursor: grab;
+}
+
+.filter-range input[type="range"]::-moz-range-thumb {
+    pointer-events: auto;
+    width: calc(13px * var(--SCALE));
+    height: calc(13px * var(--SCALE));
+    border-radius: 50%;
+    background-color: var(--BGCOLOR1);
+    border: 2px solid var(--ACCENT);
+    cursor: grab;
+}
+
+.filter-range input[type="range"]::-moz-range-track {
+    background: none;
+}
+
+.filter-alt-inputs {
     display: flex;
     align-items: center;
     gap: calc(6px * var(--SCALE));
-    padding: calc(8px * var(--SCALE)) calc(10px * var(--SCALE));
-    cursor: pointer;
-    font-weight: 600;
     font-size: calc(12px * var(--SCALE));
-    color: var(--TXTCOLOR1);
-    background-color: var(--BGCOLOR1);
-    list-style: none;
+    color: var(--TXTCOLOR2);
 }
 
-.filters-panel-sheet .filter-accordion-summary::-webkit-details-marker {
+/* Identity: label | keep/hide toggle | pattern */
+.filter-fields {
+    display: flex;
+    flex-direction: column;
+    gap: calc(5px * var(--SCALE));
+}
+
+.filter-field {
+    display: grid;
+    grid-template-columns: calc(84px * var(--SCALE)) auto minmax(0, 1fr);
+    align-items: center;
+    gap: calc(6px * var(--SCALE));
+    margin: 0;
+}
+
+.filter-field[hidden] {
     display: none;
 }
 
-.filters-panel-sheet .filter-accordion-summary::after {
-    content: '';
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid var(--TXTCOLOR2);
-    margin-left: auto;
-    flex-shrink: 0;
-    transition: transform 0.15s ease;
-    opacity: 0.75;
-}
-
-.filters-panel-sheet .filter-accordion[open] > .filter-accordion-summary {
-    background-color: rgba(0, 0, 0, 0.03);
-}
-
-.filters-panel-sheet .filter-accordion[open] > .filter-accordion-summary::after {
-    transform: rotate(180deg);
-}
-
-.filters-panel-sheet .filter-accordion-title {
-    flex: 1 1 auto;
-    min-width: 0;
-    text-align: left;
-}
-
-.filters-panel-sheet .filter-accordion-badge {
-    font-weight: 500;
-    font-size: calc(10px * var(--SCALE));
+.filter-field-label {
+    font-size: calc(12px * var(--SCALE));
     color: var(--TXTCOLOR2);
-    opacity: 0.9;
 }
 
-.filters-panel-sheet .filter-accordion-body {
-    padding: calc(8px * var(--SCALE)) calc(10px * var(--SCALE)) calc(10px * var(--SCALE));
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+.filter-field .filter-field-input {
+    width: 100%;
+    min-width: 0;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: calc(12px * var(--SCALE));
+}
+
+.filter-field .filter-field-input::placeholder {
+    opacity: 0.55;
+}
+
+.filter-field .filter-field-invalid {
+    border-color: #d32f2f;
+}
+
+.filter-neg-toggle,
+.filter-neg-sample {
+    width: calc(26px * var(--SCALE));
+    height: calc(24px * var(--SCALE));
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: calc(13px * var(--SCALE));
+    color: var(--TXTCOLOR2);
     background-color: var(--BGCOLOR1);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: var(--UI-RADIUS-TIGHT);
+    cursor: pointer;
+    padding: 0;
 }
 
-.filters-panel-sheet .filter-accordion-body .buttonFilter li {
-    background-color: var(--BGCOLOR2);
+.filter-neg-toggle[aria-pressed="true"],
+.filter-neg-sample {
+    color: #d32f2f;
+    border-color: #d32f2f;
+    background-color: rgba(211, 47, 47, 0.1);
+}
+
+.filter-neg-sample {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+}
+
+.filter-neg-toggle:disabled,
+.filter-field-input:disabled {
+    opacity: 0.5;
+}
+
+.filter-tips {
+    font-size: calc(11.5px * var(--SCALE));
+    color: var(--TXTCOLOR2);
+}
+
+.filter-tips summary {
+    cursor: pointer;
+    color: var(--ACCENT);
+}
+
+.filter-tips table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: calc(4px * var(--SCALE));
+}
+
+.filter-tips td {
+    padding: calc(3px * var(--SCALE)) calc(4px * var(--SCALE));
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    vertical-align: top;
+}
+
+.filter-tips code {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    white-space: nowrap;
+}
+
+html.dark .filter-chip,
+html.dark .filter-neg-toggle {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+html.dark .filter-chip[aria-pressed="true"] {
+    color: var(--BGCOLOR1);
+}
+
+html.dark .filter-tips td {
+    border-top-color: rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-table-sheet .legend {
@@ -717,14 +929,7 @@ html.dark .sidebar-notice-amber {
 
 /* Spacing for Search and Filter Sections */
 #tab-search-table td,
-#filterTable_squawk td,
-#filterTable2 td,
-#filterTable_reg td,
-#filterTable_callsign td,
-#filterTable_type td,
-#filterTable_icao td,
-#filterTable_route td,
-#filterTable_emitter td {
+#filterTable2 td {
     padding: 0px;
     padding-bottom: 8px;
     margin: 0px;
@@ -733,14 +938,7 @@ html.dark .sidebar-notice-amber {
 
 /* Remove border/padding from the very last row's cell in each table to clean up bottom edge */
 #tab-search-table tr:last-child td,
-#filterTable_squawk tr:last-child td,
-#filterTable2 tr:last-child td,
-#filterTable_reg tr:last-child td,
-#filterTable_callsign tr:last-child td,
-#filterTable_type tr:last-child td,
-#filterTable_icao tr:last-child td,
-#filterTable_route tr:last-child td,
-#filterTable_emitter tr:last-child td {
+#filterTable2 tr:last-child td {
     border-bottom: none;
     padding-bottom: 0px;
 }
@@ -1369,82 +1567,8 @@ table.infoSectionTable tr td {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 6px 8px !important;
 }
-#tab-filters .filterForm {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-#tab-filters .filterFormHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0;
-    line-height: 1.2;
-}
-#tab-filters .filterFormHeader .infoBlockTitleText {
-    margin: 0;
-    font-size: calc(11px * var(--SCALE));
-    line-height: 1.2;
-    min-width: 0;
-    flex: 1 1 auto;
-    padding-right: calc(4px * var(--SCALE));
-    overflow-wrap: break-word;
-}
-#tab-filters .filterFormActions {
-    display: flex;
-    gap: 4px;
-    flex-shrink: 0;
-}
-#tab-filters .filterFormBtn {
-    padding: 2px 6px;
-    min-width: 24px;
-}
-#tab-filters .filterFormBtn svg {
-    display: block;
-}
-#tab-filters .filterFormBody {
-    margin-top: 0;
-    overflow: auto;
-}
-#tab-filters .filterFormBody .buttonFilter {
-    margin-bottom: 0;
-}
 
-#tab-filters .filterFormHeader--toolbar {
-    justify-content: flex-end;
-    margin-bottom: calc(2px * var(--SCALE));
-}
-
-#tab-filters .filter-field-item {
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-}
-
-#tab-filters .filterFormBody--field {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: calc(3px * var(--SCALE));
-}
-
-#tab-filters .filter-field-label {
-    font-size: calc(10px * var(--SCALE));
-    font-weight: 600;
-    color: var(--TXTCOLOR2);
-    margin: 0;
-    line-height: 1.2;
-}
-
-#tab-filters .filter-field-input {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-}
-
-/* Dark mode: accordion body and inputs both use BGCOLOR1 — lift fields with BGCOLOR2 + light edge */
+/* Dark mode: lift filter inputs off the panel with BGCOLOR2 + light edge */
 html.dark #tab-filters .searchInput,
 html.dark #tab-filters .altitudeFilterInput {
     background-color: var(--BGCOLOR2);
@@ -1466,35 +1590,8 @@ html.dark #tab-filters .altitudeFilterInput:focus {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--ACCENT);
 }
 
-html.dark #tab-filters .filter-field-label {
-    color: var(--TXTCOLOR1);
-}
-
 html.dark .filters-panel-sheet .filters-active-bar {
     border-bottom-color: rgba(255, 255, 255, 0.12);
-}
-
-html.dark .filters-panel-sheet .filter-accordion {
-    border-color: rgba(255, 255, 255, 0.14);
-}
-
-html.dark .filters-panel-sheet .filter-accordion-body {
-    border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-html.dark .filters-panel-sheet .filter-accordion[open] > .filter-accordion-summary {
-    background-color: rgba(255, 255, 255, 0.06);
-}
-
-html.dark #tab-filters .filterFormBtn {
-    background-color: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    color: var(--TXTCOLOR1);
-}
-
-html.dark #tab-filters .filterFormBtn:hover {
-    background-color: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.3);
 }
 
 html.dark .filters-panel-sheet .filters-clear-all-btn {
@@ -1517,78 +1614,6 @@ html.dark .mobile_table_toggle.formButton {
 html.dark .mobile_table_toggle.formButton:hover {
     background-color: rgba(255, 255, 255, 0.18);
     border-color: rgba(255, 255, 255, 0.3);
-}
-
-#tab-filters #filterTable_squawk,
-#tab-filters #filterTable_reg,
-#tab-filters #filterTable_callsign,
-#tab-filters #filterTable_type,
-#tab-filters #filterTable_icao,
-#tab-filters #filterTable_route,
-#tab-filters #filterTable_emitter {
-    display: block;
-    width: 100%;
-    margin-bottom: 0;
-    border-collapse: separate;
-}
-
-/* Filter field rows tile in two columns (single-column tables still layout fine) */
-#tab-filters #filterTable_squawk tbody,
-#tab-filters #filterTable_reg tbody,
-#tab-filters #filterTable_callsign tbody,
-#tab-filters #filterTable_type tbody,
-#tab-filters #filterTable_icao tbody,
-#tab-filters #filterTable_route tbody,
-#tab-filters #filterTable_emitter tbody {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: calc(6px * var(--SCALE));
-    width: 100%;
-}
-
-#tab-filters #filterTable_squawk tr,
-#tab-filters #filterTable_reg tr,
-#tab-filters #filterTable_callsign tr,
-#tab-filters #filterTable_type tr,
-#tab-filters #filterTable_icao tr,
-#tab-filters #filterTable_route tr,
-#tab-filters #filterTable_emitter tr {
-    display: contents;
-}
-
-#tab-filters #filterTable_squawk td,
-#tab-filters #filterTable_reg td,
-#tab-filters #filterTable_callsign td,
-#tab-filters #filterTable_type td,
-#tab-filters #filterTable_icao td,
-#tab-filters #filterTable_route td,
-#tab-filters #filterTable_emitter td {
-    display: block;
-    padding: 0;
-    margin: 0;
-    min-width: 0;
-}
-
-#tab-filters #filterTable_squawk .filter-field-item,
-#tab-filters #filterTable_reg .filter-field-item,
-#tab-filters #filterTable_callsign .filter-field-item,
-#tab-filters #filterTable_type .filter-field-item,
-#tab-filters #filterTable_icao .filter-field-item,
-#tab-filters #filterTable_route .filter-field-item,
-#tab-filters #filterTable_emitter .filter-field-item {
-    margin-bottom: 0;
-}
-
-@media screen and (max-width: 400px) {
-    #tab-filters #filterTable_squawk tbody,
-    #tab-filters #filterTable_reg tbody,
-    #tab-filters #filterTable_callsign tbody,
-    #tab-filters #filterTable_type tbody,
-    #tab-filters #filterTable_icao tbody,
-    #tab-filters #filterTable_route tbody,
-    #tab-filters #filterTable_emitter tbody {
-        grid-template-columns: 1fr;
-    }
 }
 
 .largeText a {
@@ -2343,88 +2368,10 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
     border-radius: var(--UI-RADIUS-TIGHT);
 }
 
-.buttonFilter {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    cursor: pointer;
-}
-
-/* Tighter chip grid — no fixed 240px rail; chips shrink to the column */
-#tab-filters .buttonFilter {
-    display: flex;
-    flex-wrap: wrap;
-    gap: calc(3px * var(--SCALE));
-}
-
-#tab-filters .buttonFilter li {
-    float: none;
-    width: auto;
-    flex: 1 1 calc(52px * var(--SCALE));
-    min-width: calc(48px * var(--SCALE));
-    max-width: calc(88px * var(--SCALE));
-    margin-right: 0;
-    margin-bottom: 0;
-    padding: calc(2px * var(--SCALE)) calc(4px * var(--SCALE));
-    font-size: calc(11px * var(--SCALE));
-    line-height: 1.2;
-    word-break: break-word;
-}
-
-/* SOURCE: two columns; chip density matches #tab-filters .buttonFilter (Database flags), not extra vertical padding */
-#tab-filters #sourceFilter {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: calc(3px * var(--SCALE));
-    justify-items: stretch;
-    align-items: stretch;
-}
-
-#tab-filters #sourceFilter li {
-    float: none;
-    width: 100%;
-    max-width: none;
-    min-width: 0;
-    margin: 0;
-    min-height: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    box-sizing: border-box;
-    padding: calc(2px * var(--SCALE)) calc(4px * var(--SCALE));
-    font-size: calc(11px * var(--SCALE));
-    line-height: 1.2;
-    word-break: break-word;
-}
-
-#tab-filters #sourceFilter li#source-filter-uat {
-    line-height: 1.15;
-}
-
 .ui-widget-content .ui-selectable .ui-selected {
     background-color: color-mix(in srgb, var(--ACCENT-LIGHT) 20%, transparent) !important;
     border-color: var(--ACCENT-LIGHT) !important;
     color: inherit;
-}
-
-.buttonFilter li {
-    border-width: 1px;
-    border-color: var(--BGCOLOR2);
-    border-radius: var(--UI-RADIUS-TIGHT);
-    margin-right: 4px;
-    margin-bottom: 4px;
-    padding: 3px 4px;
-    float: left;
-    width: calc(85px * var(--SCALE));
-    color: var(--TXTCOLOR2);
-    font-size: var(--FS2);
-    text-align: center;
-    background-color: var(--BGCOLOR1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 #sortableColumns {
@@ -2998,19 +2945,6 @@ input{
 
 .SuperHeavy {
     background-color: darkblue;
-}
-
-/* Ensure DB flag filter buttons use the same colors, overriding jQuery UI backgrounds */
-#flagFilter .LADD {
-    background-color: orange;
-}
-
-#flagFilter .PIA {
-    background-color: red;
-}
-
-#flagFilter .Military {
-    background-color: green;
 }
 
 #selected_dbFlags {
