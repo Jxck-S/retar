@@ -46,6 +46,18 @@ select {
     border-spacing: 0;
 }
 
+/* Table box: stays inside the sidebar section; scrolls sideways only when the
+   table is wider than it (class toggled by initTableScroll in script.js) */
+.planes-table-scroll {
+    max-width: 100%;
+}
+
+.planes-table-scroll.is-scrollable {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+
 /* Rows sit on the panel with a hairline between them; the data source is a
    stripe at the row start (--row-src, set per row in script.js). Emergency
    squawks keep their inline full-row colour. */
@@ -984,7 +996,9 @@ html.dark .sidebar-notice-amber {
     border-bottom: 1px solid color-mix(in srgb, var(--TXTCOLOR1) 20%, transparent);
     font-weight: 600;
     font-size: smaller;
-    padding: calc( 5px * var(--SCALE));
+    /* header labels set the column widths: keep side padding tight so the
+       default sidebar fits every column without sideways scrolling */
+    padding: calc( 5px * var(--SCALE)) calc( 3px * var(--SCALE));
     text-align: center;
 }
 

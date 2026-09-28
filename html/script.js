@@ -2117,6 +2117,24 @@ jQuery('#selected_altitude_geom1')
     }
 }
 
+// The table can be wider than the sidebar (many columns, narrow sidebar, phones).
+// Scroll it sideways inside its own box only when it overflows: a horizontal
+// scroll container would also stop the sticky header from pinning while the
+// sidebar scrolls, so keep that working whenever the table fits.
+function initTableScroll() {
+    const wrap = document.getElementById('planes_table_scroll');
+    const table = document.getElementById('planesTable');
+    if (!wrap || !table || typeof ResizeObserver === 'undefined')
+        return;
+    const sync = () => {
+        wrap.classList.toggle('is-scrollable', table.offsetWidth > wrap.clientWidth + 1);
+    };
+    const observer = new ResizeObserver(sync);
+    observer.observe(wrap);
+    observer.observe(table);
+    sync();
+}
+
 function initLegend() {
     // same dots as the rows' source stripe and the Filters tab
     const palette = tableColorsLight || tableColors;
@@ -3564,6 +3582,7 @@ function initMap() {
     });
 
     initLegend();
+    initTableScroll();
 
     initFilters();
 
