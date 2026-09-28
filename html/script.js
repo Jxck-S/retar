@@ -555,22 +555,34 @@ function lookupAirlineForCallsign(callsign, registration) {
 }
 
 function updateSelectedAirline(selected) {
-    if (!airlineLookup) {
-        jQuery('#selected_airline_row').addClass('hidden');
-        jQuery('#selected_airline').updateText('n/a');
-        jQuery('#selected_airline').attr('title', 'Airline lookup disabled');
-        return;
+    let operatorData = null;
+    if (airlineLookup) {
+        operatorData = selected.getAirline ? selected.getAirline() : lookupAirlineForCallsign(selected.name, selected.registration);
     }
-    jQuery('#selected_airline_row').removeClass('hidden');
+    setCallsignAirline('#selected_airline', operatorData, selected.opp_icao);
+}
 
-    let operatorData = selected.getAirline ? selected.getAirline() : lookupAirlineForCallsign(selected.name, selected.registration);
+// Tooltip for operator name / logo / banner: the name first, then where it came from.
+// The operator is who is flying the aircraft now (from the callsign), not the registered owner.
+function operatorTooltip(name, opIcao, operatorData) {
+    let lines = [name || opIcao || 'Operator'];
+    lines.push('Operator (who is flying it now), derived from the callsign\'s 3-letter ICAO code' + (opIcao ? ' ' + opIcao : ''));
     if (operatorData) {
-        let title = operatorData.c ? operatorData.c + (operatorData.r ? ' / ' + '"' + operatorData.r + '"' : '') : (operatorData.r || '');
-        jQuery('#selected_airline').updateText(operatorData.n || 'n/a');
-        jQuery('#selected_airline').attr('title', title || '');
+        let extra = [];
+        if (operatorData.c) extra.push(operatorData.c);
+        if (operatorData.r) extra.push('radio callsign "' + operatorData.r + '"');
+        if (extra.length) lines.push(extra.join(' · '));
+    }
+    return lines.join('\n');
+}
+
+// Airline name shown in small italics under the callsign (sidebar + hover); hidden when unknown
+function setCallsignAirline(selector, operatorData, opIcao) {
+    const el = jQuery(selector);
+    if (operatorData && operatorData.n) {
+        el.text(operatorData.n).attr('title', operatorTooltip(operatorData.n, opIcao, operatorData)).removeClass('hidden');
     } else {
-        jQuery('#selected_airline').updateText('n/a');
-        jQuery('#selected_airline').attr('title', 'No airline match');
+        el.text('').attr('title', '').addClass('hidden');
     }
 }
 
@@ -4025,13 +4037,16 @@ function refreshSelected() {
     var $banner_img = $selected_airline_banner.find('img');
 
     let customKey = null;
+    let customMatch = null;
 
     if (customLogoIndex) {
         let entry = null;
         if (selected.registration && customLogoIndex[selected.registration]) {
             entry = customLogoIndex[selected.registration];
+            customMatch = 'registration ' + selected.registration;
         } else if (selected.flight && customLogoIndex[selected.flight.trim()]) {
             entry = customLogoIndex[selected.flight.trim()];
+            customMatch = 'flight ' + selected.flight.trim();
         }
 
         if (entry) {
@@ -4042,6 +4057,17 @@ function refreshSelected() {
             }
         }
     }
+
+    // Tooltips on logo + banner: name first, then where it came from
+    let logoTitle = '';
+    if (customKey) {
+        logoTitle = customKey + '\nCustom logo, matched by ' + customMatch;
+    } else if (opperatorICAO) {
+        let opData = airlineLookup ? (selected.getAirline ? selected.getAirline() : lookupAirlineForCallsign(selected.name, selected.registration)) : null;
+        logoTitle = operatorTooltip(opData && opData.n, opperatorICAO, opData);
+    }
+    $selected_opp_icon.attr('title', logoTitle);
+    $selected_airline_banner.attr('title', logoTitle);
 
     if (customKey) {
         if (airlineLogos) {
@@ -4205,10 +4231,15 @@ function refreshSelected() {
 
     jQuery('#selected_typelong').updateText(typeLine);
 
-    if (selected.ownOp)
+    if (selected.ownOp) {
         jQuery('#selected_ownop').updateText(selected.ownOp);
-    else
+        jQuery('#selected_ownop').attr('title', selected.ownOp
+            + '\nRegistered owner, from the aircraft registration database (by tail number)'
+            + '\nMay differ from the operator shown under the callsign, who is flying it now');
+    } else {
         jQuery('#selected_ownop').updateText("");
+        jQuery('#selected_ownop').attr('title', '');
+    }
 
     if (selected.rId && show_rId) {
         jQuery('#receiver_id').updateText(selected.rId);
@@ -4614,16 +4645,10 @@ function refreshHighlighted() {
     }
 
     let highlightedOperator = null;
-    if (highlighted.getAirline) {
-        highlightedOperator = highlighted.getAirline();
-    } else {
-        highlightedOperator = lookupAirlineForCallsign(highlighted.name, highlighted.registration);
+    if (airlineLookup) {
+        highlightedOperator = highlighted.getAirline ? highlighted.getAirline() : lookupAirlineForCallsign(highlighted.name, highlighted.registration);
     }
-    if (highlightedOperator) {
-        jQuery('#highlighted_airline').text(highlightedOperator.n || 'n/a');
-    } else {
-        jQuery('#highlighted_airline').text('n/a');
-    }
+    setCallsignAirline('#highlighted_airline', highlightedOperator, highlighted.opp_icao);
 
     jQuery('#highlighted_speed').text(format_speed_long(highlighted.gs, DisplayUnits));
 
