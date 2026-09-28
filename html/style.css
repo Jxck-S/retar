@@ -67,15 +67,12 @@ select {
     background-color: var(--BGCOLOR1);
 }
 
-/* Outer shell uses the same border, radius, and shadow as inner sidebar cards */
+/* Desktop: the sidebar is docked, so its content is flat (no card inside it).
+   Mobile turns this into a floating card over the map (see max-width: 768px). */
 #sidebar-table {
     position: relative; /* Anchor for the mobile close button */
     background-color: var(--BGCOLOR1);
-    border-radius: var(--UI-RADIUS-PANEL);
     padding: calc(10px * var(--SCALE)) calc(8px * var(--SCALE));
-    margin: calc(10px * var(--SCALE)) calc(5px * var(--SCALE));
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 /* Table block, Search tab, Filters tab: flat sections inside the #sidebar-table
@@ -3062,6 +3059,16 @@ input{
         overflow: visible;
         flex: 1 1 auto;
         min-height: 0;
+    }
+    /* floating over the map: this is where the card look belongs */
+    #sidebar-table {
+        border-radius: var(--UI-RADIUS-PANEL);
+        margin: calc(10px * var(--SCALE)) calc(5px * var(--SCALE));
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(0, 0, 0, 0.12);
+    }
+    html.dark #sidebar-table {
+        border-color: rgba(255, 255, 255, 0.1);
     }
     body.mobile_sidebar_open #sidebar-table {
         pointer-events: auto;
