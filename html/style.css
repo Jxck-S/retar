@@ -78,15 +78,27 @@ select {
     border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-/* Table block, Search tab, Filters tab — identical chrome */
+/* Table block, Search tab, Filters tab: flat sections inside the #sidebar-table
+   card (no nested cards). Only controls and floating panels get rounded boxes;
+   sections are separated by spacing and a divider. */
 .sidebar-table-sheet,
 .sidebar-panel-sheet {
     margin-top: calc(8px * var(--SCALE));
-    padding: calc(10px * var(--SCALE)) calc(8px * var(--SCALE)) calc(8px * var(--SCALE));
-    background-color: var(--BGCOLOR2);
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: var(--UI-RADIUS-PANEL);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: calc(10px * var(--SCALE)) 0 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.sidebar-table-sheet {
+    margin-top: calc(12px * var(--SCALE));
+    padding-top: calc(12px * var(--SCALE));
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+html.dark .sidebar-table-sheet {
+    border-top-color: rgba(255, 255, 255, 0.1);
 }
 
 .filters-panel-sheet .filters-active-bar {
@@ -1035,8 +1047,8 @@ html.dark .infoBlockTitleText {
     width: calc(70px * var(--SCALE));
     height: calc(24px * var(--SCALE));
     color:var(--TXTCOLOR2);
-    background-color: var(--BGCOLOR1);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: var(--UI-RADIUS-CONTROL);
     padding: 0 4px;
 }
@@ -1044,8 +1056,8 @@ html.dark .infoBlockTitleText {
     width: calc(100px * var(--SCALE));
     height: calc(24px * var(--SCALE));
     color: var(--TXTCOLOR2);
-    background-color: var(--BGCOLOR1);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: var(--UI-RADIUS-CONTROL);
     padding: 0 4px;
     box-sizing: border-box;
@@ -1594,23 +1606,23 @@ table.infoSectionTable tr td {
     padding: 6px 8px !important;
 }
 
-/* Dark mode: lift filter inputs off the panel with BGCOLOR2 + light edge */
-html.dark #tab-filters .searchInput,
-html.dark #tab-filters .altitudeFilterInput {
+/* Dark mode: lift inputs off the flat sidebar with BGCOLOR2 + light edge */
+html.dark .searchInput,
+html.dark .altitudeFilterInput {
     background-color: var(--BGCOLOR2);
     color: var(--TXTCOLOR1);
     border: 1px solid rgba(255, 255, 255, 0.22);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-html.dark #tab-filters .searchInput::placeholder,
-html.dark #tab-filters .altitudeFilterInput::placeholder {
+html.dark .searchInput::placeholder,
+html.dark .altitudeFilterInput::placeholder {
     color: var(--TXTCOLOR3);
     opacity: 1;
 }
 
-html.dark #tab-filters .searchInput:focus,
-html.dark #tab-filters .altitudeFilterInput:focus {
+html.dark .searchInput:focus,
+html.dark .altitudeFilterInput:focus {
     border-color: rgba(255, 255, 255, 0.42);
     outline: none;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--ACCENT);
@@ -2140,19 +2152,14 @@ body.map-credits-visible #altitude_chart {
     background-color: var(--BGCOLOR1);
 }
 
-/* Search / Filters: one “page” card — segmented control fused to the panel below */
+/* Search / Filters: flat section with a segmented control on top (no nested card) */
 #tabs.ui-sidebar-tabs {
     margin-top: calc(8px * var(--SCALE));
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: var(--UI-RADIUS-PANEL);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-    background-color: var(--BGCOLOR2);
-}
-
-html.dark #tabs.ui-sidebar-tabs {
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    padding: 0; /* jQuery UI .ui-tabs adds .2em, which insets the tab buttons from the content */
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background-color: transparent;
 }
 
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
@@ -2162,16 +2169,17 @@ html.dark #tabs.ui-sidebar-tabs {
     box-sizing: border-box;
     list-style: none;
     margin: 0;
-    padding: calc(6px * var(--SCALE));
+    padding: 0;
     gap: calc(6px * var(--SCALE));
-    background-color: var(--BGCOLOR1);
+    background-color: transparent;
     border: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: calc(var(--UI-RADIUS-PANEL) - 1px) calc(var(--UI-RADIUS-PANEL) - 1px) 0 0;
+    border-radius: 0;
 }
 
-html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+/* jQuery UI's clearfix ::before/::after become flex items and add a gap at each end */
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav::before,
+#tabs.ui-sidebar-tabs > ul.ui-tabs-nav::after {
+    display: none;
 }
 
 /* jQuery UI themes paint <li> (ui-state-active / hover) — strip so only our <a> buttons show color */
@@ -2303,7 +2311,7 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
 #tabs.ui-sidebar-tabs .ui-tabs-panel {
     padding: 0;
     margin: 0;
-    background-color: var(--BGCOLOR2);
+    background-color: transparent;
     border: none;
     border-radius: 0;
 }
@@ -2365,7 +2373,7 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
 }
 
 #tabs.ui-sidebar-tabs.ui-tabs .ui-tabs-nav {
-    padding: calc(6px * var(--SCALE));
+    padding: 0;
     margin: 0;
     margin-bottom: 0;
 }
@@ -2375,7 +2383,7 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
 }
 
 #tabs.ui-sidebar-tabs > ul.ui-tabs-nav.ui-widget-header {
-    background: var(--BGCOLOR1);
+    background: transparent;
     border: none;
 }
 .ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
