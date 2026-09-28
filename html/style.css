@@ -2072,24 +2072,6 @@ html.dark .mobile_table_toggle.formButton:hover {
     z-index: 100;
 }
 
-/* Mobile sidebar only: X in a flow row above the table so it never covers the injected banner */
-.sidebar_close_mobile {
-    position: static;
-    right: auto;
-    top: auto;
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(128, 128, 128, 0.1);
-    border: none;
-    border-radius: 50%;
-    transition: background-color 0.2s, transform 0.2s;
-    z-index: auto;
-}
-
 .settingsCloseBox:hover,
 .infoblockCloseBox:hover,
 .layer-switcher-close-x:hover {
@@ -2097,14 +2079,8 @@ html.dark .mobile_table_toggle.formButton:hover {
     transform: scale(1.05);
 }
 
-.sidebar_close_mobile:hover {
-    background-color: rgba(128, 128, 128, 0.2);
-    transform: scale(1.05);
-}
-
 .settingsCloseBox::after,
 .infoblockCloseBox::after,
-.sidebar_close_mobile::after,
 .layer-switcher-close-x::after {
     content: '\2715'; /* Clean bold X */
     font-size: 18px;
@@ -2136,11 +2112,6 @@ html.dark .mobile_table_toggle.formButton:hover {
 .infoblockCloseBox::after {
     font-size: 16px;
     opacity: 0.7;
-}
-
-/* Mobile sidebar: full-width row above table (banner, stats, tabs sit below the X) */
-.sidebar-table-top-chrome {
-    display: none;
 }
 
 
@@ -3170,32 +3141,11 @@ input{
     }
 }
 
-/* Mobile sidebar close button — row above injected banner / table */
-@media screen and (max-width: 768px) {
-    /* close button in the free space at the right of the counts row, clear of the banner */
-    .sidebar-table-top-chrome {
-        display: flex;
-        position: absolute;
-        bottom: calc(8px * var(--SCALE));
-        right: calc(10px * var(--SCALE));
-        z-index: 2;
-    }
-    .sidebar-table-top-chrome .sidebar_close_mobile {
-        width: calc(30px * var(--SCALE));
-        height: calc(30px * var(--SCALE));
-    }
-
-    .sidebar_close_mobile {
-        display: flex !important;
-        background: rgba(128, 128, 128, 0.15); /* Slightly darker on mobile for visibility */
-    }
-}
-
 @media screen and (max-width: 768px) {
     /* Hide map buttons when mobile sidebar is open */
     body.mobile_sidebar_open #header_top,
     body.mobile_sidebar_open #header_side .button,
-    body.mobile_sidebar_open #header_side .svgButton:not(.sidebar_close_mobile),
+    body.mobile_sidebar_open #header_side .svgButton,
     body.mobile_sidebar_open .buttonContainer,
     .fullscreenButton { /* Hide fullscreen button on mobile entirely */
         display: none !important;

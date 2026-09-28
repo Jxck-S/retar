@@ -1906,16 +1906,6 @@ jQuery('#selected_altitude_geom1')
         },
     });
 
-    jQuery("#sidebar_close_mobile").click(function() {
-        if (toggles.sidebar_visible) {
-             toggles.sidebar_visible.toggle(false);
-        } else {
-             jQuery("#sidebar_container").hide();
-        }
-        if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
-            TAR.altitudeChart.syncMobileCollapse();
-    });
-
     // Mobile: with the sidebar panels open, the map shows between them; tapping it
     // returns to map mode (capture phase, so the tap doesn't also select a plane)
     document.getElementById('map_container').addEventListener('pointerdown', function (e) {
@@ -1923,7 +1913,13 @@ jQuery('#selected_altitude_geom1')
             return;
         e.stopPropagation();
         e.preventDefault();
-        jQuery("#sidebar_close_mobile").click();
+        if (toggles.sidebar_visible) {
+            toggles.sidebar_visible.toggle(false);
+        } else {
+            jQuery("#sidebar_container").hide();
+        }
+        if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+            TAR.altitudeChart.syncMobileCollapse();
     }, true);
 
     jQuery("#mobile_table_toggle").click(function() {
