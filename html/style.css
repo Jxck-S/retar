@@ -12,6 +12,12 @@
     --UI-RADIUS-CONTROL: calc(8px * var(--SCALE));
     /* Tiny marks: checkboxes, badges, slider tracks, map scale / zoom labels */
     --UI-RADIUS-SMALL: calc(4px * var(--SCALE));
+    /* Map buttons: neutral surface, text-coloured icons; accent only when switched on */
+    --MAPBTN-BG: var(--BGCOLOR1);
+    --MAPBTN-FG: var(--TXTCOLOR1);
+    --MAPBTN-HOVER: color-mix(in srgb, var(--TXTCOLOR1) 10%, var(--BGCOLOR1));
+    --MAPBTN-BORDER: color-mix(in srgb, var(--TXTCOLOR1) 16%, transparent);
+    --MAPBTN-SHADOW: 0 1px 3px rgba(0, 0, 0, 0.18);
 }
 
 html,
@@ -628,13 +634,16 @@ html.dark .filter-tips td {
     border-radius: var(--UI-RADIUS-CONTROL);
     
     /* Using shorthand to enforce all background properties at once and prevent overrides */
-    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>') no-repeat center !important;
+    background: var(--MAPBTN-BG) !important;
+    --icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>');
+    color: var(--MAPBTN-FG);
+    padding: 0;
     
     /* Smaller icon (20px) creates more "spacing" inside the 28px button */
     background-size: 20px !important;
 
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    border: none;
+    box-shadow: var(--MAPBTN-SHADOW);
+    border: 1px solid var(--MAPBTN-BORDER);
     cursor: pointer;
     transition: all 0.2s ease;
     
@@ -643,17 +652,7 @@ html.dark .filter-tips td {
 }
 
 .sidebar_button:hover {
-    background-color: var(--ACCENT-LIGHT) !important;
-}
-
-/* Dark mode adjustment if needed - assuming html.dark sets filters or we just let it be dark on dark? 
-   Ideally we want contrasting icon. 
-*/
-html.dark .sidebar_button {
-    /* Dark mode background logic - keep standard accent for consistency if it works, or slightly dimmer */
-    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>') no-repeat center !important;
-    background-size: 20px !important;
-    border-color: rgba(255,255,255,0.3);
+    background-color: var(--MAPBTN-HOVER) !important;
 }
 
 #toggle_sidebar_button.show_sidebar {
@@ -679,7 +678,8 @@ html.dark .sidebar_button {
     /* Shrink -> Restore / Minimize Sidebar. 
        Icon: Restore/Arrows In style.
     */
-    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>') no-repeat center !important;
+    background: var(--MAPBTN-BG) !important;
+    --icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>');
     background-size: 20px !important;
     transform: none;
     /* Default is hidden (since we start in normal map mode usually). 
@@ -701,7 +701,8 @@ html.dark .sidebar_button {
     /* Expand -> Full Screen / Maximize Sidebar. 
        Icon: Maximize/Arrows Out style to indicate full screen mode.
     */
-    background: var(--ACCENT) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>') no-repeat center !important;
+    background: var(--MAPBTN-BG) !important;
+    --icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>');
     background-size: 20px !important;
     transform: none;
     /* Default visible (normal state) */
@@ -818,8 +819,8 @@ html.dark .sidebar_button {
 
 .ol-zoom-in, .ol-zoom-out {
     background-image: none !important;
-    background-color: var(--ACCENT) !important;
-    color: white !important;
+    background-color: var(--MAPBTN-BG) !important;
+    color: var(--MAPBTN-FG) !important;
     width: calc(28px * var(--SCALE)) !important;
     height: calc(28px * var(--SCALE)) !important;
     border-radius: var(--UI-RADIUS-CONTROL) !important;
@@ -828,15 +829,14 @@ html.dark .sidebar_button {
     line-height: calc(28px * var(--SCALE)) !important; /* Center vertically */
     text-align: center !important;
     cursor: pointer !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--MAPBTN-SHADOW);
     transition: all 0.2s ease;
-    border: none !important;
+    border: 1px solid var(--MAPBTN-BORDER) !important;
     margin: calc(2px * var(--SCALE)) !important;
 }
 
 .ol-zoom-in:hover, .ol-zoom-out:hover {
-    background-color: var(--ACCENT-LIGHT) !important;
-    transform: translateY(-1px);
+    background-color: var(--MAPBTN-HOVER) !important;
 }
 
 .ol-zoom-in {
@@ -1397,7 +1397,10 @@ select.error, textarea.error, input.error {
 }
 
 .svgButton {
-    background-color: var(--ACCENT);
+    background-color: var(--MAPBTN-BG);
+    color: var(--MAPBTN-FG);
+    border: 1px solid var(--MAPBTN-BORDER);
+    box-sizing: border-box;
     width: calc( 28px * var(--SCALE));
     height: calc( 28px * var(--SCALE));
     cursor: pointer;
@@ -1405,18 +1408,18 @@ select.error, textarea.error, input.error {
     margin: calc( 2px * var(--SCALE));
     display: inline-block;
     border-radius: var(--UI-RADIUS-CONTROL);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.1s;
+    box-shadow: var(--MAPBTN-SHADOW);
+    transition: background-color 0.15s ease;
     vertical-align: top;
 }
 
-.svgButton:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.1);
+.svgButton:hover,
+.button:hover {
+    background-color: var(--MAPBTN-HOVER);
 }
 
 .fullscreenButton {
-    background-image: url('images/fullscreen.svg');
+    --icon: url('images/fullscreen.svg');
     background-size: 20px;
     background-repeat: no-repeat;
 }
@@ -1425,7 +1428,7 @@ select.error, textarea.error, input.error {
     width: calc(28px * var(--SCALE));
     height: calc(28px * var(--SCALE));
     cursor: pointer;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>');
+    --icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="white"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>');
 
     /* Center the image */
     background-size: 20px;
@@ -1436,34 +1439,22 @@ select.error, textarea.error, input.error {
     margin: calc(2px * var(--SCALE));
 
     /* Modern Look matching .button */
-    border-bottom: none;
     border-radius: var(--UI-RADIUS-CONTROL);
-    background-color: var(--ACCENT);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
     align-self: center;
-}
-
-.settingsCog:hover {
-    background-color: var(--ACCENT-LIGHT);
-    /* transform rule removed */
 }
 
 .layersButton {
     /* Layers icon: stroked stacked layers SVG provided by user */
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'></polygon><polyline points='2 17 12 22 22 17'></polyline><polyline points='2 12 12 17 22 12'></polyline></svg>");
+    --icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'></polygon><polyline points='2 17 12 22 22 17'></polyline><polyline points='2 12 12 17 22 12'></polyline></svg>");
     background-size: 20px;
     background-position: center;
     background-repeat: no-repeat;
-}
-.layersButton:hover {
-    background-color: var(--ACCENT-LIGHT);
 }
 
 .locationButton {
     /* Target style: Filled center, Ring, 4 Ticks */
     /* Adjusted spacing: Inner radius 3 (was 4) to increase gap to ring (r=7) */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3' fill='white'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='white' stroke-width='2'/%3E%3Cline x1='12' y1='3' x2='12' y2='5' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='12' y1='19' x2='12' y2='21' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='3' y1='12' x2='5' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='19' y1='12' x2='21' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3' fill='white'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='white' stroke-width='2'/%3E%3Cline x1='12' y1='3' x2='12' y2='5' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='12' y1='19' x2='12' y2='21' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='3' y1='12' x2='5' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3Cline x1='19' y1='12' x2='21' y2='12' stroke='white' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
     background-size: 20px;
     background-repeat: no-repeat;
     background-position: center;
@@ -1472,35 +1463,25 @@ select.error, textarea.error, input.error {
 .militaryButton {
     /* Military Rank style: Star + Chevrons (User Reference) */
     /* Hollow Star (stroke) to match image, Thick Chevrons for visibility */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Star (Top) --%3E%3Cpolygon points='12 1 14.5 6 20 6 16 9.5 17.5 14.5 12 12 6.5 14.5 8 9.5 4 6 9.5 6' /%3E%3C!-- Chevrons (Bottom) --%3E%3Cpolyline points='4 15 12 19 20 15' /%3E%3Cpolyline points='4 19 12 23 20 19' /%3E%3C/svg%3E");
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Star (Top) --%3E%3Cpolygon points='12 1 14.5 6 20 6 16 9.5 17.5 14.5 12 12 6.5 14.5 8 9.5 4 6 9.5 6' /%3E%3C!-- Chevrons (Bottom) --%3E%3Cpolyline points='4 15 12 19 20 15' /%3E%3Cpolyline points='4 19 12 23 20 19' /%3E%3C/svg%3E");
     background-size: 20px;
     background-repeat: no-repeat;
     background-position: center;
-}
-
-/* Active state for Military button (when ON) */
-#U.activeButton {
-    /* Keep Red Background (var(--ACCENT)) to match other buttons */
-    /* Switch to Black Icon to indicate active state */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3C!-- Star (Top) --%3E%3Cpolygon points='12 1 14.5 6 20 6 16 9.5 17.5 14.5 12 12 6.5 14.5 8 9.5 4 6 9.5 6' /%3E%3C!-- Chevrons (Bottom) --%3E%3Cpolyline points='4 15 12 19 20 15' /%3E%3Cpolyline points='4 19 12 23 20 19' /%3E%3C/svg%3E");
-}
-#U.activeButton:hover {
-    /* Removing custom hover bg to match standard button behavior */
 }
 
 .replayButton {
-    background-image: url('images/replay-white.svg');
+    --icon: url('images/replay-white.svg');
     background-size: 20px;
     background-repeat: no-repeat;
     background-position: center;
-}
-#RP.activeButton {
-    filter: invert(1);
 }
 
 
 .button {
-    background-color: var(--ACCENT);
+    background-color: var(--MAPBTN-BG);
+    color: var(--MAPBTN-FG);
+    border: 1px solid var(--MAPBTN-BORDER);
+    box-sizing: border-box;
     width: calc(28px * var(--SCALE));
     height: calc(28px * var(--SCALE));
     border-radius: var(--UI-RADIUS-CONTROL);
@@ -1509,7 +1490,8 @@ select.error, textarea.error, input.error {
     cursor: pointer;
     text-align: center;
     background-clip: padding-box;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--MAPBTN-SHADOW);
+    transition: background-color 0.15s ease;
     vertical-align: top;
 }
 
@@ -1527,16 +1509,53 @@ select.error, textarea.error, input.error {
 {
     font-weight: bold;
     font-size: calc( 15px * var(--SCALE));
-    line-height:  calc( 27px * var(--SCALE));
+    line-height:  calc( 26px * var(--SCALE));
     text-align: center;
     margin: calc( 5px * var(--SCALE));
 }
 
-.activeButton {
- color:#000
+/* toggled on: the only place map buttons use the accent colour */
+.button.activeButton,
+.svgButton.activeButton,
+.button.activeButton:hover,
+.svgButton.activeButton:hover {
+    background-color: var(--ACCENT);
+    border-color: transparent;
+    color: #fff;
 }
-.inActiveButton {
- color:#fff
+
+/* Icons are masks filled with the text colour, so one icon works on the
+   light / dark surface and turns white on the accent when switched on */
+.militaryButton,
+.locationButton,
+.layersButton,
+.settingsCog,
+.fullscreenButton,
+.replayButton,
+.sidebar_button {
+    background-image: none;
+}
+
+.militaryButton::before,
+.locationButton::before,
+.layersButton::before,
+.settingsCog::before,
+.fullscreenButton::before,
+.replayButton::before,
+.sidebar_button::before {
+    content: '';
+    display: block;
+    width: calc(20px * var(--SCALE));
+    height: calc(20px * var(--SCALE));
+    margin: calc(3px * var(--SCALE)) auto 0;
+    background-color: currentColor;
+    -webkit-mask: var(--icon) center / contain no-repeat;
+    mask: var(--icon) center / contain no-repeat;
+    pointer-events: none;
+}
+
+.sidebar_button::before {
+    margin: 0 auto;
 }
 
 #highlighted_infoblock {
