@@ -2780,9 +2780,20 @@ input{
     vertical-align: middle;
 }
 
-/* Callsign + operator logo stay one line; logo does not wrap under */
-.highlightedTitle > .alignCS .identLarge {
+/* Title block: callsign (+ airline under it) with operator logo centered beside
+   the pair. Block-level flex so no inline line-box gap sits under the callsign. */
+.highlightedTitle > .alignCS {
+    display: flex;
+}
+
+.callsignStack {
+    display: flex;
+    flex-direction: column;
     flex: 0 1 auto;
+    min-width: 0;
+}
+
+.highlightedTitle > .alignCS .identLarge {
     min-width: 0;
 }
 
@@ -2790,9 +2801,69 @@ input{
     flex: 0 0 auto;
 }
 
-/* Extra gap before hex row when a logo is shown (share link row breathing room) */
-.highlightedTitle > .alignCS:has(.identOppIcon img) + #selected_icao {
-    margin-top: calc(8px * var(--SCALE));
+/* Hover box only: callsign + logo on one row (logo shrunk to the callsign's
+   height), airline name full width underneath both. The stack wrapper is
+   flattened so callsign and airline become grid items directly. Items spanning
+   the 1fr track don't size the auto tracks, so a long airline name can't push
+   the logo away from the callsign. */
+#highlighted_infoblock .highlightedTitle > .alignCS {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    column-gap: calc(6px * var(--SCALE));
+    row-gap: 0;
+    width: 100%;
+}
+
+#highlighted_infoblock .callsignStack {
+    display: contents;
+}
+
+#highlighted_infoblock .alignCS .identLarge {
+    grid-row: 1;
+    grid-column: 1;
+}
+
+#highlighted_infoblock .alignCS .identOppIcon {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: start;
+    min-width: 0;
+}
+
+#highlighted_infoblock .identOppIcon img {
+    max-height: calc(24px * var(--SCALE));
+    max-width: 100%;
+    padding: 2px;
+    box-sizing: border-box;
+}
+
+#highlighted_infoblock .alignCS .callsignAirline {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+/* Airline name (from callsign 3-letter prefix) tucked under the callsign */
+.callsignAirline {
+    font-size: calc(12px * var(--SCALE));
+    line-height: calc(14px * var(--SCALE));
+    font-style: italic;
+    color: var(--TXTCOLOR2);
+    /* Long names wrap beside the operator logo instead of truncating;
+       capped at 2 lines so extreme names can't blow up the title block. */
+    overflow-wrap: break-word;
+    text-wrap: balance;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+}
+
+/* One consistent gap between the callsign block and the hex / route row */
+.highlightedTitle > .alignCS + * {
+    margin-top: calc(6px * var(--SCALE));
 }
 
 #selected_icao {
