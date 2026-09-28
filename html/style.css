@@ -4,14 +4,14 @@
     --FS1: calc(10px * var(--SCALE));
     --FS2: calc(13px * var(--SCALE));
     --FS3: calc(17px * var(--SCALE));
-    /* Settings/Layers modals used literal 10px — only for large surfaces */
-    --UI-RADIUS-PANEL: 10px;
-    /* Map/header buttons: keep visibly squarer than the 10px panels (was 8px) */
-    --UI-RADIUS-CONTROL: calc(5px * var(--SCALE));
-    /* Search, filters, column chips, tabs — tighter than panel corners */
-    --UI-RADIUS-TIGHT: calc(4px * var(--SCALE));
-    /* Tab pills: outer top corners nest inside #tabs panel radius minus nav padding (~6px*SCALE) */
-    --UI-RADIUS-TABS-OUTER: max(3px, calc(var(--UI-RADIUS-PANEL) - 6px * var(--SCALE) - 1px));
+    /* Corner radius: one value per role, used everywhere (no pills, no squares
+       except flush edges; circles only for dots, thumbs and round icon buttons) */
+    /* Panels, cards, popovers, floating boxes */
+    --UI-RADIUS-PANEL: 12px;
+    /* Anything you click or type in: buttons, map buttons, tabs, inputs, chips, images */
+    --UI-RADIUS-CONTROL: calc(8px * var(--SCALE));
+    /* Tiny marks: checkboxes, badges, slider tracks, map scale / zoom labels */
+    --UI-RADIUS-SMALL: calc(4px * var(--SCALE));
 }
 
 html,
@@ -37,6 +37,18 @@ select {
     font-size: var(--FS2);
     white-space: nowrap;
     cursor: default;
+    /* no gaps between cells: header and each row read as one bar with rounded ends */
+    border-spacing: 0 calc(2px * var(--SCALE));
+}
+
+#planesTable tr > td:first-child {
+    border-top-left-radius: var(--UI-RADIUS-SMALL);
+    border-bottom-left-radius: var(--UI-RADIUS-SMALL);
+}
+
+#planesTable tr > td:last-child {
+    border-top-right-radius: var(--UI-RADIUS-SMALL);
+    border-bottom-right-radius: var(--UI-RADIUS-SMALL);
 }
 
 #layout_container {
@@ -170,7 +182,7 @@ select {
     color: var(--TXTCOLOR1);
     background-color: var(--BGCOLOR1);
     border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 999px;
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: calc(4px * var(--SCALE)) calc(10px * var(--SCALE));
     cursor: pointer;
     transition: background-color 0.12s, border-color 0.12s;
@@ -219,7 +231,7 @@ select {
     top: 50%;
     height: 4px;
     margin-top: -2px;
-    border-radius: 2px;
+    border-radius: var(--UI-RADIUS-SMALL);
 }
 
 .filter-range-track {
@@ -326,7 +338,7 @@ select {
     color: var(--TXTCOLOR2);
     background-color: var(--BGCOLOR1);
     border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     cursor: pointer;
     padding: 0;
 }
@@ -658,7 +670,7 @@ html.dark .sidebar_button {
     bottom: 30px;
     left: 8px;
     padding: 2px 4px;
-    border-radius: 4px;
+    border-radius: var(--UI-RADIUS-SMALL);
     font-size: 10px;
     background: var(--ol-partial-background-color);
     color: var(--ol-foreground-color);
@@ -735,6 +747,20 @@ html.dark .sidebar_button {
 .ol-control button {
     outline: none;
     z-index: 999;
+    border-radius: var(--UI-RADIUS-CONTROL);
+}
+
+/* OpenLayers ships 2px / 4px corners; use ours */
+.ol-control {
+    border-radius: var(--UI-RADIUS-CONTROL);
+}
+
+.ol-scale-line {
+    border-radius: var(--UI-RADIUS-SMALL);
+}
+
+.ol-attribution.ol-uncollapsible {
+    border-radius: var(--UI-RADIUS-CONTROL) 0 0 0;
 }
 
 .ol-zoom-in, .ol-zoom-out {
@@ -839,6 +865,7 @@ html.dark .sidebar-notice-amber {
     width: 50%;
     background-color: var(--BGCOLOR1);
     padding: calc( 5px * var(--SCALE));
+    border-radius: var(--UI-RADIUS-CONTROL);
 }
 
 #js_error {
@@ -848,7 +875,7 @@ html.dark .sidebar-notice-amber {
     background-color: rgba(33, 33, 33, 0.95);
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
@@ -882,18 +909,16 @@ html.dark .sidebar-notice-amber {
 }
 
 
+/* colour lives on the cells so the header bar gets the rounded row ends */
 .aircraft_table_header {
-    background-color: var(--ACCENT);
     color: #FFFFFF;
     cursor: pointer;
     position: sticky;
     top: 0;
     z-index: 10;
-    box-shadow:
-        0 -2px 2px -1px rgba(0, 0, 0, 0.5),
-        0 2px 2px -1px rgba(0, 0, 0, 0.7);
 }
 .aircraft_table_header td {
+    background-color: var(--ACCENT);
     font-size: smaller;
     padding: calc( 5px * var(--SCALE));
     text-align: center;
@@ -1012,7 +1037,7 @@ html.dark .infoBlockTitleText {
     color:var(--TXTCOLOR2);
     background-color: var(--BGCOLOR1);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 0 4px;
 }
 .searchInput {
@@ -1021,7 +1046,7 @@ html.dark .infoBlockTitleText {
     color: var(--TXTCOLOR2);
     background-color: var(--BGCOLOR1);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 0 4px;
     box-sizing: border-box;
 }
@@ -1031,7 +1056,7 @@ html.dark .infoBlockTitleText {
     color: var(--TXTCOLOR2);
     background-color: rgba(128, 128, 128, 0.35);
     border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 4px 10px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1484,7 +1509,8 @@ select.error, textarea.error, input.error {
     top: calc( 60px * var(--SCALE));
     min-width:  calc(132px * var(--SCALE));
     padding-right: calc( 5px * var(--SCALE));
-    box-shadow: calc( 4px * var(--SCALE)) calc( 4px * var(--SCALE)) calc( 10px * var(--SCALE)) #444444;
+    border-radius: var(--UI-RADIUS-PANEL);
+    box-shadow: 0 calc( 4px * var(--SCALE)) calc( 16px * var(--SCALE)) rgba(0, 0, 0, 0.3);
     cursor: pointer;
     z-index: 9999;
     display: none;
@@ -1636,6 +1662,7 @@ html.dark .mobile_table_toggle.formButton:hover {
 
 
 .legendTitle {
+    border-radius: var(--UI-RADIUS-SMALL);
     line-height: calc( 19px * var(--SCALE));
     padding-right: calc( 3px * var(--SCALE));
     padding-left: calc( 3px * var(--SCALE));
@@ -1747,7 +1774,7 @@ html.dark .mobile_table_toggle.formButton:hover {
     cursor: pointer;
     background-color: transparent;
     border: 2px solid rgba(128, 128, 128, 0.5);
-    border-radius: 3px;
+    border-radius: var(--UI-RADIUS-SMALL);
     position: relative;
     transition: all 0.2s ease;
     background-image: none;
@@ -1832,7 +1859,7 @@ html.dark .mobile_table_toggle.formButton:hover {
 
 .settingsSection {
     border: 1px solid rgba(128, 128, 128, 0.2);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     margin-bottom: 6px;
     overflow: hidden;
 }
@@ -1907,7 +1934,7 @@ html.dark .mobile_table_toggle.formButton:hover {
     cursor: pointer;
     background-color: transparent;
     border: 2px solid rgba(128, 128, 128, 0.5);
-    border-radius: 3px;
+    border-radius: var(--UI-RADIUS-SMALL);
     position: relative;
     transition: all 0.2s ease;
     background-image: none;
@@ -2086,7 +2113,7 @@ body.map-credits-visible #altitude_chart {
     text-decoration: none;
     padding: calc( 4px * var(--SCALE));
     line-height: calc( 22px * var(--SCALE));
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
 }
 .bottom-info-container {
     padding-top: calc( 10px * var(--SCALE));
@@ -2195,19 +2222,6 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav {
     transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Outer tab corners follow the panel radius; inner meeting edge stays CONTROL (must come after rule above) */
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:first-child > a.ui-tabs-anchor {
-    border-radius: var(--UI-RADIUS-TABS-OUTER) var(--UI-RADIUS-CONTROL) var(--UI-RADIUS-CONTROL) var(--UI-RADIUS-TABS-OUTER) !important;
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:last-child > a.ui-tabs-anchor {
-    border-radius: var(--UI-RADIUS-CONTROL) var(--UI-RADIUS-TABS-OUTER) var(--UI-RADIUS-TABS-OUTER) var(--UI-RADIUS-CONTROL) !important;
-}
-
-#tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li:only-child > a.ui-tabs-anchor {
-    border-radius: var(--UI-RADIUS-TABS-OUTER) !important;
-}
-
 /* jQuery UI sets aria-selected on <li>, not on <a> — scope inactive dark styles so they never override accent */
 html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li[aria-selected="false"] > a.ui-tabs-anchor {
     color: var(--TXTCOLOR1) !important;
@@ -2312,7 +2326,7 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
     font-size: calc(15px * var(--SCALE));
     font-weight: bold;
     color: var(--TXTCOLOR1);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     margin-bottom: 4px;
     transition: background-color 0.2s;
 }
@@ -2365,7 +2379,7 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
     border: none;
 }
 .ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
 }
 
 .ui-widget-content .ui-selectable .ui-selected {
@@ -2393,7 +2407,7 @@ html.dark #tabs.ui-sidebar-tabs > ul.ui-tabs-nav > li.ui-state-active > a.ui-tab
     padding: 6px 4px;
     /* Very compact padding */
     border: 1px solid var(--ACCENT);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     /* Rounded corners */
     background-color: var(--BGCOLOR2);
     text-align: center;
@@ -2478,7 +2492,7 @@ a.aircraft_photo_link {
     max-width: 72%;
     margin: 2px auto 0 auto;
     background: #fff;
-    border-radius: 4px;
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 6px 10px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -2541,7 +2555,7 @@ a.ui-button:active,
 
 .ui-slider {
     background-color: rgba(128, 128, 128, 0.25);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     height: 6px;
     border: none;
     margin: 8px 4px 14px;
@@ -2570,7 +2584,7 @@ a.ui-button:active,
     background-color: rgba(128, 128, 128, 0.15);
     color: var(--TXTCOLOR2);
     border: 1px solid rgba(128, 128, 128, 0.3);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 0 10px;
     font-size: 13px;
     line-height: calc(26px * var(--SCALE));
@@ -2625,7 +2639,7 @@ a.ui-button:active,
     background-color: rgba(128, 128, 128, 0.4);
     color: var(--TXTCOLOR2);
     border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 6px 14px;
     font-size: 13px;
     font-family: inherit;
@@ -2731,7 +2745,7 @@ input{
     height: auto;
     width: auto;
     background: white;
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 3px;
     /* Total height: 26px + 6px = 32px */
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
@@ -2905,7 +2919,7 @@ input{
     font-size: calc(14px * var(--SCALE));
     font-weight: 500;
     color: var(--TXTCOLOR1);
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     transition: all 0.2s ease;
     box-sizing: border-box;
     /* ensure padding doesn't overflow */
@@ -2957,7 +2971,7 @@ input{
 .dbFlagBadge {
     display: inline-block;
     padding: 2px 6px;
-    border-radius: 2px;
+    border-radius: var(--UI-RADIUS-SMALL);
 }
 
 .dbFlagBadge,
@@ -2995,7 +3009,7 @@ input{
     margin-right: auto;
     max-width: 70%;
     background: white;
-    border-radius: var(--UI-RADIUS-TIGHT);
+    border-radius: var(--UI-RADIUS-CONTROL);
     padding: 1px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
@@ -3264,7 +3278,7 @@ body.mobile_sidebar_open .layer-switcher {
     cursor: pointer;
     background-color: transparent;
     border: 2px solid rgba(128, 128, 128, 0.5);
-    border-radius: 3px;
+    border-radius: var(--UI-RADIUS-SMALL);
     position: relative;
     transition: all 0.2s ease;
 }
