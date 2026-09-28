@@ -34,7 +34,10 @@
       <div id="highlighted_infoblock" style="pointer-events: none">
         <div class="highlightedTitle infoBlockSection">
           <div class="alignCS">
-            <span class="identLarge"><span id="highlighted_callsign">n/a</span></span>
+            <div class="callsignStack">
+              <span class="identLarge"><span id="highlighted_callsign">n/a</span></span>
+              <div class="callsignAirline hidden" id="highlighted_airline"></div>
+            </div>
             <div id="highlighted_opp_icon" class="identOppIcon"></div>
           </div>
           <div>
@@ -51,10 +54,6 @@
             <div class="infoData"><span id="highlighted_icaotype">n/a</span></div>
           </div>
           <div class="rSpacer">
-          </div>
-          <div>
-            <!-- <div class="infoHeading"><span>Airline: </span></div> -->
-            <div class="infoHeading"><span id="highlighted_airline">n/a</span></div>
           </div>
           <div>
               <div id="routeRowHighlight" class="infoHeading"><span title="Reported flight origin and destination according to adsbdb.com">Route</span>:</div>
@@ -90,7 +89,10 @@
 
           <div class="highlightedTitle infoBlockSection">
             <div class="alignCS">
-              <span class="identLarge" title="Callsign: Typically the air traffic control callsign or the aircraft's registration, as entered into the transponder by the pilot" id="selected_callsign">n/a</span>
+              <div class="callsignStack">
+                <span class="identLarge" title="Callsign: Typically the air traffic control callsign or the aircraft's registration, as entered into the transponder by the pilot" id="selected_callsign">n/a</span>
+                <div class="callsignAirline hidden" id="selected_airline"></div>
+              </div>
               <div id="selected_opp_icon" class="identOppIcon"></div>
             </div>
             <div id="selected_icao" title="ICAO hex ID: The aircraft's unique ICAO identification number shown in hexadecimal format as set in the aircrafts transponder (can be wrong, we will still display the data with the wrong hex)">
@@ -169,7 +171,7 @@
                   <div class="aircraft_media_panel">
                     <div id="selected_photo" class="aircraft_media_frame" title="Aircraft photo or type silhouette"></div>
                     <div id="copyrightInfo"></div>
-                    <div title="Airline Banner" id="selected_airline_banner"></div>
+                    <div id="selected_airline_banner"></div>
                   </div>
                 </td>
               </tr>
@@ -197,14 +199,6 @@
                   <div class="infoData">
                     <span title="Country of registration" id="selected_country">n/a</span>
                   </div>
-                </td>
-              </tr>
-              <tr id="selected_airline_row" class="hidden">
-                <td>
-                  <div class="infoHeading">
-                    <span title="Airline/Operator name for the active callsign">Airline: </span>
-                  </div>
-                  <div class="infoData"><span id="selected_airline" title="n/a">n/a</span></div>
                 </td>
               </tr>
               <tr>
