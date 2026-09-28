@@ -15,6 +15,13 @@
 // plane table and in the detailed plane info. Valid values are
 // "nautical", "metric", or "imperial".
 //DisplayUnits = "nautical";
+// Override DisplayUnits for a single quantity (altitudeUnits, verticalRateUnits,
+// speedUnits, distanceUnits), same values as DisplayUnits. The Units dropdown in
+// the settings doesn't affect overridden quantities.
+// e.g. metric everywhere except altitude in feet:
+//DisplayUnits = "metric";
+//altitudeUnits = "nautical";
+//verticalRateUnits = "nautical";
 
 // -- Map settings ----------------------------------------
 // These settings are overridden by any position information
@@ -171,6 +178,10 @@ MapType_tar1090 = "osm";
 //monochromeTracks = "#000000";
 //
 
+// draw a dashed line from the selected aircraft in its direction of travel
+// covering this many minutes at the current ground speed, 0 disables
+// headingLineMinutes = 5;
+
 // altitudeChartDefaultState = true;
 
 // These settings control the coloring of aircraft by altitude.
@@ -282,6 +293,18 @@ PageDescription = "ADS-B plane tracking interface";
 // labelFamily = 'Tahoma, Verdana, Helvetica, sans-serif';
 // labelScale = 1;
 
+// show the current map zoom level above the scale line
+// showZoomLevel = true;
+
+// Default state of the U / T / L / O / K buttons on page load.
+// L / O / K are remembered by the browser once clicked, the default only applies before that.
+// O has no visible effect unless labels (L) are on.
+// defaultMilitaryOnly = false;    // U: only show military aircraft
+// defaultAllTracks = false;       // T: show all tracks
+// defaultLabels = false;          // L: aircraft labels
+// defaultExtendedLabels = 0;      // O: label extension, 0 - 3
+// defaultTrackLabels = false;     // K: track labels
+
 // globalScale = 1;
 // userScale = 1;
 // iconScale = 1;
@@ -306,6 +329,9 @@ PageDescription = "ADS-B plane tracking interface";
 
 // show links to various registration websites (not all countries)
 // registrationLinks = true;
+// custom link for the registration, overrides the per country links (requires registrationLinks)
+// placeholders: REGISTRATION, ICAO, TYPE (type code, may be empty), values are URL-encoded
+// registrationLinkTemplate = 'https://duckduckgo.com/?q=TYPE+REGISTRATION&iax=images&ia=images';
 
 // enable callsign-based airline lookup from the operators database
 // airlineLookup = true;

@@ -1177,7 +1177,7 @@ function earlyInitPage() {
         loStore['sidebar_visible'] = "true";
     }
 
-    if (usp.has('allTracks')) {
+    if (usp.has('allTracks') || defaultAllTracks) {
         SelectedAllPlanes = true;
         buttonActive('#T', SelectedAllPlanes);
     }
@@ -1360,7 +1360,8 @@ function earlyInitPage() {
     }
 
     initLabelConfig();
-    if (loStore['trackLabels'] == "true" || usp.has('trackLabels')) {
+    if (loStore['trackLabels'] == "true" || usp.has('trackLabels')
+        || (loStore['trackLabels'] == undefined && defaultTrackLabels)) {
         toggleTrackLabels();
     }
     if (loStore['tableInView'] == "true" || usp.has('tableInView')) {
@@ -2705,27 +2706,30 @@ function startPage() {
     // that is a closed circle on the sphere such that the
     // great circle distance from 'center' to each point is
     // 'radius' meters
-    utils.make_geodesic_circle = function (center, radius, points) {
-        const angularDistance = radius / 6378137.0;
-        const lon1 = center[0] * Math.PI / 180.0;
-        const lat1 = center[1] * Math.PI / 180.0;
+    // Point 'distance' meters from 'start' ([lon, lat]) along 'bearing' (radians) on the sphere
+    utils.geodesic_destination = function (start, bearing, distance) {
+        const angularDistance = distance / 6378137.0;
+        const lon1 = start[0] * Math.PI / 180.0;
+        const lat1 = start[1] * Math.PI / 180.0;
 
+        let lat2 = Math.asin(Math.sin(lat1) * Math.cos(angularDistance) +
+            Math.cos(lat1) * Math.sin(angularDistance) * Math.cos(bearing));
+        let lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(lat1),
+            Math.cos(angularDistance) - Math.sin(lat1) * Math.sin(lat2));
+
+        return [lon2 * 180.0 / Math.PI, lat2 * 180.0 / Math.PI];
+    }
+
+    utils.make_geodesic_circle = function (center, radius, points) {
         let geom;
         for (let i = 0; i <= points; ++i) {
             const bearing = i * 2 * Math.PI / points;
-
-            let lat2 = Math.asin(Math.sin(lat1) * Math.cos(angularDistance) +
-                Math.cos(lat1) * Math.sin(angularDistance) * Math.cos(bearing));
-            let lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(lat1),
-                Math.cos(angularDistance) - Math.sin(lat1) * Math.sin(lat2));
-
-            lat2 = lat2 * 180.0 / Math.PI;
-            lon2 = lon2 * 180.0 / Math.PI;
+            const point = utils.geodesic_destination(center, bearing, radius);
 
             if (!geom)
-                geom = new ol.geom.LineString([[lon2, lat2]]);
+                geom = new ol.geom.LineString([point]);
             else
-                geom.appendCoordinate([lon2, lat2]);
+                geom.appendCoordinate(point);
         }
         return geom;
     }
@@ -2931,7 +2935,7 @@ function ol_map_init() {
         }),
         controls: [new ol.control.Zoom({delta: 1, duration: 0, target: 'map_canvas',}),
             new ol.control.Attribution({collapsed: true}),
-            new ol.control.ScaleLine({units: DisplayUnits})
+            new ol.control.ScaleLine({units: units_for('distance', DisplayUnits)})
         ],
         interactions: new ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false,}),
         maxTilesLoading: 4,
@@ -2941,6 +2945,8 @@ function ol_map_init() {
     webglInit();
     console.timeEnd('webglInit');
 
+    if (showZoomLevel)
+        jQuery('#zoomLevel').show();
 
     let foundType = false;
     ol.control.LayerSwitcher.forEachRecursive(layers_group, function(lyr) {
@@ -2992,6 +2998,8 @@ function ol_map_init() {
 
             lyr.on('change:visible', function(evt) {
                 loStore['layer_' + evt.target.get('name')] = evt.target.getVisible();
+                if (evt.target.get('name') == 'aiscatcher' && loadFinished)
+                    refreshFilter();
             });
         }
     })
@@ -4260,7 +4268,9 @@ function refreshSelected() {
     if (selected.wd != null && selected.ws != null) {
         jQuery('#selected_wd').updateText(format_track_brief(selected.wd, true));
         jQuery('#selected_ws').updateText(format_speed_long(selected.ws, DisplayUnits));
-    } else if (!globeIndex && magResult && selected.gs != null && selected.tas != null && selected.track != null && selected.mag_heading != null) {
+    } else if (0 && !globeIndex && magResult && selected.gs != null && selected.tas != null && selected.track != null && selected.mag_heading != null) {
+        // disable calculating wind in the webinterface, it can be VERY inaccurate
+        // use readsb if you want wind speeds :)
 
         const trk = (Math.PI / 180) * selected.track;
         const hdg = (Math.PI / 180) * heading;
@@ -5610,7 +5620,7 @@ function adjustInfoBlock() {
     }
     jQuery('#selected_infoblock').css("width", infoBlockWidth * globalScale + 'px');
 
-    jQuery('.ol-scale-line').css('left', (infoBlockWidth * globalScale + 8) + 'px');
+    jQuery('.ol-scale-line, #zoomLevel').css('left', (infoBlockWidth * globalScale + 8) + 'px');
     jQuery('#replayBar').css('left', (infoBlockWidth * globalScale + 8) + 'px');
 
     if (SelectedPlane && toggles['enableInfoblock'].state) {
@@ -5636,7 +5646,7 @@ function adjustInfoBlock() {
             jQuery("#sidebar_container").css('margin-left', '0');
         //jQuery('#sidebar_canvas').css('margin-bottom', 0);
 
-        jQuery('.ol-scale-line').css('left', '8px');
+        jQuery('.ol-scale-line, #zoomLevel').css('left', '8px');
         jQuery('#replayBar').css('left', '0px');
         jQuery('#credits').css('bottom', '');
         jQuery('#credits').css('left', '');
@@ -5713,7 +5723,7 @@ function onDisplayUnitsChanged(e) {
     // Reset map scale line units
     OLMap.getControls().forEach(function(control) {
         if (control instanceof ol.control.ScaleLine) {
-            control.setUnits(DisplayUnits);
+            control.setUnits(units_for('distance', DisplayUnits));
         }
     });
 
@@ -5914,7 +5924,7 @@ function invertMap(evt){
     }
 
     function createLegendSVG() {
-        const isMetric = DisplayUnits === 'metric';
+        const isMetric = units_for('altitude', DisplayUnits) === 'metric';
         const padX = 18;
         const innerW = 920;
         const W = innerW + 2 * padX;
@@ -6089,8 +6099,9 @@ function initLabelConfig() {
         g.labelConfig = Object.assign({}, defaults);
     }
 
-    // Also respect legacy enableLabels
-    if (loStore['enableLabels'] == 'true') {
+    // Also respect legacy enableLabels, URL param and config default (defaultLabels)
+    if (loStore['enableLabels'] == 'true' || usp.has('enableLabels')
+        || (!saved && loStore['enableLabels'] == undefined && defaultLabels)) {
         g.labelConfig.enabled = true;
     }
 
@@ -6374,14 +6385,17 @@ function updateAltFilter() {
         enabled = true;
 
     if (!enabled) {
+        // no altitude filter: leave min/max unset, otherwise altFiltered() hides
+        // everything without an altitude (AIS ships, aircraft without altitude)
         PlaneFilter.enabled = false;
         PlaneFilter.minAltitude = undefined;
         PlaneFilter.maxAltitude = undefined;
+        return;
     }
 
     PlaneFilter.enabled = enabled;
 
-    if (DisplayUnits == "metric") {
+    if (units_for('altitude', DisplayUnits) == "metric") {
         PlaneFilter.minAltitude = minAltitude * 3.2808;
         PlaneFilter.maxAltitude = maxAltitude * 3.2808;
     } else {
@@ -6816,6 +6830,9 @@ function changeZoom(init) {
     g.zoomLvl = OLMap.getView().getZoom();
 
     checkScale();
+
+    if (showZoomLevel)
+        jQuery('#zoomLevel').updateText('zoom ' + g.zoomLvl.toFixed(1));
 
     // small zoomstep, no need to change aircraft scaling
     if (!init && Math.abs(g.zoomLvl-g.zoomLvlCache) < 0.4)
@@ -7366,7 +7383,7 @@ function processURLParams(){
         OLMap.getView().setZoom(zoom);
     }
 
-    if (usp.has('mil'))
+    if (usp.has('mil') || defaultMilitaryOnly)
         toggleMilitary();
 
     if (usp.has('airport')) {
@@ -8363,9 +8380,10 @@ function drawSiteCircle() {
         circleColor = i < SiteCirclesColors.length ? SiteCirclesColors[i] : circleColor;
 
         let conversionFactor = 1000.0;
-        if (DisplayUnits === "nautical") {
+        const distUnits = units_for('distance', DisplayUnits);
+        if (distUnits === "nautical") {
             conversionFactor = 1852.0;
-        } else if (DisplayUnits === "imperial") {
+        } else if (distUnits === "imperial") {
             conversionFactor = 1609.0;
         }
 
@@ -9859,10 +9877,15 @@ function setAutoselect() {
     autoSelectClosest();
 }
 function registrationLink(plane) {
-    
+    if (registrationLinkTemplate) {
+        const values = { REGISTRATION: plane.registration, ICAO: plane.icao, TYPE: plane.icaoType || '' };
+        return registrationLinkTemplate.replace(/REGISTRATION|ICAO|TYPE/g, (m) => encodeURIComponent(values[m]));
+    }
+
     const countryLinks = {
         Brazil: (reg) => `https://aeronaves.anac.gov.br/aeronaves/cons_rab_resposta_en.asp?textMarca=${reg}`,
-        Australia: (reg) => `https://www.casa.gov.au/search-centre/aircraft-register?reg=${reg.replace(/^VH-/, '')}`,
+        // CASA only lists VH- regs (not RAAus 24-xxxx or ADF A56-xxx)
+        Australia: (reg) => reg.startsWith('VH-') ? `https://www.casa.gov.au/search-centre/aircraft-register?reg=${reg.slice(3)}` : '',
         Jamaica: (reg) => `https://www.jcaa.gov.jm/aircraft-registry/${reg}`,
         Montenegro: (reg) => `https://www.caa.me/en/registri?field_registarska_oznaka1_value=${reg}`,
         Norway: (reg) => `https://www.luftfartstilsynet.no/aktorer/norges-luftfartoyregister/registrerte-luftfartoy/?mark=${reg}`,
