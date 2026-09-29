@@ -18,6 +18,13 @@
     --MAPBTN-HOVER: color-mix(in srgb, var(--TXTCOLOR1) 10%, var(--BGCOLOR1));
     --MAPBTN-BORDER: color-mix(in srgb, var(--TXTCOLOR1) 16%, transparent);
     --MAPBTN-SHADOW: 0 1px 3px rgba(0, 0, 0, 0.18);
+    /* Map button groups: fused stacks split by hairlines (see .mapBtnGroup) */
+    --MAPBTN-SIZE: calc(36px * var(--SCALE));
+    --MAPBTN-ICON: calc(18px * var(--SCALE));
+    --MAPBTN-GAP: calc(10px * var(--SCALE));
+    --MAPBTN-INSET: calc(10px * var(--SCALE));
+    --MAPBTN-DIVIDER: color-mix(in srgb, var(--TXTCOLOR1) 10%, var(--BGCOLOR1));
+    --MAPBTN-GROUP-SHADOW: 0 0 0 0.5px var(--MAPBTN-BORDER), 0 2px 4px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 html,
@@ -842,32 +849,38 @@ html.dark .filter-tips td {
     background-image: none !important;
     background-color: var(--MAPBTN-BG) !important;
     color: var(--MAPBTN-FG) !important;
-    width: calc(28px * var(--SCALE)) !important;
-    height: calc(28px * var(--SCALE)) !important;
-    border-radius: var(--UI-RADIUS-CONTROL) !important;
+    width: var(--MAPBTN-SIZE) !important;
+    height: var(--MAPBTN-SIZE) !important;
+    border-radius: 0 !important;
     font-size: calc(20px * var(--SCALE)) !important;
-    font-weight: bold !important;
-    line-height: calc(28px * var(--SCALE)) !important; /* Center vertically */
+    font-weight: 500 !important;
+    line-height: var(--MAPBTN-SIZE) !important; /* Center vertically */
     text-align: center !important;
     cursor: pointer !important;
-    box-shadow: var(--MAPBTN-SHADOW);
-    transition: all 0.2s ease;
-    border: 1px solid var(--MAPBTN-BORDER) !important;
-    margin: calc(2px * var(--SCALE)) !important;
+    box-shadow: none;
+    transition: background-color 0.15s ease;
+    border: none !important;
+    margin: 0 !important;
 }
 
 .ol-zoom-in:hover, .ol-zoom-out:hover {
     background-color: var(--MAPBTN-HOVER) !important;
 }
 
-.ol-zoom-in {
-    margin-bottom: calc(5px * var(--SCALE)) !important;
-}
-
+/* Same fused stack as .mapBtnGroup */
 .ol-zoom {
-    background-color: transparent !important;
-    left: calc(100% - calc( 65px * var(--SCALE)));
-    top: calc(100% - calc( 85px * var(--SCALE)));
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 0;
+    background-color: var(--MAPBTN-DIVIDER) !important;
+    border-radius: var(--UI-RADIUS-PANEL);
+    overflow: hidden;
+    box-shadow: var(--MAPBTN-GROUP-SHADOW);
+    top: auto;
+    left: auto;
+    right: var(--MAPBTN-INSET);
+    bottom: calc(28px * var(--SCALE));
 }
 
 .ol-attribution {
@@ -1198,7 +1211,7 @@ select.error, textarea.error, input.error {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Default layer switcher panel hidden; we use #layers_infoblock (same style as settings) instead */
+/* Default layer switcher panel hidden; we use the Layers tab of #map_panel instead */
 .layer-switcher .panel {
     display: none !important;
 }
@@ -1407,17 +1420,17 @@ select.error, textarea.error, input.error {
 
 #header_side {
     position: absolute;
-    right: calc( 0px * var(--SCALE));
-    top:  calc( 0px * var(--SCALE));
-    width: calc( 38px * var(--SCALE));
+    right: var(--MAPBTN-INSET);
+    top: var(--MAPBTN-INSET);
+    margin: 0;
     z-index: 9;
 }
+/* Sits left of the side column, top-aligned with it */
 #header_top {
-    text-align: right;
     position: absolute;
-    right: calc( 94px * var(--SCALE));
-    top: calc( 0px * var(--SCALE));
-    height: calc( 38px * var(--SCALE));
+    right: calc(var(--MAPBTN-INSET) + var(--MAPBTN-SIZE) + var(--MAPBTN-GAP));
+    top: var(--MAPBTN-INSET);
+    margin: 0;
     z-index: 9;
 }
 
@@ -1526,8 +1539,96 @@ select.error, textarea.error, input.error {
     margin: calc( 1px * var(--SCALE));
     text-align: center;
 }
-.buttonSpacer {
-    margin: calc( 9px * var(--SCALE));
+
+/* Map buttons as fused stacks (Apple / Google Maps style). The group paints
+   the divider colour and its buttons sit 1px apart on it, so the hairlines come
+   from the flex gap and a button hidden with display:none leaves no stray line. */
+#header_side .buttonContainer,
+#header_top .buttonContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--MAPBTN-GAP);
+    margin: 0;
+}
+
+.mapBtnGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--MAPBTN-DIVIDER);
+    border-radius: var(--UI-RADIUS-PANEL);
+    overflow: hidden;
+    box-shadow: var(--MAPBTN-GROUP-SHADOW);
+}
+
+#header_top .mapBtnGroup {
+    flex-direction: row;
+}
+
+/* the wrapper is only there so JS can hide the toggle; lay out the button itself */
+.mapBtnGroup #toggle_sidebar_control {
+    display: contents;
+}
+
+.mapBtnGroup > .button,
+.mapBtnGroup > .svgButton,
+.mapBtnGroup #toggle_sidebar_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--MAPBTN-SIZE);
+    height: var(--MAPBTN-SIZE);
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--MAPBTN-BG) !important;
+    color: var(--MAPBTN-FG);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* beats #toggle_sidebar_button.hide_sidebar { display: block !important } */
+.mapBtnGroup #toggle_sidebar_button {
+    display: flex !important;
+}
+
+.mapBtnGroup > .button:hover,
+.mapBtnGroup > .svgButton:hover,
+.mapBtnGroup #toggle_sidebar_button:hover {
+    background: var(--MAPBTN-HOVER) !important;
+}
+
+.mapBtnGroup > .button:active,
+.mapBtnGroup > .svgButton:active,
+.mapBtnGroup #toggle_sidebar_button:active {
+    background: color-mix(in srgb, var(--TXTCOLOR1) 16%, var(--BGCOLOR1)) !important;
+}
+
+/* toggled on: accent-tinted cell with an accent icon */
+.mapBtnGroup > .button.activeButton,
+.mapBtnGroup > .svgButton.activeButton,
+.mapBtnGroup > .button.activeButton:hover,
+.mapBtnGroup > .svgButton.activeButton:hover {
+    background: color-mix(in srgb, var(--ACCENT) 14%, var(--MAPBTN-BG)) !important;
+    color: var(--ACCENT);
+}
+
+.mapBtnGroup > .svgButton::before,
+.mapBtnGroup > .button::before,
+.mapBtnGroup #toggle_sidebar_button::before,
+.mapBtnGroup > .button > svg {
+    width: var(--MAPBTN-ICON);
+    height: var(--MAPBTN-ICON);
+    margin: 0;
+}
+
+.mapBtnGroup .buttonText {
+    margin: 0;
+    font-size: calc(14px * var(--SCALE));
+    font-weight: 600;
+    line-height: 1;
 }
 
 .buttonText
@@ -1752,248 +1853,7 @@ html.dark .mobile_table_toggle.formButton:hover {
     margin-right: calc(12px * var(--SCALE));
 }
 
-#settings_infoblock {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(calc(360px * var(--SCALE)), 95vw);
-    max-width: 95vw;
-    height: 70vh;
-    max-height: 70vh;
-    overflow: auto;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    padding: 20px;
-    z-index: 9999;
-    display: none;
-    background-color: var(--BGCOLOR2);
-    border-radius: var(--UI-RADIUS-PANEL);
-    border: 1px solid rgba(128, 128, 128, 0.3);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: var(--TXTCOLOR2);
-    box-sizing: border-box;
-}
-@media (min-width: 768px) {
-    #settings_infoblock {
-        position: absolute;
-        left: auto;
-        right: calc(48px * var(--SCALE));
-        transform: translateY(-50%);
-    }
-}
-
-#settings_infoblock * {
-    font-family: inherit;
-    box-sizing: border-box;
-}
-
-/* Modern panel header (Settings & Layers) */
-.settingsPanelHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: calc(14px * var(--SCALE)) calc(44px * var(--SCALE)) calc(12px * var(--SCALE)) calc(16px * var(--SCALE));
-    margin: calc(-20px * var(--SCALE)) calc(-20px * var(--SCALE)) calc(16px * var(--SCALE)) calc(-20px * var(--SCALE));
-    margin-bottom: calc(16px * var(--SCALE));
-    background: linear-gradient(180deg, rgba(128, 128, 128, 0.08) 0%, transparent 100%);
-    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-    border-radius: var(--UI-RADIUS-PANEL) var(--UI-RADIUS-PANEL) 0 0;
-    min-height: calc(44px * var(--SCALE));
-    box-sizing: border-box;
-}
-.settingsPanelHeaderTitle {
-    font-size: calc(15px * var(--SCALE));
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: var(--TXTCOLOR2);
-    text-transform: none;
-}
-
-/* Layers picker: same look as settings */
-#layers_infoblock {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(calc(360px * var(--SCALE)), 95vw);
-    max-width: 95vw;
-    height: 70vh;
-    max-height: 70vh;
-    overflow: auto;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    padding: 20px;
-    z-index: 9999;
-    display: none;
-    background-color: var(--BGCOLOR2);
-    border-radius: var(--UI-RADIUS-PANEL);
-    border: 1px solid rgba(128, 128, 128, 0.3);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: var(--TXTCOLOR2);
-    box-sizing: border-box;
-}
-@media (min-width: 768px) {
-    #layers_infoblock {
-        position: absolute;
-        left: auto;
-        right: calc(48px * var(--SCALE));
-        transform: translateY(-50%);
-    }
-}
-#layers_infoblock * {
-    font-family: inherit;
-    box-sizing: border-box;
-}
-#layers_infoblock .settingsText {
-    flex: 1;
-    min-width: 0;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-#layers_infoblock .settingsCheckbox {
-    width: calc(16px * var(--SCALE));
-    height: calc(16px * var(--SCALE));
-    float: left;
-    margin-right: calc(10px * var(--SCALE));
-    cursor: pointer;
-    background-color: transparent;
-    border: 2px solid rgba(128, 128, 128, 0.5);
-    border-radius: var(--UI-RADIUS-SMALL);
-    position: relative;
-    transition: all 0.2s ease;
-    background-image: none;
-}
-#layers_infoblock .settingsCheckbox::after {
-    content: '';
-    position: absolute;
-    display: none;
-    width: calc(5px * var(--SCALE));
-    height: calc(9px * var(--SCALE));
-    left: 50%;
-    top: 50%;
-    margin-left: calc(-2.5px * var(--SCALE));
-    margin-top: calc(-4.5px * var(--SCALE));
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    box-sizing: border-box;
-}
-#layers_infoblock .settingsCheckbox:hover {
-    border-color: var(--ACCENT, #4a8fe7);
-}
-#layers_infoblock .settingsCheckboxChecked {
-    background-color: var(--ACCENT, #4a8fe7) !important;
-    border-color: var(--ACCENT, #4a8fe7) !important;
-}
-#layers_infoblock .settingsCheckboxChecked::after {
-    display: block;
-}
-#layers_infoblock .settingsOptionContainer {
-    cursor: pointer;
-}
-
-/* Styled radio for base map picker (circle + inner dot when selected) */
-#layers_infoblock .settingsRadio {
-    width: calc(16px * var(--SCALE));
-    height: calc(16px * var(--SCALE));
-    min-width: calc(16px * var(--SCALE));
-    float: left;
-    margin-right: calc(10px * var(--SCALE));
-    cursor: pointer;
-    background-color: transparent;
-    border: 2px solid rgba(128, 128, 128, 0.5);
-    border-radius: 50%;
-    position: relative;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-    flex-shrink: 0;
-}
-#layers_infoblock .settingsRadio::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: calc(8px * var(--SCALE));
-    height: calc(8px * var(--SCALE));
-    margin-left: calc(-4px * var(--SCALE));
-    margin-top: calc(-4px * var(--SCALE));
-    background-color: var(--ACCENT, #4a8fe7);
-    border-radius: 50%;
-    display: none;
-}
-#layers_infoblock .settingsRadio:hover {
-    border-color: var(--ACCENT, #4a8fe7);
-}
-#layers_infoblock .settingsRadioSelected {
-    border-color: var(--ACCENT, #4a8fe7);
-}
-#layers_infoblock .settingsRadioSelected::after {
-    display: block;
-}
-
-.settingsSections {
-    padding: 0;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-}
-
-#settings_infoblock .settingsSliderContainer {
-    max-width: 100%;
-}
-
-.settingsSection {
-    border: 1px solid rgba(128, 128, 128, 0.2);
-    border-radius: var(--UI-RADIUS-CONTROL);
-    margin-bottom: 6px;
-    overflow: hidden;
-}
-
-.settingsSection:last-child {
-    margin-bottom: 0;
-}
-
-.settingsSectionHeader {
-    cursor: pointer;
-    padding: 8px 10px;
-    font-weight: 600;
-    font-size: 13px;
-    color: var(--TXTCOLOR2);
-    background-color: rgba(128, 128, 128, 0.1);
-    list-style: none;
-    user-select: none;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    min-width: 0;
-}
-
-.settingsSectionHeader::-webkit-details-marker {
-    display: none;
-}
-
-.settingsSectionHeader::before {
-    content: '▸ ';
-    display: inline-block;
-    width: 1em;
-    transition: transform 0.15s ease;
-}
-
-.settingsSection[open] .settingsSectionHeader::before {
-    transform: rotate(90deg);
-}
-
-.settingsSectionHeader:hover {
-    background-color: rgba(128, 128, 128, 0.15);
-}
-
-.settingsSectionContent {
-    padding: 8px 10px 10px;
-    border-top: 1px solid rgba(128, 128, 128, 0.15);
-}
-
-#settings_section_units .settingsOptionContainer {
-    cursor: pointer;
-    align-items: center;
-}
-
+/* Toggle rows outside the map panel (e.g. the table column picker) */
 .settingsOptionContainer {
     display: flex;
     align-items: flex-start;
@@ -2002,57 +1862,497 @@ html.dark .mobile_table_toggle.formButton:hover {
     min-width: 0;
 }
 
-#settings_infoblock .settingsText {
-    flex: 1;
-    min-width: 0;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-#settings_infoblock .settingsCheckbox {
-    width: calc(16px * var(--SCALE));
-    height: calc(16px * var(--SCALE));
-    float: left;
-    margin-right: calc(10px * var(--SCALE));
-    cursor: pointer;
-    background-color: transparent;
-    border: 2px solid rgba(128, 128, 128, 0.5);
-    border-radius: var(--UI-RADIUS-SMALL);
-    position: relative;
-    transition: all 0.2s ease;
-    background-image: none;
-}
-
-#settings_infoblock .settingsCheckbox::after {
-    content: '';
+/* ==========================================================================
+   Map panel: Layers / Labels / Settings as tabs of one panel, docked beside
+   the map buttons so the map stays visible and updates live behind it.
+   ========================================================================== */
+#map_panel {
+    --PANEL-FG: var(--TXTCOLOR1);
+    --PANEL-MUTED: var(--TXTCOLOR3);
+    --PANEL-GROUP: color-mix(in srgb, var(--TXTCOLOR1) 5%, var(--BGCOLOR1));
+    --PANEL-LINE: color-mix(in srgb, var(--TXTCOLOR1) 9%, transparent);
+    --PANEL-FILL: color-mix(in srgb, var(--TXTCOLOR1) 6%, transparent);
+    --PANEL-TRACK: color-mix(in srgb, var(--TXTCOLOR1) 20%, var(--BGCOLOR1));
+    --PANEL-DANGER: #c62828;
+    display: none;
+    flex-direction: column;
     position: absolute;
+    /* below the top button cluster, left of the side column */
+    top: calc(var(--MAPBTN-INSET) * 2 + var(--MAPBTN-SIZE));
+    right: calc(var(--MAPBTN-INSET) + var(--MAPBTN-SIZE) + var(--MAPBTN-GAP));
+    bottom: var(--MAPBTN-INSET);
+    width: min(calc(360px * var(--SCALE)), calc(100% - 80px));
+    z-index: 9999;
+    overflow: hidden;
+    background: var(--BGCOLOR1);
+    color: var(--PANEL-FG);
+    border-radius: var(--UI-RADIUS-PANEL);
+    box-shadow: 0 0 0 0.5px var(--MAPBTN-BORDER), 0 2px 6px rgba(0, 0, 0, 0.08), 0 12px 40px rgba(0, 0, 0, 0.22);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: calc(14px * var(--SCALE));
+    line-height: 1.35;
+}
+
+html.dark #map_panel {
+    --PANEL-DANGER: #ef9a9a;
+}
+
+#map_panel.mapPanelOpen {
+    display: flex;
+}
+
+#map_panel * {
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+/* the map button whose tab is showing */
+.mapBtnGroup > .mapPanelOpener {
+    box-shadow: inset 0 0 0 2px var(--ACCENT);
+}
+
+.mapPanelHeader {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 12px 10px;
+}
+
+/* segmented control: the panel tabs and the map region switcher */
+.mapPanelTabs,
+.mapPanelSegmented {
+    flex: 1;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 2px;
+    padding: 2px;
+    background: var(--PANEL-FILL);
+    border-radius: calc(var(--UI-RADIUS-CONTROL) + 1px);
+}
+
+.mapPanelTabs button,
+.mapPanelSegmented button {
+    border: 0;
+    background: none;
+    border-radius: calc(var(--UI-RADIUS-CONTROL) - 1px);
+    padding: 6px 8px;
+    font-size: calc(13px * var(--SCALE));
+    font-weight: 500;
+    color: var(--PANEL-MUTED);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mapPanelTabs button:hover,
+.mapPanelSegmented button:hover {
+    color: var(--PANEL-FG);
+}
+
+.mapPanelTabs button[aria-selected="true"],
+.mapPanelSegmented button[aria-selected="true"] {
+    background: var(--BGCOLOR1);
+    color: var(--PANEL-FG);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+}
+
+html.dark .mapPanelTabs button[aria-selected="true"],
+html.dark .mapPanelSegmented button[aria-selected="true"] {
+    background: color-mix(in srgb, var(--TXTCOLOR1) 16%, var(--BGCOLOR1));
+}
+
+.mapPanelSegmented {
+    margin-bottom: 4px;
+}
+
+.mapPanelClose {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--UI-RADIUS-CONTROL);
+    background: var(--PANEL-FILL);
+    color: var(--PANEL-MUTED);
+    cursor: pointer;
+}
+
+.mapPanelClose::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.mapPanelClose:hover {
+    color: var(--PANEL-FG);
+    background: color-mix(in srgb, var(--TXTCOLOR1) 12%, transparent);
+}
+
+.mapPanelTabs button:focus-visible,
+.mapPanelSegmented button:focus-visible,
+.mapPanelClose:focus-visible,
+#map_panel .settingsOptionContainer:focus-visible,
+.layerTile:focus-visible {
+    outline: 2px solid var(--ACCENT);
+    outline-offset: -2px;
+}
+
+.mapPanelPane {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 12px 16px;
+}
+
+.mapPanelPane[hidden] {
     display: none;
 }
 
-#settings_infoblock .settingsCheckbox:hover {
-    border-color: var(--ACCENT, #4a8fe7);
-}
-
-#settings_infoblock .settingsCheckboxChecked {
-    background-color: var(--ACCENT, #4a8fe7) !important;
-    border-color: var(--ACCENT, #4a8fe7) !important;
-}
-
-#settings_infoblock .settingsCheckboxChecked::after {
+/* Settings search, pinned to the top while the list scrolls */
+.mapPanelSearch {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     display: block;
-    width: calc(5px * var(--SCALE));
-    height: calc(9px * var(--SCALE));
-    left: 50%;
-    top: 50%;
-    margin-left: calc(-2.5px * var(--SCALE));
-    margin-top: calc(-4.5px * var(--SCALE));
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    box-sizing: border-box;
+    padding-bottom: 4px;
+    background: var(--BGCOLOR1);
 }
 
-/* Close buttons — absolute top-right (settings, layers, selected aircraft) */
+.mapPanelSearch::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: 16px;
+    height: 16px;
+    background-color: var(--PANEL-MUTED);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") center / contain no-repeat;
+    pointer-events: none;
+}
+
+.mapPanelSearch input {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px 0 34px;
+    border: 0;
+    border-radius: calc(var(--UI-RADIUS-CONTROL) + 2px);
+    background: var(--PANEL-GROUP);
+    color: var(--PANEL-FG);
+    font-size: calc(14px * var(--SCALE));
+    outline: none;
+}
+
+.mapPanelSearch input::placeholder {
+    color: var(--PANEL-MUTED);
+}
+
+.mapPanelSearch input:focus {
+    box-shadow: 0 0 0 2px var(--ACCENT);
+}
+
+/* Sections: small heading, then an inset group of rows */
+#map_panel .settingsSectionHeader {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+    padding: 14px 4px 6px;
+    font-size: calc(11px * var(--SCALE));
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--PANEL-MUTED);
+}
+
+#map_panel .settingsSections > .settingsSection:first-child > .settingsSectionHeader,
+#layers_picker_content > .settingsSection:first-child > .settingsSectionHeader {
+    padding-top: 6px;
+}
+
+.layerCurrentName {
+    margin-left: auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+#map_panel .settingsSectionContent {
+    background: var(--PANEL-GROUP);
+    border-radius: var(--UI-RADIUS-PANEL);
+    overflow: hidden;
+}
+
+/* Rows overlap by 1px and draw their divider on top, so the first visible
+   row's divider is clipped by the group whatever is hidden above it */
+#map_panel .settingsOptionContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: calc(44px * var(--SCALE));
+    margin: -1px 0 0;
+    padding: 9px 14px;
+    border: 0;
+    border-top: 1px solid var(--PANEL-LINE);
+    background: none;
+    color: var(--PANEL-FG);
+    font-size: calc(14px * var(--SCALE));
+    text-align: left;
+    cursor: pointer;
+}
+
+#map_panel .settingsOptionContainer:hover {
+    background: var(--PANEL-FILL);
+}
+
+#map_panel .settingsStatic {
+    cursor: default;
+}
+
+#map_panel .settingsStatic:hover {
+    background: none;
+}
+
+#map_panel .settingsSliderContainer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-bottom: 16px;
+}
+
+#map_panel .settingsSliderContainer .ui-slider {
+    margin: 0 8px;
+}
+
+#map_panel .settingsText {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 1px;
+    font-size: inherit;
+    line-height: 1.35;
+    letter-spacing: 0;
+    color: inherit;
+    overflow-wrap: anywhere;
+}
+
+.settingsHint {
+    font-size: calc(12px * var(--SCALE));
+    color: var(--PANEL-MUTED);
+}
+
+.settingsSubHeader {
+    margin-top: -1px;
+    padding: 10px 14px 4px;
+    border-top: 1px solid var(--PANEL-LINE);
+    font-size: calc(12px * var(--SCALE));
+    font-weight: 600;
+    color: var(--PANEL-MUTED);
+}
+
+#map_panel .settingsDangerRow .settingsText {
+    color: var(--PANEL-DANGER);
+    font-weight: 500;
+}
+
+.settingsSearchHidden {
+    display: none !important;
+}
+
+.settingsNoMatch {
+    padding: 24px 8px;
+    text-align: center;
+    color: var(--PANEL-MUTED);
+    font-size: calc(13px * var(--SCALE));
+}
+
+/* Switches (the markup is still .settingsCheckbox, so every Toggle gets one) */
+#map_panel .settingsCheckbox {
+    order: 2;
+    flex: none;
+    position: relative;
+    width: calc(38px * var(--SCALE));
+    height: calc(22px * var(--SCALE));
+    margin: 0;
+    float: none;
+    border: 0;
+    border-radius: calc(11px * var(--SCALE));
+    background: var(--PANEL-TRACK);
+    background-image: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+#map_panel .settingsCheckbox::after {
+    content: '';
+    position: absolute;
+    display: block;
+    left: 2px;
+    top: 2px;
+    width: calc(18px * var(--SCALE));
+    height: calc(18px * var(--SCALE));
+    margin: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transform: none;
+    transition: transform 0.15s ease;
+}
+
+#map_panel .settingsCheckboxChecked {
+    background: var(--ACCENT);
+}
+
+#map_panel .settingsCheckboxChecked::after {
+    transform: translateX(calc(16px * var(--SCALE)));
+}
+
+/* label fields: the real checkbox stays for the <label>, the switch shows state */
+#map_panel .labelConfigInput {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#map_panel .labelConfigInput:focus-visible + .settingsCheckbox {
+    outline: 2px solid var(--ACCENT);
+    outline-offset: 2px;
+}
+
+/* fields do nothing while labels are off */
+#labelConfigMenu:has(#labelToggle_enabled:not(:checked)) .labelFieldsSection .settingsSectionContent {
+    opacity: 0.5;
+}
+
+/* Base maps as picture tiles */
+.layerTiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 10px;
+}
+
+.layerTile {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: var(--PANEL-FG);
+    text-align: left;
+    cursor: pointer;
+}
+
+.layerTileThumb {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 2;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--PANEL-GROUP);
+    box-shadow: 0 0 0 1px var(--PANEL-LINE);
+    transition: box-shadow 0.15s ease;
+}
+
+.layerTileThumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.layerTileNoThumb {
+    background: hsl(var(--thumb-hue) 45% 88%);
+    color: hsl(var(--thumb-hue) 40% 30%);
+    font-size: calc(18px * var(--SCALE));
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+html.dark .layerTileNoThumb {
+    background: hsl(var(--thumb-hue) 30% 22%);
+    color: hsl(var(--thumb-hue) 50% 80%);
+}
+
+.layerTile:hover .layerTileThumb {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ACCENT) 45%, transparent);
+}
+
+.layerTileSelected .layerTileThumb {
+    box-shadow: 0 0 0 2px var(--ACCENT);
+}
+
+.layerTileSelected .layerTileThumb::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--ACCENT) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E") center / 11px no-repeat;
+}
+
+.layerTileName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: calc(12px * var(--SCALE));
+    font-weight: 500;
+}
+
+.layerTileSelected .layerTileName {
+    color: var(--ACCENT);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #map_panel .settingsCheckbox,
+    #map_panel .settingsCheckbox::after,
+    .layerTileThumb {
+        transition: none;
+    }
+}
+
+/* Phones: a bottom sheet over the map */
+@media screen and (max-width: 768px) {
+    #map_panel {
+        position: fixed;
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: auto;
+        max-height: 80vh;
+        z-index: 10000;
+        border-radius: var(--UI-RADIUS-PANEL) var(--UI-RADIUS-PANEL) 0 0;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .layerTiles {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Close buttons — absolute top-right (selected aircraft) */
 .settingsCloseBox,
 .infoblockCloseBox,
 .layer-switcher-close-x {
@@ -2087,12 +2387,6 @@ html.dark .mobile_table_toggle.formButton:hover {
     font-weight: bold;
     color: var(--TXTCOLOR1);
     line-height: 1;
-}
-
-/* Specific overrides for settings/layers headers */
-.settingsPanelHeader .settingsCloseBox {
-    top: 5px;
-    right: 5px;
 }
 
 /* Selected aircraft panel — smaller X, previous corner placement */
@@ -2644,37 +2938,6 @@ a.ui-button:active,
     opacity: 0.8;
 }
 
-/* Settings reset button and form buttons – opaque so they don’t blend in */
-#settings_infoblock .formButton {
-    background-color: rgba(128, 128, 128, 0.4);
-    color: var(--TXTCOLOR2);
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: var(--UI-RADIUS-CONTROL);
-    padding: 6px 14px;
-    font-size: 13px;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-#settings_infoblock .formButton:hover {
-    background-color: rgba(128, 128, 128, 0.55);
-    border-color: var(--ACCENT, #4a8fe7);
-}
-
-/* Settings divider */
-#settings_infoblock .rSpacer hr {
-    border: none;
-    border-top: 1px solid rgba(128, 128, 128, 0.15);
-    margin: 6px 0;
-}
-
-/* Settings infoblock title text */
-#settings_infoblock .infoBlockTitleText {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--TXTCOLOR2);
-    opacity: 0.9;
-}
 
 
 input{
@@ -3289,105 +3552,6 @@ body.mobile_sidebar_open .layer-switcher {
     .ol-zoom {
         display: none !important;
     }
-}
-
-/* Label Configuration Menu (same styling as Settings & Layers, no sub-dividers) */
-#labelConfigMenu {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10000;
-    width: min(calc(360px * var(--SCALE)), 95vw);
-    max-width: 95vw;
-    padding: 20px;
-    box-sizing: border-box;
-    background-color: var(--BGCOLOR2);
-    border: 1px solid rgba(128, 128, 128, 0.3);
-    border-radius: var(--UI-RADIUS-PANEL);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: var(--TXTCOLOR2);
-}
-@media (min-width: 768px) {
-    #labelConfigMenu {
-        position: absolute;
-        left: auto;
-        right: calc(48px * var(--SCALE));
-        transform: translateY(-50%);
-    }
-}
-#labelConfigMenu * {
-    font-family: inherit;
-    box-sizing: border-box;
-}
-#labelConfigMenu .labelConfigInput {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-    pointer-events: none;
-}
-#labelConfigMenu .settingsCheckbox {
-    width: calc(16px * var(--SCALE));
-    height: calc(16px * var(--SCALE));
-    flex-shrink: 0;
-    margin-right: calc(10px * var(--SCALE));
-    cursor: pointer;
-    background-color: transparent;
-    border: 2px solid rgba(128, 128, 128, 0.5);
-    border-radius: var(--UI-RADIUS-SMALL);
-    position: relative;
-    transition: all 0.2s ease;
-}
-#labelConfigMenu .settingsCheckbox::after {
-    content: '';
-    position: absolute;
-    display: none;
-    width: calc(5px * var(--SCALE));
-    height: calc(9px * var(--SCALE));
-    left: 50%;
-    top: 50%;
-    margin-left: calc(-2.5px * var(--SCALE));
-    margin-top: calc(-4.5px * var(--SCALE));
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    box-sizing: border-box;
-}
-#labelConfigMenu .settingsCheckbox:hover {
-    border-color: var(--ACCENT, #4a8fe7);
-}
-#labelConfigMenu .settingsCheckboxChecked {
-    background-color: var(--ACCENT, #4a8fe7) !important;
-    border-color: var(--ACCENT, #4a8fe7) !important;
-}
-#labelConfigMenu .settingsCheckboxChecked::after {
-    display: block;
-}
-#labelConfigMenu .settingsOptionContainer {
-    cursor: pointer;
-}
-#labelConfigMenu .settingsText {
-    flex: 1;
-    min-width: 0;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    font-size: 13px;
-}
-#labelConfigMenu #labelConfigMenuBody {
-    padding-top: 0;
-}
-
-#labelConfigMenuOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-    background: transparent;
 }
 
 /* ==========================================================================
