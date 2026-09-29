@@ -1490,11 +1490,7 @@ function earlyInitPage() {
     jQuery("#leg_next").click(function() {legShift(1)});
 
     jQuery('#settingsCog').on('click', function() {
-        hideCustomLayersPanel();
-        closeLabelMenu();
-        jQuery('#settings_infoblock').toggle();
-        if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
-            TAR.altitudeChart.syncMobileCollapse();
+        toggleMapPanel('settings');
     });
 
     if (!onMobile) {
@@ -1510,12 +1506,6 @@ function earlyInitPage() {
         // Mobile: Hide fullscreen button (User requested Desktop Only)
         jQuery('#fullscreenButton').hide();
     }
-
-    jQuery('#settings_close').on('click', function() {
-        jQuery('#settings_infoblock').hide();
-        if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
-            TAR.altitudeChart.syncMobileCollapse();
-    });
 
     jQuery('#groundvehicle_filter').on('click', function() {
         filterGroundVehicles(true);
@@ -1564,14 +1554,6 @@ function earlyInitPage() {
             toggles.airlineBanners.hideCheckbox();
         }
     })();
-
-    // Make entire row clickable for Units section checkboxes (airline logos/banners, ground vehicles, non-ICAO)
-    jQuery('#settings_section_units').on('click', '.settingsOptionContainer', function(e) {
-        const $cb = jQuery(this).find('.settingsCheckbox');
-        if ($cb.length && !$cb.is(e.target) && !jQuery.contains($cb[0], e.target)) {
-            $cb.trigger('click');
-        }
-    });
 
     new Toggle({
         key: "lastLeg",
@@ -3646,7 +3628,10 @@ function initMap() {
             case "c":
             case "Esc":
             case "Escape":
-                deselectAllPlanes();
+                if (mapPanelTab)
+                    closeMapPanel();
+                else
+                    deselectAllPlanes();
                 break;
                 // zoom and movement
             case "q":
@@ -6340,37 +6325,12 @@ function updateLabelConfig() {
 }
 
 function closeLabelMenu() {
-    const menu = document.getElementById('labelConfigMenu');
-    const overlay = document.getElementById('labelConfigMenuOverlay');
-    if (menu) menu.style.display = 'none';
-    if (overlay) overlay.style.display = 'none';
-    if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
-        TAR.altitudeChart.syncMobileCollapse();
+    if (mapPanelTab === 'labels')
+        closeMapPanel();
 }
 
 function toggleLabelMenu() {
-    const menu = document.getElementById('labelConfigMenu');
-    let overlay = document.getElementById('labelConfigMenuOverlay');
-
-    if (menu.style.display === 'none' || !menu.style.display) {
-        // Close other panels when opening label menu
-        jQuery('#settings_infoblock').hide();
-        hideCustomLayersPanel();
-        // Show menu + overlay (no dimming; overlay is transparent for click-outside)
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'labelConfigMenuOverlay';
-            overlay.onclick = function() { toggleLabelMenu(); };
-            document.body.appendChild(overlay);
-        }
-        overlay.style.display = 'block';
-        menu.style.display = 'block';
-        syncLabelCheckboxes();
-    } else {
-        closeLabelMenu();
-    }
-    if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
-        TAR.altitudeChart.syncMobileCollapse();
+    toggleMapPanel('labels');
 }
 
 
@@ -6381,6 +6341,7 @@ function toggleTrackLabels() {
     remakeTrails();
 
     buttonActive('#K', trackLabels);
+    jQuery('#trackLabels_cb').toggleClass('settingsCheckboxChecked', trackLabels);
 }
 
 function toggleMultiSelect(newState) {
@@ -10539,35 +10500,78 @@ function invalidateLayersPanel() {
     delete c.dataset.layersPanelBuilt;
 }
 
-// Sync radio/checkbox visuals from OpenLayers (e.g. base map changed elsewhere).
+// Sync tiles and switches from OpenLayers (e.g. base map changed elsewhere).
 function refreshLayersPanelControls() {
     const container = document.getElementById('layers_picker_content');
     if (!container || !layers_group || container.dataset.layersPanelBuilt !== '1')
         return;
     const byName = {};
+    let currentBase = null;
     ol.control.LayerSwitcher.forEachRecursive(layers_group, function (lyr) {
         const n = lyr.get('name');
         if (n)
             byName[n] = lyr;
+        if (lyr.get('type') === 'base' && lyr.get('title') && lyr.getVisible())
+            currentBase = lyr;
     });
-    container.querySelectorAll('.settingsOptionContainer[data-layer-name]').forEach(function (row) {
-        const name = row.getAttribute('data-layer-name');
-        const layer = byName[name];
+    container.querySelectorAll('[data-layer-name]').forEach(function (el) {
+        const layer = byName[el.getAttribute('data-layer-name')];
         if (!layer)
             return;
-        const radio = row.querySelector('.settingsRadio');
-        const cb = row.querySelector('.settingsCheckbox');
-        if (radio) {
-            const sel = !!layer.getVisible();
-            radio.classList.toggle('settingsRadioSelected', sel);
-            radio.setAttribute('aria-checked', sel);
-        } else if (cb) {
-            cb.classList.toggle('settingsCheckboxChecked', layer.getVisible());
+        const on = !!layer.getVisible();
+        if (el.classList.contains('layerTile')) {
+            el.classList.toggle('layerTileSelected', on);
+            el.setAttribute('aria-checked', on);
+        } else {
+            const cb = el.querySelector('.settingsCheckbox');
+            if (cb)
+                cb.classList.toggle('settingsCheckboxChecked', on);
         }
     });
+    const currentName = container.querySelector('.layerCurrentName');
+    if (currentName)
+        currentName.textContent = currentBase ? currentBase.get('title') : '';
 }
 
-// Build the custom layers panel (same structure as settings: details/summary + settingsCheckbox/settingsText)
+function makePanelSection(title) {
+    const section = document.createElement('section');
+    section.className = 'settingsSection';
+    const header = document.createElement('h3');
+    header.className = 'settingsSectionHeader';
+    header.textContent = title;
+    const content = document.createElement('div');
+    content.className = 'settingsSectionContent';
+    section.appendChild(header);
+    section.appendChild(content);
+    return { section: section, header: header, content: content };
+}
+
+// Thumbnails are images/layers/<layer name>.webp, made by scripts/gen-layer-thumbs.js.
+// A layer without one gets a coloured tile with its initials.
+function layerThumb(lyr) {
+    const name = lyr.get('name') || '';
+    const title = lyr.get('title') || name;
+    const thumb = document.createElement('span');
+    thumb.className = 'layerTileThumb';
+    const img = document.createElement('img');
+    img.alt = '';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.onerror = function () {
+        img.remove();
+        let hue = 0;
+        for (let i = 0; i < name.length; i++)
+            hue = (hue * 31 + name.charCodeAt(i)) % 360;
+        thumb.classList.add('layerTileNoThumb');
+        thumb.style.setProperty('--thumb-hue', hue);
+        thumb.textContent = title.split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 3).toUpperCase();
+    };
+    img.src = 'images/layers/' + encodeURIComponent(name) + '.webp';
+    thumb.appendChild(img);
+    return thumb;
+}
+
+// Layers tab: region switcher, base maps as picture tiles, then overlays as switches.
 function buildLayersPanel() {
     const container = document.getElementById('layers_picker_content');
     if (!container || !layers_group)
@@ -10576,24 +10580,12 @@ function buildLayersPanel() {
         return;
     container.innerHTML = '';
 
-    // Collect all base layers globally (for radio: only one visible across the map)
+    // Collect all base layers globally (only one is visible across the map)
     const allBaseLayers = [];
     ol.control.LayerSwitcher.forEachRecursive(layers_group, function (lyr) {
         if (lyr.get('type') === 'base' && lyr.get('title'))
             allBaseLayers.push(lyr);
     });
-
-    function syncAllBaseRadios() {
-        container.querySelectorAll('.layers-base-content .settingsRadio').forEach(function (el) {
-            const row = el.closest('.settingsOptionContainer');
-            if (!row) return;
-            const name = row.getAttribute('data-layer-name');
-            const layer = allBaseLayers.filter(function (l) { return (l.get('name') || '') === name; })[0];
-            const selected = !!(layer && layer.getVisible());
-            el.classList.toggle('settingsRadioSelected', selected);
-            el.setAttribute('aria-checked', selected);
-        });
-    }
 
     const rootLayers = layers_group.getLayers();
     // Collect base map groups, then order: Worldwide first, then US, Europe, Custom
@@ -10616,75 +10608,95 @@ function buildLayersPanel() {
         const orderIndex = baseGroupOrder.indexOf(name);
         baseGroups.push({
             group: item,
-            groupLayers: groupLayers,
+            title: item.get('title') || name || 'Base maps',
+            // layers.js uses .reverse() when building the group collection, so reverse for display (first-pushed first)
+            layers: groupLayers.slice().reverse(),
             sortKey: orderIndex >= 0 ? orderIndex : baseGroupOrder.length,
         });
     }
     baseGroups.sort(function (a, b) { return a.sortKey - b.sortKey; });
 
-    baseGroups.forEach(function (entry) {
-        const item = entry.group;
-        const groupLayers = entry.groupLayers;
-        const groupTitle = item.get('title') || item.get('name') || 'Base maps';
-        const baseDetails = document.createElement('details');
-        baseDetails.className = 'settingsSection';
-        const baseSummary = document.createElement('summary');
-        baseSummary.className = 'settingsSectionHeader';
-        baseSummary.textContent = groupTitle;
-        baseDetails.appendChild(baseSummary);
-        const baseContent = document.createElement('div');
-        baseContent.className = 'settingsSectionContent layers-base-content';
-        // layers.js uses .reverse() when building the group collection, so reverse for display (first-pushed at top)
-        const orderedLayers = groupLayers.slice().reverse();
-        orderedLayers.forEach(function (lyr) {
-            const row = document.createElement('div');
-            row.className = 'settingsOptionContainer';
-            row.setAttribute('data-layer-name', lyr.get('name') || '');
-            const radio = document.createElement('div');
-            radio.className = 'settingsRadio' + (lyr.getVisible() ? ' settingsRadioSelected' : '');
-            radio.setAttribute('role', 'radio');
-            radio.setAttribute('aria-checked', lyr.getVisible());
-            const text = document.createElement('div');
-            text.className = 'settingsText';
-            text.textContent = lyr.get('title') || lyr.get('name') || '';
-            row.appendChild(radio);
-            row.appendChild(text);
-            baseContent.appendChild(row);
-            row.addEventListener('click', function () {
+    const currentBase = allBaseLayers.filter(function (l) { return l.getVisible(); })[0];
+    let region = baseGroups.filter(function (e) { return e.layers.indexOf(currentBase) >= 0; })[0] || baseGroups[0];
+
+    const regionTabs = document.createElement('div');
+    regionTabs.className = 'mapPanelSegmented';
+    regionTabs.setAttribute('role', 'tablist');
+    regionTabs.setAttribute('aria-label', 'Map region');
+
+    const base = makePanelSection('Base map');
+    const currentName = document.createElement('span');
+    currentName.className = 'layerCurrentName';
+    base.header.appendChild(currentName);
+    base.content.className = 'layerTiles';
+    base.content.setAttribute('role', 'radiogroup');
+    base.content.setAttribute('aria-label', 'Base map');
+
+    function renderTiles() {
+        base.content.innerHTML = '';
+        region.layers.forEach(function (lyr) {
+            const title = lyr.get('title') || lyr.get('name') || '';
+            const tile = document.createElement('button');
+            tile.type = 'button';
+            tile.className = 'layerTile';
+            tile.title = title;
+            tile.setAttribute('role', 'radio');
+            tile.setAttribute('data-layer-name', lyr.get('name') || '');
+            tile.appendChild(layerThumb(lyr));
+            const label = document.createElement('span');
+            label.className = 'layerTileName';
+            label.textContent = title;
+            tile.appendChild(label);
+            tile.addEventListener('click', function () {
                 allBaseLayers.forEach(function (b) { b.setVisible(b === lyr); });
-                syncAllBaseRadios();
+                refreshLayersPanelControls();
             });
+            base.content.appendChild(tile);
         });
-        baseDetails.appendChild(baseContent);
-        appendOverlayLayers(baseContent, item);
-        container.appendChild(baseDetails);
-    });
-
-    const baseGroupSet = new Set(baseGroups.map(function (e) { return e.group; }));
-
-    for (let i = 0; i < rootLayers.getLength(); i++) {
-        const item = rootLayers.item(i);
-        if (!(item instanceof ol.layer.Group))
-            continue;
-        if (item.get('type') === 'base')
-            continue;
-        if (baseGroupSet.has(item))
-            continue;
-        const title = item.get('title') || item.get('name') || 'Overlay';
-        const details = document.createElement('details');
-        details.className = 'settingsSection';
-        const summary = document.createElement('summary');
-        summary.className = 'settingsSectionHeader';
-        summary.textContent = title;
-        details.appendChild(summary);
-        const content = document.createElement('div');
-        content.className = 'settingsSectionContent';
-        appendOverlayLayers(content, item);
-        details.appendChild(content);
-        container.appendChild(details);
+        regionTabs.querySelectorAll('button').forEach(function (b, i) {
+            b.setAttribute('aria-selected', baseGroups[i] === region);
+        });
+        refreshLayersPanelControls();
     }
 
+    baseGroups.forEach(function (entry) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('role', 'tab');
+        b.textContent = entry.title;
+        b.addEventListener('click', function () {
+            region = entry;
+            renderTiles();
+        });
+        regionTabs.appendChild(b);
+    });
+    if (baseGroups.length > 1)
+        container.appendChild(regionTabs);
+    container.appendChild(base.section);
+
+    // Overlays, one section per group that has any
+    const overlayGroups = baseGroups.map(function (e) { return { group: e.group, title: e.title }; });
+    const baseGroupSet = new Set(baseGroups.map(function (e) { return e.group; }));
+    for (let i = 0; i < rootLayers.getLength(); i++) {
+        const item = rootLayers.item(i);
+        if (!(item instanceof ol.layer.Group) || item.get('type') === 'base' || baseGroupSet.has(item))
+            continue;
+        overlayGroups.push({ group: item, title: item.get('title') || item.get('name') || 'Overlay' });
+    }
+    const overlaySections = [];
+    overlayGroups.forEach(function (entry) {
+        const sec = makePanelSection(entry.title);
+        appendOverlayLayers(sec.content, entry.group);
+        if (sec.content.children.length)
+            overlaySections.push({ sec: sec, entry: entry });
+    });
+    overlaySections.forEach(function (o) {
+        o.sec.header.textContent = overlaySections.length > 1 ? 'Overlays · ' + o.entry.title : 'Overlays';
+        container.appendChild(o.sec.section);
+    });
+
     container.dataset.layersPanelBuilt = '1';
+    renderTiles();
 }
 
 function appendOverlayLayers(container, group) {
@@ -10699,18 +10711,15 @@ function appendOverlayLayers(container, group) {
             continue;
         }
         if (child instanceof ol.layer.Group) {
-            const title = child.get('title') || child.get('name') || 'Layer';
-            const subDetails = document.createElement('details');
-            subDetails.className = 'settingsSection';
-            const subSummary = document.createElement('summary');
-            subSummary.className = 'settingsSectionHeader';
-            subSummary.textContent = title;
-            subDetails.appendChild(subSummary);
-            const subContent = document.createElement('div');
-            subContent.className = 'settingsSectionContent';
-            appendOverlayLayers(subContent, child);
-            subDetails.appendChild(subContent);
-            container.appendChild(subDetails);
+            // nested group: a small sub-heading, then its layers in the same list
+            const sub = document.createElement('div');
+            sub.className = 'settingsSubHeader';
+            sub.textContent = child.get('title') || child.get('name') || 'Layer';
+            const before = container.children.length;
+            container.appendChild(sub);
+            appendOverlayLayers(container, child);
+            if (container.children.length === before + 1)
+                sub.remove();
         } else if (child.get('type') === 'overlay' && child.get('title')) {
             addLayerRow(container, child, child.get('title'));
         }
@@ -10729,7 +10738,7 @@ function addLayerRow(container, layer, title) {
     row.appendChild(cb);
     row.appendChild(text);
     container.appendChild(row);
-    row.addEventListener('click', function (e) {
+    row.addEventListener('click', function () {
         layer.setVisible(!layer.getVisible());
         cb.classList.toggle('settingsCheckboxChecked', layer.getVisible());
         if (layer.get('name'))
@@ -10738,22 +10747,125 @@ function addLayerRow(container, layer, title) {
 }
 
 function showCustomLayersPanel() {
-    jQuery('#settings_infoblock').hide();
-    closeLabelMenu();
-    buildLayersPanel();
-    refreshLayersPanelControls();
-    jQuery('#layers_infoblock').show();
-    if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
-        TAR.altitudeChart.syncMobileCollapse();
+    openMapPanel('layers');
 }
 
 function hideCustomLayersPanel() {
-    jQuery('#layers_infoblock').hide();
+    if (mapPanelTab === 'layers')
+        closeMapPanel();
+}
+
+// ---- Map panel: one docked panel with Layers / Labels / Settings tabs ----
+
+let mapPanelTab = null;
+const mapPanelOpeners = { layers: '#layers_button', labels: '#L', settings: '#settingsCog' };
+
+function openMapPanel(tab) {
+    if (tab === 'layers') {
+        buildLayersPanel();
+        refreshLayersPanelControls();
+    } else if (tab === 'labels') {
+        syncLabelCheckboxes();
+    }
+    mapPanelTab = tab;
+    const panel = document.getElementById('map_panel');
+    panel.classList.add('mapPanelOpen');
+    panel.querySelectorAll('[data-map-panel-tab]').forEach(function (b) {
+        const on = b.dataset.mapPanelTab === tab;
+        b.setAttribute('aria-selected', on);
+        b.tabIndex = on ? 0 : -1;
+    });
+    panel.querySelectorAll('.mapPanelPane').forEach(function (pane) {
+        pane.hidden = pane.dataset.tab !== tab;
+    });
+    for (const t in mapPanelOpeners)
+        jQuery(mapPanelOpeners[t]).toggleClass('mapPanelOpener', t === tab);
     if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
         TAR.altitudeChart.syncMobileCollapse();
 }
 
+function closeMapPanel() {
+    mapPanelTab = null;
+    const panel = document.getElementById('map_panel');
+    // a focused (now hidden) search box would swallow the keyboard shortcuts
+    if (panel.contains(document.activeElement))
+        document.activeElement.blur();
+    panel.classList.remove('mapPanelOpen');
+    for (const t in mapPanelOpeners)
+        jQuery(mapPanelOpeners[t]).removeClass('mapPanelOpener');
+    if (TAR.altitudeChart && TAR.altitudeChart.syncMobileCollapse)
+        TAR.altitudeChart.syncMobileCollapse();
+}
+
+function toggleMapPanel(tab) {
+    if (mapPanelTab === tab)
+        closeMapPanel();
+    else
+        openMapPanel(tab);
+}
+
+// Hide settings rows that don't match the search; hide sections left empty.
+function filterSettings(query) {
+    const q = query.trim().toLowerCase();
+    const pane = document.getElementById('settings_infoblock');
+    let anyVisible = false;
+    pane.querySelectorAll('.settingsSection').forEach(function (section) {
+        const sectionMatch = q && section.querySelector('.settingsSectionHeader').textContent.toLowerCase().includes(q);
+        let visible = 0;
+        section.querySelectorAll('.settingsOptionContainer').forEach(function (row) {
+            const match = !q || sectionMatch || row.textContent.toLowerCase().includes(q);
+            row.classList.toggle('settingsSearchHidden', !match);
+            // rows a Toggle hid itself (hideCheckbox) stay hidden
+            if (match && row.style.display !== 'none')
+                visible++;
+        });
+        section.classList.toggle('settingsSearchHidden', visible === 0);
+        if (visible)
+            anyVisible = true;
+    });
+    pane.querySelector('.settingsNoMatch').hidden = anyVisible;
+}
+
 $(document).ready(function () {
-    jQuery('#layers_button').on('click', showCustomLayersPanel);
-    jQuery('#layers_close').on('click', hideCustomLayersPanel);
+    jQuery('#layers_button').on('click', function () { toggleMapPanel('layers'); });
+    jQuery('#map_panel_close').on('click', closeMapPanel);
+
+    const $panel = jQuery('#map_panel');
+    $panel.on('click', '[data-map-panel-tab]', function () {
+        openMapPanel(this.dataset.mapPanelTab);
+    });
+    // arrow keys move between tabs
+    $panel.on('keydown', '[role="tab"]', function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')
+            return;
+        const tabs = $panel.find('[role="tab"]').toArray();
+        const next = tabs[(tabs.indexOf(this) + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+        openMapPanel(next.dataset.mapPanelTab);
+        next.focus();
+        e.preventDefault();
+    });
+    // the whole row toggles its switch, not just the switch itself
+    $panel.on('click', '.settingsOptionContainer', function (e) {
+        if (this.tagName === 'LABEL' || this.hasAttribute('data-layer-name'))
+            return;
+        const cb = this.querySelector('.settingsCheckbox');
+        if (!cb || cb.contains(e.target) || jQuery(e.target).closest('select, input, button, a, .ui-slider, .ui-selectmenu-button').length)
+            return;
+        cb.click();
+    });
+    jQuery('#settings_search').on('input', function () {
+        filterSettings(this.value);
+    });
+    // Esc in the search box clears it first, then closes the panel
+    jQuery('#settings_search').on('keydown', function (e) {
+        if (e.key !== 'Escape')
+            return;
+        if (this.value) {
+            this.value = '';
+            filterSettings('');
+        } else {
+            closeMapPanel();
+        }
+        e.preventDefault();
+    });
 });
