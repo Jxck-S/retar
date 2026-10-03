@@ -434,7 +434,7 @@ let planespottingAPI = false;
 // Custom Photos API — tried first if enabled (returns { "credit": "...", "retrieve_url": "..." })
 let customPhotosApi = false;
 let customPhotosApiUrl = "";
-let customPhotosClickable = false;
+let customPhotosClickable = true;
 
 // get flight route from routeApi service default setting (toggle via settings checkbox)
 let useRouteAPI = false;

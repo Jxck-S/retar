@@ -394,6 +394,7 @@ HideCols = [
 // planespottingAPI = false;
 // customPhotosApi = true;
 // customPhotosApiUrl = "https://example.com/iapi/photos/details/";
+// customPhotosClickable = false; // optional: disable opening custom photos in a new tab
 
 // get flight route from routeApi service default setting (toggle via settings checkbox)
 // useRouteAPI = false;
