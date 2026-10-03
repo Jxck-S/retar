@@ -3315,14 +3315,14 @@ input{
     }
 
     /*
-     * Full-screen mobile sidebar used to sit above the map and eat every touch.
-     * Pass events through the shell; only #sidebar-table (card + margins in its box)
-     * re-enables hits. Scroll moves to #sidebar-table while open so the list/tabs still scroll.
+     * The full-screen mobile sidebar shell remains above the map and selected
+     * aircraft panel while closed. Pass events through both shell layers in
+     * either state; the visible top and bottom panels re-enable their own hits.
      */
-    body.mobile_sidebar_open #sidebar_container {
+    #sidebar_container {
         pointer-events: none;
     }
-    body.mobile_sidebar_open #sidebar_canvas {
+    #sidebar_canvas {
         pointer-events: none;
         padding: 0; /* panels dock to the screen edges */
         overflow: visible;
