@@ -102,7 +102,8 @@ PlaneObject.prototype.setNull = function() {
     this.nav_heading    = null;
     this.nav_modes      = null;
     this.nav_qnh        = null;
-    this.rc				= null;
+    this.rc             = null;
+    this.spi            = null;
 
     this.rotation       = 0;
     this.rotationCache = 999;
@@ -189,6 +190,7 @@ function planeCloneState(target, source) {
     target.nav_modes = source.nav_modes;
     target.nav_qnh = source.nav_qnh;
     target.rc = source.rc;
+    target.spi = source.spi;
     target.rotation = source.rotation;
     target.rotationCache = source.rotationCache;
     target.nac_p = source.nac_p;
@@ -791,6 +793,12 @@ PlaneObject.prototype.getMarkerColor = function(options) {
         h = 0;
         s = 100;
         l = 40;
+    }
+
+    if (this.spi == 1) {
+        h = ColorByAlt.ident.h;
+        s = ColorByAlt.ident.s;
+        l = ColorByAlt.ident.l;
     }
 
     if (h < 0) {
@@ -1686,6 +1694,7 @@ PlaneObject.prototype.updateData = function(now, last, data, init) {
     this.nav_qnh = data.nav_qnh;
     this.geom_rate = data.geom_rate;
     this.rc = data.rc;
+    this.spi = data.spi;
     if (!replay || data.squawk != null)
         this.squawk = (data.squawk == null) ? null : `${data.squawk}`;
     this.wd = data.wd;
@@ -2686,6 +2695,7 @@ PlaneObject.prototype.updateTraceData = function(state, _now) {
         this.baro_rate = data.baro_rate;
         this.geom_rate = data.geom_rate;
         this.rc = data.rc;
+        this.spi = data.spi;
         this.squawk = (data.squawk == null) ? null : `${data.squawk}`;
 
         this.wd = data.wd;
