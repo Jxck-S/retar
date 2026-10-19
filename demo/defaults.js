@@ -434,7 +434,7 @@ let planespottersAPI = true;
 let planespottersAPIurl = "https://api.planespotters.net/pub/photos/";
 let planespottingAPI = false;
 
-// Custom Photos API — tried first if enabled (returns { "credit": "...", "retrieve_url": "..." })
+// Custom Photos API — tried first if enabled (returns { "credit": "...", "retrieve_url": "...", "link": "..." }; link is optional and used as the click-through page)
 let customPhotosApi = false;
 let customPhotosApiUrl = "";
 let customPhotosClickable = true;

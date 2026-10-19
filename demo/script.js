@@ -4119,11 +4119,24 @@ function refreshPhoto(selected) {
                     fullUrl = baseUrl + fullUrl;
                 }
 
+                // Prefer the photo's page at its source; fall back to the image itself
+                let pageUrl = fullUrl;
+                if (data.link) {
+                    try {
+                        const linkObj = new URL(data.link, baseUrl || window.location.href);
+                        if (linkObj.protocol === "http:" || linkObj.protocol === "https:") {
+                            pageUrl = linkObj.href;
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+                }
+
                 let adaptedData = {
                     photos: [
                         {
                             thumbnail: fullUrl,
-                            link: fullUrl,
+                            link: pageUrl,
                             photographer: data.credit,
                         },
                     ],
